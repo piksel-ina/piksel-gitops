@@ -1,0 +1,19 @@
+---
+# --- Notification configuration for FluxCD ---
+apiVersion: notification.toolkit.fluxcd.io/v1beta2
+kind: Alert
+metadata:
+  name: notifier
+  namespace: flux-system
+spec:
+  summary: "Staging notifications"
+  # Use the Slack provider for notifications
+  providerRef:
+    name: slack
+  eventSeverity: info
+  # Define the event sources that will trigger notifications
+  eventSources:
+    - kind: GitRepository
+      name: "*"
+    - kind: Kustomization
+      name: "*"
