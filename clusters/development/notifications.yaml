@@ -6,7 +6,7 @@ metadata:
   name: notifier
   namespace: flux-system
 spec:
-  summary: "Staging notifications"
+  summary: "Development notifications"
   # Use the Slack provider for notifications
   providerRef:
     name: slack
