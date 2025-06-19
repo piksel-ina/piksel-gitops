@@ -265,3 +265,126 @@ kubectl get secret slack-webhook-dev slack-webhook-prod -n flux-system
 - [Flux Notification Documentation](https://fluxcd.io/flux/components/notification/)
 - [Slack Webhook Setup Guide](https://api.slack.com/messaging/webhooks)
 - [Flux Alert Configuration](https://fluxcd.io/flux/components/notification/alert/)
+
+## NVIDIA GPU Device Plugin
+
+This configuration deploys the NVIDIA Kubernetes Device Plugin to enable GPU workloads in the cluster by exposing NVIDIA GPUs as schedulable resources to the Kubernetes scheduler.
+
+### About NVIDIA Device Plugin
+
+The NVIDIA Device Plugin for Kubernetes is a DaemonSet that allows you to automatically expose the number of GPUs on each node of your cluster and run GPU-enabled containers. It implements the Kubernetes device plugin framework to advertise NVIDIA GPUs to the kubelet.
+
+### Configuration Details
+
+**Deployment Strategy**
+
+- **Namespace**: Dedicated `gpu-operator` namespace with privileged security context
+- **Chart Source**: Official NVIDIA Helm repository (`https://nvidia.github.io/k8s-device-plugin`)
+- **Version**: `0.17.x` (automatic patch updates within v0.17 series)
+- **Node Targeting**: Only deploys on nodes with NVIDIA GPUs via Karpenter labels
+- **Management**: Fully managed by Flux CD with GitOps principles
+
+**Security Configuration**
+
+```yaml
+labels:
+  pod-security.kubernetes.io/enforce: privileged # Required for GPU driver access
+  pod-security.kubernetes.io/audit: baseline # Security monitoring
+  pod-security.kubernetes.io/warn: baseline # Security warnings
+```
+
+**Node Selection Strategy**
+
+```yaml
+nodeSelector:
+  karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
+```
+
+### This Enables:
+
+1. **GPU Resource Discovery**
+
+- **Automatic Detection**: Discovers all NVIDIA GPUs on worker nodes
+- **Resource Advertising**: Exposes GPUs as `nvidia.com/gpu` resources to Kubernetes scheduler
+- **Health Monitoring**: Continuously monitors GPU health and availability
+- **Hot-plug Support**: Automatically detects GPU changes without node restart
+
+2. **Workload Scheduling**
+
+- **Resource Requests**: Pods can request GPU resources using `nvidia.com/gpu: 1`
+- **Exclusive Access**: Ensures GPU isolation between containers
+- **Multi-GPU Support**: Supports workloads requiring multiple GPUs
+- **Mixed Workloads**: Allows CPU and GPU workloads on same nodes
+
+3. **AWS Integration**
+
+- **Karpenter Compatibility**: Works seamlessly with Karpenter node provisioning
+- **Instance Type Support**: Compatible with p3, p4, g4, g5, and other GPU instance types
+- **Cost Optimization**: Only runs on nodes that actually have GPUs
+- **Auto-scaling**: Supports dynamic GPU node scaling based on workload demands
+
+### Supported GPU Workloads
+
+- **Machine Learning**: TensorFlow, PyTorch, CUDA-based training and inference
+- **AI/Deep Learning**: Model training, neural network inference
+- **High-Performance Computing**: Scientific computing, simulations
+- **Graphics Rendering**: GPU-accelerated rendering and visualization
+- **Cryptocurrency**: Mining and blockchain operations
+- **Video Processing**: Transcoding, streaming, computer vision
+
+### Required Setup
+
+1. **Infrastructure Prerequisites**
+
+   - AWS EKS cluster with GPU-enabled worker nodes
+   - Karpenter configured with GPU instance types
+   - NVIDIA drivers installed on worker nodes (typically via AMI)
+
+2. **Node Configuration**
+   Ensure your Karpenter NodePool includes GPU instance types:
+   ```yaml
+   requirements:
+     - key: karpenter.k8s.aws/instance-family
+       operator: In
+       values: ["p3", "p4", "g4dn", "g5"]
+   ```
+
+### Verification
+
+After deployment, verify the device plugin is working:
+
+```bash
+# Check device plugin pods are running
+kubectl get pods -n gpu-operator
+
+# Verify GPUs are detected on nodes
+kubectl describe nodes | grep -A 5 "Allocatable"
+kubectl get nodes -o custom-columns="NAME:.metadata.name,GPU:.status.allocatable.nvidia\.com/gpu"
+
+# Test with a simple GPU workload
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-test
+spec:
+  containers:
+  - name: gpu-container
+    image: nvidia/cuda:12.0-runtime-ubuntu20.04
+    command: ["nvidia-smi"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+  restartPolicy: Never
+EOF
+
+# Check GPU test results
+kubectl logs gpu-test
+```
+
+### References
+
+- [NVIDIA Device Plugin Documentation](https://github.com/NVIDIA/k8s-device-plugin)
+- [Kubernetes Device Plugin Framework](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/overview.html)
+- [AWS EKS GPU Support](https://docs.aws.amazon.com/eks/latest/userguide/gpu-ami.html)
