@@ -192,3 +192,76 @@ controller:
 - [Kubernetes Ingress Documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 - [NGINX Ingress Annotations](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/)
 - [Helm Chart Repository](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx)
+
+## Flux Slack Notification
+
+This configuration creates separate Slack notification providers for Flux CD to send GitOps deployment notifications to environment-specific Slack channels.
+
+### About Flux Notification Provider
+
+The Flux Notification Provider enables Flux to send alerts and status updates about GitOps operations (deployments, reconciliations, failures) to external systems like Slack, Discord, Microsoft Teams, or webhook endpoints.
+
+### Configuration Details
+
+**Environment Separation Strategy**
+
+- **Multiple Providers**: Separate providers for each environment
+- **Dedicated Channels**: Environment-specific Slack channels
+- **Isolated Webhooks**: Different webhook URLs for better security and management
+- **Namespace**: Both deployed in `flux-system` namespace
+- **Provider Name**: "slack-dev" and "slack-prod"
+- **Channel**:
+  - "flux-piksel-dev-env" # Development notifications channel
+  - "flux-piksel-prod-env" # Production notifications channel
+- **Secret**:
+  - "slack-webhook-dev" # Development-specific webhook URL
+  - "slack-webhook-prod" # Production-specific webhook URL
+
+### This Enables:
+
+1. **Environment-Specific Notifications**
+
+- **Isolated Channels**: Dev and prod notifications are completely separated
+- **Targeted Audience**: Different teams can subscribe to relevant channels
+- **Noise Reduction**: Production teams only see critical prod alerts
+- **Security Isolation**: Separate webhooks prevent cross-environment access
+
+2. **Flexible Alert Management**
+
+- **Different Severity Levels**: Dev can be verbose, prod can be critical-only
+- **Environment Context**: Clear identification of which environment is affected
+- **Independent Configuration**: Each environment can have different notification rules
+
+### Required Setup
+
+1. **Slack Channels**
+   Create the required Slack channels in your workspace:
+
+   - `#flux-piksel-dev-env` - Development environment notifications
+   - `#flux-piksel-prod-env` - Production environment notifications
+
+2. **Create separate secrets for each environment**
+
+- Should be done in Terraform Repo [piksel-infra](https://github.com/piksel-ina/piksel-infra)
+
+### Verification
+
+After deployment, verify both providers are ready:
+
+```bash
+# Check both providers status
+kubectl get provider -n flux-system
+
+# Check individual provider details
+kubectl describe provider slack-dev -n flux-system
+kubectl describe provider slack-prod -n flux-system
+
+# Verify secrets exist
+kubectl get secret slack-webhook-dev slack-webhook-prod -n flux-system
+```
+
+### References
+
+- [Flux Notification Documentation](https://fluxcd.io/flux/components/notification/)
+- [Slack Webhook Setup Guide](https://api.slack.com/messaging/webhooks)
+- [Flux Alert Configuration](https://fluxcd.io/flux/components/notification/alert/)

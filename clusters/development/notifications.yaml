@@ -7,10 +7,15 @@ metadata:
   namespace: flux-system
 spec:
   summary: "Development notifications"
+
   # Use the Slack provider for notifications
   providerRef:
-    name: slack
+    name: slack-dev
+
+  # Severity set to info for development environment
+  # This will send notifications for all events
   eventSeverity: info
+
   # Define the event sources that will trigger notifications
   eventSources:
     - kind: GitRepository
