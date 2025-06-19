@@ -70,3 +70,125 @@ kubectl logs -n cert-manager deployment/cert-manager
 - [cert-manager Documentation](https://cert-manager.io/docs/)
 - [Jetstack Helm Charts](https://artifacthub.io/packages/helm/cert-manager/cert-manager)
 - [Let's Encrypt Documentation](https://letsencrypt.org/docs/)
+
+## NGINX Ingress Controller Setup
+
+This configuration deploys the NGINX Ingress Controller using Flux CD (GitOps) to manage HTTP/HTTPS traffic routing into the Kubernetes cluster.
+
+### About NGINX Ingress Controller
+
+The NGINX Ingress Controller is a Kubernetes ingress controller that uses NGINX as a reverse proxy and load balancer. It manages external access to services in a cluster, typically HTTP/HTTPS, and provides features like SSL termination, name-based virtual hosting, and load balancing.
+
+### Configuration Details
+
+1. **Components**
+
+   - **Namespace**: Dedicated `ingress-nginx` namespace for resource isolation
+   - **HelmRepository**: Points to official Kubernetes NGINX Ingress chart repository
+   - **HelmRelease**: Manages the NGINX Ingress Controller deployment via Flux CD
+
+2. **Key Settings**
+
+- **version**: "4.12.x" # Uses latest patch version in 4.12 series
+- **Update intervals**:
+  - interval: 30m # Flux reconciliation interval
+  - chart.interval: 12h # Chart update check interval
+  - repo.interval: 24h # Repository update check interval
+
+3. **Service Configuration**
+
+- **type**: "LoadBalancer" # Exposes controller via cloud load balancer
+- Gets external IP address for cluster ingress traffic
+
+4. **Security & Header Configuration**
+
+- **allowSnippetAnnotations**: true # ⚠️ Allows custom NGINX config snippets (security risk)
+- **compute-full-forwarded-for**: "true" # Computes complete forwarded-for header
+- **forwarded-for-header**: "X-Forwarded-For" # Preserves client IP addresses
+- **use-forwarded-headers**: "true" # Uses forwarded headers from upstream proxies
+- **annotations-risk-level**: Critical # Acknowledges security risk of snippets
+
+5. **Disabled Features**
+
+- **admissionWebhooks**: false # Disables validation webhooks for ingress resources
+
+### This Enables:
+
+1. **Traffic Management**
+
+- **Ingress Routing**: Routes external HTTP/HTTPS traffic to internal services
+- **Load Balancing**: Distributes traffic across multiple service endpoints
+- **SSL Termination**: Handles TLS/SSL certificate termination at the edge
+- **Virtual Hosting**: Supports multiple domains/subdomains on single IP
+
+2. **Advanced Features**
+
+- **Custom Configuration**: Allows NGINX configuration snippets via annotations
+- **Client IP Preservation**: Maintains original client IP through proxy chains
+- **Health Checks**: Built-in health checking for backend services
+- **Rate Limiting**: Can implement rate limiting and throttling
+
+3. **GitOps Integration**
+
+- **Declarative**: Managed through Git commits
+- **Self-healing**: Automatically maintains desired state
+- **Controlled Updates**: Automatically gets patch updates within 4.12.x series
+
+### Security Considerations
+
+⚠️ **Important Security Notes:**
+
+- `allowSnippetAnnotations: true` allows arbitrary NGINX configuration injection
+- This can be exploited for privilege escalation or data exfiltration
+- Consider disabling in production or implementing strict RBAC controls
+- `annotations-risk-level: Critical` acknowledges this risk
+
+### Verification
+
+After deployment, verify NGINX Ingress Controller is working:
+
+```bash
+# Check ingress controller pods
+kubectl get pods -n ingress-nginx
+
+# Check service and external IP
+kubectl get svc -n ingress-nginx
+
+# Check ingress controller logs
+kubectl logs -n ingress-nginx deployment/ingress-nginx-controller
+
+# Test with a sample ingress
+kubectl get ingress --all-namespaces
+```
+
+### Production Recommendations
+
+1. **Security Hardening**
+
+```yaml
+# Recommended production values
+allowSnippetAnnotations: false # Disable snippets
+admissionWebhooks:
+  enabled: true # Enable validation
+```
+
+2. **Resource Limits**
+
+```yaml
+# Add resource constraints
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 90Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+```
+
+### References
+
+- [NGINX Ingress Controller Documentation](https://kubernetes.github.io/ingress-nginx/)
+- [Kubernetes Ingress Documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+- [NGINX Ingress Annotations](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/)
+- [Helm Chart Repository](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx)
