@@ -4,7 +4,7 @@ namespace: monitoring
 resources:
   - ../../base/monitoring/kube-prometheus-stack
   # - ../../base/monitoring/loki-stack
-  # - ./dashboards
+  - ./dashboards
 patches:
   - path: kube-prometheus-stack-values.yaml
     target:
