@@ -22,7 +22,7 @@ spec:
       enabled: false
     prometheus:
       prometheusSpec:
-        retention: 72h
+        retention: 14d
         resources:
           requests:
             cpu: 500m
@@ -37,7 +37,7 @@ spec:
               storageClassName: standard
               resources:
                 requests:
-                  storage: 10Gi
+                  storage: 20Gi
     grafana:
       enabled: true
     # Need to stop node-exporters attempting to deploy on Fargate nodes

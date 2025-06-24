@@ -1,0 +1,54 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  valuesFrom:
+    - kind: Secret
+      name: grafana-values
+      valuesKey: values.yaml
+      optional: false
+  values:
+    prometheus:
+      prometheusSpec:
+        retention: 2d # Short retention for development
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits: # Ensure limits are set for development
+            cpu: 1000m
+            memory: 1024Mi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: gp2
+              resources:
+                requests:
+                  storage: 5Gi # Reduced storage for development
+    grafana:
+      admin:
+        existingSecret: grafana-admin-secret
+        userKey: admin-user
+        passwordKey: admin-password
+
+      env:
+        GF_SERVER_ROOT_URL: https://grafana.dev.pik-sel.id/
+
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          external-dns.alpha.kubernetes.io/hostname: grafana.dev.pik-sel.id
+        hosts:
+          - grafana.dev.pik-sel.id
+        tls:
+          - hosts:
+              - grafana.dev.pik-sel.id
+            secretName: grafana-ingress
+
+      # grafana.ini:
+      #     Contents here are merged in from the secrets created in Terraform
+      #     and this is where the DB creds and SSO config lives.
