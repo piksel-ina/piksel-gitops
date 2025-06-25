@@ -37,9 +37,7 @@
         "target": {
           "limit": 100,
           "matchAny": false,
-          "tags": [
-            "flux"
-          ],
+          "tags": ["flux"],
           "type": "tags"
         }
       }
@@ -170,9 +168,7 @@
   "refresh": "10s",
   "schemaVersion": 36,
   "style": "light",
-  "tags": [
-    "flux"
-  ],
+  "tags": ["flux"],
   "templating": {
     "list": [
       {
@@ -233,12 +229,8 @@
         "allValue": ".+",
         "current": {
           "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": ["All"],
+          "value": ["$__all"]
         },
         "datasource": "${DS_LOKI}",
         "definition": "label_values(app)",
@@ -258,12 +250,8 @@
         "allValue": ".+",
         "current": {
           "selected": true,
-          "text": [
-            "flux-system"
-          ],
-          "value": [
-            "flux-system"
-          ]
+          "text": ["flux-system"],
+          "value": ["flux-system"]
         },
         "datasource": "${DS_LOKI}",
         "definition": "label_values(namespace)",
