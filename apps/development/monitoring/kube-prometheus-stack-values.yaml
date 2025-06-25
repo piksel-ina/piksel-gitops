@@ -48,6 +48,9 @@ spec:
           - hosts:
               - grafana.dev.pik-sel.id
             secretName: grafana-ingress
+      grafana.ini:
+        log:
+          level: debug
 
       # grafana.ini:
       #     Contents here are merged in from the secrets created in Terraform
