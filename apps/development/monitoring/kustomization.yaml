@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: monitoring
 resources:
   - ../../base/monitoring/kube-prometheus-stack
-  # - ../../base/monitoring/loki-stack
+  - ../../base/monitoring/loki-stack
   - ../../base/monitoring/monitoring-config
   - ./dashboards
 patches:
