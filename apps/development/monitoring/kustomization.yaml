@@ -12,3 +12,5 @@ patches:
       kind: HelmRelease
       name: kube-prometheus-stack
       namespace: monitoring
+configurations:
+  - ../../base/monitoring/kube-prometheus-stack/kustomizeconfig.yaml

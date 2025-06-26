@@ -5,6 +5,9 @@ metadata:
   namespace: monitoring
 spec:
   valuesFrom:
+    - kind: ConfigMap
+      name: flux-kube-state-metrics-config
+      valuesKey: kube-state-metrics-config.yaml
     - kind: Secret
       name: grafana-values
       valuesKey: values.yaml
