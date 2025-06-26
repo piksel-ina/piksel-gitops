@@ -5,7 +5,6 @@ resources:
   - ../../base/monitoring/kube-prometheus-stack
   - ../../base/monitoring/loki-stack
   - ../../base/monitoring/monitoring-config
-  - ./dashboards
 patches:
   - path: kube-prometheus-stack-values.yaml
     target:
