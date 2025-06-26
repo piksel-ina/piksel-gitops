@@ -11,5 +11,10 @@ patches:
       kind: HelmRelease
       name: kube-prometheus-stack
       namespace: monitoring
+  - path: loki-patch.yaml
+    target:
+      kind: HelmRelease
+      name: loki
+      namespace: monitoring
 configurations:
   - ../../base/monitoring/kube-prometheus-stack/kustomizeconfig.yaml
