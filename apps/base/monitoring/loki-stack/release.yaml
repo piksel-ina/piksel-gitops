@@ -67,16 +67,8 @@ spec:
               period: 24h
       pattern_ingester:
         enabled: true
-        replicas: 1
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
-            ruler:
-              enable_api: true
+      ruler:
+        enable_api: true
     lokiCanary:
       enabled: false
     deploymentMode: SingleBinary

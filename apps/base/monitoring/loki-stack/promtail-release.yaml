@@ -16,9 +16,21 @@ spec:
         name: grafana-charts
       interval: 60m
   values:
-    # https://grafana.com/docs/loki/latest/send-data/promtail/installation/
     config:
-      # publish data to loki
       clients:
         - url: http://loki-gateway/loki/api/v1/push
           tenant_id: 1
+      snippets:
+        pipelineStages:
+          # First, parse the CRI log line to extract the log content, timestamp, etc.
+          # This stage outputs a JSON object.
+          - cri: {}
+          # Second, parse the JSON output from the CRI stage.
+          # This makes the 'log' field available for the next stage.
+          - json:
+              expressions:
+                output: log
+          # Finally, set the log output to be ONLY the original log content.
+          # This strips away all the extra metadata that the cri stage might have produced.
+          - output:
+              source: output
