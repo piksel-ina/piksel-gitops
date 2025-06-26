@@ -9,7 +9,8 @@ spec:
     - name: kube-prometheus-stack
   chart:
     spec:
-      version: "6.x"
+      # Pin chart version to match Loki for compatibility.
+      version: "6.0.0"
       chart: promtail
       sourceRef:
         kind: HelmRepository
@@ -20,17 +21,3 @@ spec:
       clients:
         - url: http://loki-gateway/loki/api/v1/push
           tenant_id: 1
-      snippets:
-        pipelineStages:
-          # First, parse the CRI log line to extract the log content, timestamp, etc.
-          # This stage outputs a JSON object.
-          - cri: {}
-          # Second, parse the JSON output from the CRI stage.
-          # This makes the 'log' field available for the next stage.
-          - json:
-              expressions:
-                output: log
-          # Finally, set the log output to be ONLY the original log content.
-          # This strips away all the extra metadata that the cri stage might have produced.
-          - output:
-              source: output

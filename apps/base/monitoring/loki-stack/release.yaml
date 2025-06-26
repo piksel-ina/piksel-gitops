@@ -8,7 +8,7 @@ spec:
     - name: kube-prometheus-stack
   chart:
     spec:
-      version: "6.x"
+      version: "6.0.0"
       chart: loki
       sourceRef:
         kind: HelmRepository
@@ -21,7 +21,6 @@ spec:
       enabled: false
     test:
       enabled: false
-    # following https://github.com/fluxcd/flux2-monitoring-example/pull/23/files#diff-5e041afacf25eb055565b4a1c32d5b81201ddce29c84adf13a6ae88463e0832b
     extraObjects:
       - apiVersion: v1
         kind: ConfigMap
@@ -53,7 +52,6 @@ spec:
         allow_structured_metadata: true
         retention_period: 24h
         volume_enabled: true
-      # https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
       commonConfig:
         replication_factor: 1
       schemaConfig:
@@ -89,8 +87,6 @@ spec:
       enabled: true
       persistence:
         storageClass: gp2
-
-    # Zero out replica counts of other deployment modes
     backend:
       replicas: 0
     read:
