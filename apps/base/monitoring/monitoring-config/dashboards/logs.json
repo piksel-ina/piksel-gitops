@@ -38,7 +38,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 6,
   "links": [],
   "panels": [
     {
@@ -50,7 +50,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-GrYlRd"
           },
           "custom": {
             "axisBorderShow": false,
@@ -61,7 +61,7 @@
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "bars",
-            "fillOpacity": 0,
+            "fillOpacity": 31,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -70,8 +70,8 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
+            "lineWidth": 2,
+            "pointSize": 1,
             "scaleDistribution": {
               "type": "linear"
             },
@@ -109,6 +109,7 @@
         "y": 0
       },
       "id": 4,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [],
@@ -116,6 +117,7 @@
           "placement": "bottom",
           "showLegend": false
         },
+        "timezone": ["browser"],
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -131,27 +133,15 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "sum(count_over_time({job=~\".+\"} | json | namespace=~\"$namespace\", controller=~\"$controller\" | __error__!=\"\" | level=~\"$level\" |= \"$query\" [$__interval]))",
+          "expr": "rate({job=\"loki.source.kubernetes.pods\"}[$__auto])",
           "instant": false,
           "legendFormat": "Log count",
           "queryType": "range",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
-          },
-          "direction": "backward",
-          "editorMode": "builder",
-          "expr": "",
-          "hide": false,
-          "queryType": "range",
-          "refId": "B"
         }
       ],
-      "title": "Timeseries ",
+      "title": "Log Volume",
       "type": "timeseries"
     },
     {
@@ -218,17 +208,12 @@
       {
         "allValue": "info|error",
         "current": {
-          "text": "All",
+          "text": "$__all",
           "value": "$__all"
         },
         "includeAll": true,
         "name": "level",
         "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          },
           {
             "selected": false,
             "text": "info",
@@ -245,40 +230,40 @@
       },
       {
         "current": {
-          "text": "",
-          "value": ""
+          "text": "$__all",
+          "value": "$__all"
         },
         "name": "controller",
         "options": [
           {
             "selected": true,
-            "text": "",
-            "value": ""
+            "text": "$__all",
+            "value": "$__all"
           }
         ],
-        "query": "",
+        "query": "$__all",
         "type": "textbox"
       },
       {
         "current": {
-          "text": "",
-          "value": ""
+          "text": "$__all",
+          "value": "$__all"
         },
         "name": "namespace",
         "options": [
           {
             "selected": true,
-            "text": "",
-            "value": ""
+            "text": "$__all",
+            "value": "$__all"
           }
         ],
-        "query": "",
+        "query": "$__all",
         "type": "textbox"
       },
       {
         "current": {
           "text": "Loki",
-          "value": "Loki"
+          "value": "P8E80F9AEF21F6940"
         },
         "includeAll": false,
         "label": "Datasource",
