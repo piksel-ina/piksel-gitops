@@ -5,7 +5,7 @@ metadata:
 spec:
   interval: 5m
   dependsOn:
-    - name: loki
+    - name: kube-prometheus-stack
   chart:
     spec:
       chart: grafana-agent
