@@ -38,220 +38,19 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 11,
+  "id": 18,
   "links": [],
   "panels": [
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 5,
-      "panels": [],
-      "title": "Overall Stats",
-      "type": "row"
-    },
     {
       "datasource": {
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "Shows the total number of log lines per second across all of your pods.",
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "bars",
-            "fillOpacity": 31,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 16,
-        "x": 0,
-        "y": 1
-      },
-      "id": 4,
-      "interval": "1m",
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "timezone": ["browser"],
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
-          },
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "sum(rate({job=\"loki.source.kubernetes.pods\"}[$__interval]))",
-          "instant": false,
-          "legendFormat": "Total Log Rate",
-          "queryType": "range",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Total Log Rate",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
-      },
-      "description": "Shows the number of unique pod instances that are currently sending logs.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 16,
-        "y": 1
-      },
-      "id": 6,
-      "interval": "1m",
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
-          },
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "count(count by (instance) (count_over_time({job=\"loki.source.kubernetes.pods\"}[$__interval])))",
-          "instant": false,
-          "legendFormat": "Active Pod Streams",
-          "queryType": "range",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Active Log Streams",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 7
-      },
-      "id": 7,
-      "panels": [],
-      "title": "Error Monitoring",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
-      },
-      "description": "Tracks the rate of logs containing critical keywords.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds",
-            "seriesBy": "last"
           },
           "custom": {
             "axisBorderShow": false,
@@ -271,9 +70,6 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
-            "lineStyle": {
-              "fill": "solid"
-            },
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -298,12 +94,8 @@
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 3
-              },
-              {
-                "color": "#FF9830",
-                "value": 6
+                "color": "red",
+                "value": 80
               }
             ]
           }
@@ -311,12 +103,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 8,
+        "h": 4,
+        "w": 24,
         "x": 0,
-        "y": 8
+        "y": 0
       },
-      "id": 8,
+      "id": 4,
       "options": {
         "legend": {
           "calcs": [],
@@ -324,11 +116,10 @@
           "placement": "bottom",
           "showLegend": false
         },
-        "timezone": ["browser"],
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
-          "sort": "asc"
+          "sort": "none"
         }
       },
       "pluginVersion": "11.5.2",
@@ -340,12 +131,15 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "sum(rate({job=\"loki.source.kubernetes.pods\"} |~ \"error|failed|exception\" [$__interval]))",
+          "expr": "sum(count_over_time({namespace=~\"$namespace\", app=~\"$controller\"} | detected_level=~\"$level\" [$__interval]))",
+          "instant": false,
+          "legendFormat": "Log count",
           "queryType": "range",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": " Error Rate Over Time",
+      "title": "Log Volume",
       "type": "timeseries"
     },
     {
@@ -353,134 +147,28 @@
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "Ranks services by the number of errors they have produced in the selected time range.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "shades"
-          },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto",
-              "wrapText": true
-            },
-            "filterable": false,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 193
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "instance"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 540
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 16,
-        "x": 8,
-        "y": 8
-      },
-      "id": 9,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "enablePagination": false,
-          "fields": ["Value #A"],
-          "reducer": ["sum"],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
-          },
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "sum by (instance) (count_over_time({job=\"loki.source.kubernetes.pods\"} |~ \"error|failed|exception\" [30m]))",
-          "legendFormat": "Error Count",
-          "queryType": "instant",
-          "refId": "Error Count",
-          "step": ""
-        }
-      ],
-      "title": "Top Services by Error Count",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
-      },
-      "description": "A live-updating feed of log lines that are errors.",
+      "description": "Logs from services running in Kubernetes",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 25,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 4
       },
-      "id": 10,
+      "id": 2,
       "options": {
-        "dedupStrategy": "none",
+        "dedupStrategy": "numbers",
         "enableInfiniteScrolling": false,
         "enableLogDetails": true,
-        "prettifyLogMessage": false,
+        "prettifyLogMessage": true,
         "showCommonLabels": false,
         "showLabels": false,
-        "showTime": true,
+        "showTime": false,
         "sortOrder": "Descending",
-        "wrapLogMessage": true
+        "wrapLogMessage": false
       },
       "pluginVersion": "11.5.2",
       "targets": [
@@ -491,15 +179,12 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{job=\"loki.source.kubernetes.pods\"} | json | level=~\"error|failed|exception\"",
-          "legendFormat": "",
-          "maxLines": 100,
+          "expr": "{namespace=~\"$namespace\", app =~\"$controller\"}\r\n| logfmt\r\n| level=~\"(?i)error|crit|fatal\" \r\n| line_format \"\\nLevel: {{.level}} ---\\n Time: {{.ts}} ---\\n Message: {{.msg}}\\n\"\r\n",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Latest Error Feed",
-      "transparent": true,
+      "title": "Live Logs",
       "type": "logs"
     }
   ],
@@ -508,7 +193,84 @@
   "schemaVersion": 40,
   "tags": ["flux"],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": "info|error",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "includeAll": true,
+        "name": "level",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "info",
+            "value": "info"
+          },
+          {
+            "selected": false,
+            "text": "error",
+            "value": "error"
+          }
+        ],
+        "query": "info,error",
+        "type": "custom"
+      },
+      {
+        "allValue": ".+",
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        },
+        "datasource": "${Loki}",
+        "definition": "label_values(app)",
+        "includeAll": true,
+        "multi": true,
+        "name": "controller",
+        "options": [],
+        "query": "label_values(app)",
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allValue": ".+",
+        "current": {
+          "text": ["flux-system"],
+          "value": ["flux-system"]
+        },
+        "datasource": "${Loki}",
+        "definition": "label_values(namespace)",
+        "includeAll": true,
+        "multi": true,
+        "name": "namespace",
+        "options": [],
+        "query": "label_values(namespace)",
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "Loki",
+          "value": "Loki"
+        },
+        "includeAll": false,
+        "label": "Datasource",
+        "name": "Loki",
+        "options": [],
+        "query": "loki",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
