@@ -26,6 +26,10 @@ spec:
             operator: Exists
           - key: "CriticalAddonsOnly"
             operator: "Exists"
+    serviceAccount:
+      create: true
+    rbac:
+      create: true
     alloy:
       configMap:
         create: true
