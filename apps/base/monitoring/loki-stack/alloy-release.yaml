@@ -45,7 +45,6 @@ spec:
         loki.write "default" {
           endpoint {
             // This is the address of your Loki service from the other HelmRelease.
-            // Format: http://<service-name>.<namespace>.svc.cluster.local:<port>/loki/api/v1/push
-            url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+            url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
           }
         }
