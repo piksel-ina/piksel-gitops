@@ -1,0 +1,51 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: argo-workflows
+spec:
+  values:
+    server:
+      ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          external-dns.alpha.kubernetes.io/hostname: argo.dev.pik-sel.id
+        hosts:
+          - argo.dev.pik-sel.id
+        tls:
+          - hosts:
+              - argo.dev.pik-sel.id
+            secretName: argo-ingress
+      extraArgs:
+        - "--auth-mode=sso"
+      logging:
+        level: debug
+      sso:
+        issuer: "https://dev-yqkhkttr7nx6u7o4.us.auth0.com/"
+        redirectUrl: https://argo.dev.pik-sel.id/oauth2/callback
+        customGroupClaimName: "groups"
+        rbac:
+          enabled: true
+    artifactRepository:
+      archiveLogs: true
+      s3:
+        bucket: "piksel-dev-argo-artifacts-dep"
+        region: ap-southeast-3
+        endpoint: s3.ap-southeast-3.amazonaws.com
+
+    controller:
+      persistence:
+        postgresql:
+          host: db-endpoint.db.svc.cluster.local
+          port: 5432
+          database: argo
+          tableName: workflows
+          userNameSecret:
+            name: argo
+            key: username
+          passwordSecret:
+            name: argo
+            key: password
+          ssl: true
+          sslMode: require

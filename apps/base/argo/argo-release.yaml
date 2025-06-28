@@ -30,6 +30,7 @@ spec:
           - openid
           - profile
           - email
+          - groups
       # Logging configuration
       logging:
         level: info
