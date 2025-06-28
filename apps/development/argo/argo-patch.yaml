@@ -4,6 +4,7 @@ metadata:
   name: argo-workflows
 spec:
   values:
+    useStaticCredentials: false
     server:
       ingress:
         enabled: true
