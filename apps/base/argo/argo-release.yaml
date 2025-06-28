@@ -1,0 +1,74 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: argo-workflows
+spec:
+  releaseName: argo-workflows
+  chart:
+    spec:
+      chart: argo-workflows
+      version: "0.45.18"
+      sourceRef:
+        kind: HelmRepository
+        name: argo-repository
+  interval: 5m
+  values:
+    singleNamespace: true
+    server:
+      # SSO
+      sso:
+        enabled: true
+        issuer: <YOUR_AUTH0_ISSUER_URL> # e.g., https://your-tenant.auth0.com/
+        clientId:
+          name: argo-client-secret
+          key: client-id
+        clientSecret:
+          name: argo-client-secret
+          key: client-secret
+        redirectUrl: <YOUR_ARGO_UI_URL>/oauth2/callback # e.g., https://argo.your-domain.com/oauth2/callback
+        scopes:
+          - openid
+          - profile
+          - email
+      # Logging configuration
+      logging:
+        level: info
+        globallevel: "0"
+
+    # Workflow Controller
+    controller:
+      logging:
+        level: info
+        globallevel: "0"
+      workflowNamespaces:
+        - argo-workflows
+
+    # Workflow configuration
+    workflow:
+      serviceAccount:
+        create: true
+        name: "argo-workflows-executor" # Need to be overridden on each environment
+        annotations:
+          workflows.argoproj.io/rbac-rule: "true"
+          workflows.argoproj.io/rbac-rule-precedence: "1"
+          eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/ArgoWorkflowsExecutorRole" # Replace with actual role ARN
+      rbac:
+        create: true
+
+    # Artifact repository configuration : replace with real S3 bucket info
+    artifactRepository:
+      s3:
+        bucket: "argo-artifacts-dep"
+        region: ap-southeast-3
+        keyFormat: "artifacts/{{workflow.namespace}}/{{workflow.name}}/{{pod.name}}"
+        useSDKCreds: true
+
+    # Executor configuration
+    executor:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi

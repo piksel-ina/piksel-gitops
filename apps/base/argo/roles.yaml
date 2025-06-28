@@ -1,0 +1,220 @@
+# Minimal executor role for workflow task execution
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: executor
+rules:
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtaskresults
+    verbs:
+      - create
+      - patch
+---
+# Bind executor role to Terraform SA (used by workflows)
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argo-workflow-executor-default-binding
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflows-executor
+roleRef:
+  kind: Role
+  name: executor
+  apiGroup: rbac.authorization.k8s.io
+---
+# Admin role for Argo Workflows (read-write access)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-workflow-admin-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+      - pods
+      - pods/log
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - create
+      - delete
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - eventsources
+      - sensors
+      - workflows
+      - workflows/finalizers
+      - workfloweventbindings
+      - workfloweventbindings/finalizers
+      - workflowtemplates
+      - workflowtemplates/finalizers
+      - clusterworkflowtemplates
+      - clusterworkflowtemplates/finalizers
+      - cronworkflows
+      - cronworkflows/finalizers
+      - workflowtaskresults
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+      - create
+---
+# Viewer role (read-only + some patch permissions)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-workflow-viewer-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+      - pods/log
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - eventsources
+      - sensors
+      - workflows
+      - workfloweventbindings
+      - workflowtemplates
+      - clusterworkflowtemplates
+      - cronworkflows
+      - workflowtaskresults
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtaskresults
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+---
+# Bind admin role to admin login SA
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argo-workflow-admin-role-binding
+subjects:
+  - kind: ServiceAccount
+    name: argo-admin-login
+roleRef:
+  kind: Role
+  name: argo-workflow-admin-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# Bind viewer role to user login SA
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argo-workflow-viewer-role-binding
+subjects:
+  - kind: ServiceAccount
+    name: argo-user-login
+roleRef:
+  kind: Role
+  name: argo-workflow-viewer-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# Default role for argo workflows that balances security and usability.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: workflows-defaults-role
+rules:
+  # --- Core Kubernetes Resources ---
+  # Allow reading configuration and secrets, which is a very common need.
+  - apiGroups: [""]
+    resources:
+      - configmaps
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  # Allow workflows to inspect and log their own pods and see events.
+  - apiGroups: [""]
+    resources:
+      - pods
+      - pods/log
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  # Allow workflows to create/delete other pods.
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - create
+      - patch
+      - delete
+  # --- Argo Proj Resources ---
+  # Allow workflows to interact with other Argo resources in a read-only fashion.
+  - apiGroups: ["argoproj.io"]
+    resources:
+      - workflowtemplates
+      - clusterworkflowtemplates
+      - cronworkflows
+      - workfloweventbindings
+      - workflowtaskresults
+    verbs:
+      - get
+      - list
+      - watch
+  # Allow workflows to create, manage, and delete OTHER workflows.
+  - apiGroups: ["argoproj.io"]
+    resources:
+      - workflows
+      - workflows/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - patch
+      - delete
+---
+# --- BIND THE DEFAULTS ROLE ---
+# This connects the role above to the Argo Service Account
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argo-workflow-executor-defaults-binding
+subjects:
+  - kind: ServiceAccount
+    name: argo-workflows-executor
+roleRef:
+  kind: Role
+  name: workflows-defaults-role
+  apiGroup: rbac.authorization.k8s.io
