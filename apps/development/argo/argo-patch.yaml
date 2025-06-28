@@ -33,6 +33,19 @@ spec:
         bucket: "piksel-dev-argo-artifacts-dep"
         region: ap-southeast-3
         endpoint: s3.ap-southeast-3.amazonaws.com
+        keyFormat: "artifacts/{{workflow.namespace}}/{{workflow.name}}/{{pod.name}}"
+        roleARN: "arn:aws:iam::236122835646:role/iam-role-for-argo-workflow-service-account"
+
+    workflow:
+      serviceAccount:
+        create: true
+        name: "argo-workflows-executor"
+        annotations:
+          workflows.argoproj.io/rbac-rule: "true"
+          workflows.argoproj.io/rbac-rule-precedence: "1"
+          eks.amazonaws.com/role-arn: "arn:aws:iam::236122835646:role/iam-role-for-argo-workflow-service-account"
+      rbac:
+        create: true
 
     controller:
       persistence:

@@ -48,7 +48,7 @@ spec:
     workflow:
       serviceAccount:
         create: true
-        name: "argo-workflows-executor" # Need to be overridden on each environment
+        name: "argo-workflows-executor"
         annotations:
           workflows.argoproj.io/rbac-rule: "true"
           workflows.argoproj.io/rbac-rule-precedence: "1"
@@ -62,7 +62,7 @@ spec:
         bucket: "argo-artifacts-dep"
         region: ap-southeast-3
         keyFormat: "artifacts/{{workflow.namespace}}/{{workflow.name}}/{{pod.name}}"
-        useSDKCreds: true
+        useSDKCreds: false
 
     # Executor configuration
     executor:
