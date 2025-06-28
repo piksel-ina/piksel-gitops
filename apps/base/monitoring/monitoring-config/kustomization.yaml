@@ -9,6 +9,8 @@ configMapGenerator:
       - dashboards/control-plane.json
       - dashboards/cluster.json
       - dashboards/logs.json
+      - dashboards/k8s-global-view.json
+      - dashboards/ram-cpu-utilization.json
     options:
       labels:
         grafana_dashboard: "1"
