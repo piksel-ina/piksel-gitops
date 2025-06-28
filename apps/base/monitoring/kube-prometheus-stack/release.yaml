@@ -33,9 +33,6 @@ spec:
             cpu: 500m
             memory: 512Mi
         podMonitorNamespaceSelector: {}
-        podMonitorSelector:
-          matchLabels:
-            app.kubernetes.io/component: monitoring
         storageSpec:
           volumeClaimTemplate:
             spec:
