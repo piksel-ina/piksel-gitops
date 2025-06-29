@@ -36,9 +36,12 @@ spec:
             - /bin/sh
             - -c
             - |
+              # Create certs directory
+              mkdir -p /shared-auth/certs
+
               # Download RDS CA bundle for ap-southeast-3 region
               echo "Downloading RDS CA bundle for ap-southeast-3..."
-              wget -O /shared-auth/rds-ca.pem https://truststore.pki.rds.amazonaws.com/ap-southeast-3/ap-southeast-3-bundle.pem
+              wget -O /shared-auth/certs/rds-ca.pem https://truststore.pki.rds.amazonaws.com/ap-southeast-3/ap-southeast-3-bundle.pem
               if [ $? -eq 0 ]; then
                 echo "RDS CA bundle downloaded successfully."
               else
@@ -58,12 +61,17 @@ spec:
                   echo "Warning: Secret for ${secret} not found or missing password key" >&2
                 fi
               done
-              echo "Generated userlist.txt content (debug):"
-              cat /shared-auth/userlist.txt
+              echo "Userlist.txt generated successfully."
+
+              # Copy the pgbouncer config file
+              cp /config/pgbouncer.ini /shared-auth/pgbouncer.ini
+              echo "pgbouncer.ini copied successfully."
           volumeMounts:
             - name: shared-auth
               mountPath: /shared-auth
-            # Mount each individual secret from the database namespace
+            - name: pgbouncer-config
+              mountPath: /config
+              readOnly: true
             - name: argo-secret
               mountPath: /secrets/argo
               readOnly: true
@@ -85,6 +93,7 @@ spec:
             - name: odcread-secret
               mountPath: /secrets/odcread
               readOnly: true
+
       containers:
         - name: pg-proxy
           image: bitnami/pgbouncer:1.24.1
@@ -93,27 +102,35 @@ spec:
             - containerPort: 5432
               protocol: TCP
           env:
-            - name: PGBOUNCER_POOL_MODE
-              value: "transaction" # Suitable for mixed workloads
-            - name: PGBOUNCER_MAX_CLIENT_CONN
-              value: "200" # Adjust based on total expected connections
-            - name: PGBOUNCER_DEFAULT_POOL_SIZE
-              value: "20" # Adjust based on RDS connection limits
-            - name: PGBOUNCER_RESERVE_POOL_SIZE
-              value: "5" # For connection spikes
-            - name: PGBOUNCER_SERVER_TLS_SSLMODE
-              value: "verify-ca" # TLS to RDS
-            - name: PGBOUNCER_SERVER_TLS_CA_FILE
-              value: "/etc/pgbouncer/certs/rds-ca.pem"
-            - name: PGBOUNCER_DATABASE
+            # Bitnami PgBouncer specific environment variables
+            - name: POSTGRESQL_HOST
+              value: "db-endpoint.database.svc.cluster.local"
+            - name: POSTGRESQL_PORT
+              value: "5432"
+            - name: POSTGRESQL_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db_name
-            - name: PGBOUNCER_HOST
-              value: "db-endpoint.database.svc.cluster.local"
-            - name: PGBOUNCER_PORT
-              value: "5432"
+                  key: username
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: password
+            - name: PGBOUNCER_CONFIG_FILE
+              value: /etc/pgbouncer/pgbouncer.ini
+            - name: PGBOUNCER_AUTH_TYPE
+              value: "plain"
+            - name: PGBOUNCER_AUTH_FILE
+              value: "/etc/pgbouncer/userlist.txt"
+            - name: PGBOUNCER_POOL_MODE
+              value: "transaction"
+            - name: PGBOUNCER_MAX_CLIENT_CONN
+              value: "200"
+            - name: PGBOUNCER_DEFAULT_POOL_SIZE
+              value: "20"
+            - name: PGBOUNCER_RESERVE_POOL_SIZE
+              value: "5"
           resources:
             requests:
               cpu: 100m
@@ -123,13 +140,10 @@ spec:
               memory: 512Mi
           volumeMounts:
             - name: shared-auth
-              mountPath: /etc/pgbouncer/userlist.txt
-              subPath: userlist.txt
+              mountPath: /etc/pgbouncer
               readOnly: true
-            - name: shared-auth
-              mountPath: /etc/pgbouncer/certs/rds-ca.pem
-              subPath: rds-ca.pem
-              readOnly: true
+            - name: log-dir
+              mountPath: /var/log/pgbouncer
       volumes:
         - name: shared-auth
           emptyDir: {}
@@ -154,4 +168,9 @@ spec:
         - name: odcread-secret
           secret:
             secretName: odcread
+        - name: pgbouncer-config
+          configMap:
+            name: pgbouncer-config
+        - name: log-dir
+          emptyDir: {}
       restartPolicy: Always
