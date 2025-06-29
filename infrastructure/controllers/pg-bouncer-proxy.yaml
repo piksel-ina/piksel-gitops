@@ -1,3 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgbouncer-config
+  namespace: database
+data:
+  pgbouncer.ini: |
+    [databases]
+    * = host=db-endpoint.database.svc.cluster.local port=5432 sslmode=verify-ca sslcert=/etc/pgbouncer/certs/rds-ca.pem
+
+    [pgbouncer]
+    pool_mode = transaction
+    max_client_conn = 200
+    default_pool_size = 20
+    reserve_pool_size = 5
+    auth_type = plain
+    auth_file = /etc/pgbouncer/userlist.txt
+    listen_addr = *
+    listen_port = 5432
+    logfile = /var/log/pgbouncer/pgbouncer.log
+    pidfile = /tmp/pgbouncer.pid
+    sslcert = /etc/pgbouncer/certs/rds-ca.pem
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -174,3 +197,20 @@ spec:
         - name: log-dir
           emptyDir: {}
       restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pg-proxy-service
+  namespace: database
+  labels:
+    app: pg-proxy
+spec:
+  selector:
+    app: pg-proxy
+  ports:
+    - name: pgbouncer
+      protocol: TCP
+      port: 5432 # External port (what clients will connect to)
+      targetPort: 6432 # Internal port (what PgBouncer is listening on)
+  type: ClusterIP
