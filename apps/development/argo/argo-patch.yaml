@@ -20,10 +20,17 @@ spec:
             secretName: argo-ingress
       extraArgs:
         - "--auth-mode=sso"
+      extraRules:
+        - apiGroups:
+            - ""
+          resources:
+            - secrets
+          resourceNames:
+            - argo-client-secret
+          verbs:
+            - get
       logging:
         level: debug
-      server:
-      # SSO
       sso:
         enabled: true
         issuer: "https://dev-yqkhkttr7nx6u7o4.us.auth0.com/"
@@ -42,6 +49,7 @@ spec:
         customGroupClaimName: "groups"
         rbac:
           enabled: true
+
     artifactRepository:
       archiveLogs: true
       s3:
