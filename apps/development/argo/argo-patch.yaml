@@ -51,7 +51,7 @@ spec:
     controller:
       persistence:
         postgresql:
-          host: db-endpoint.db.svc.cluster.local
+          host: db-endpoint.database.svc.cluster.local
           port: 5432
           database: argo
           tableName: workflows
