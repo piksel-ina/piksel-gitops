@@ -51,8 +51,8 @@ spec:
     controller:
       persistence:
         postgresql:
-          host: db-endpoint.database.svc.cluster.local
-          port: 5432
+          host: pg-proxy-service.database.svc.cluster.local
+          port: 6432
           database: argo
           tableName: workflows
           userNameSecret:
@@ -61,5 +61,4 @@ spec:
           passwordSecret:
             name: argo
             key: password
-          ssl: true
-          sslMode: require
+          ssl: false
