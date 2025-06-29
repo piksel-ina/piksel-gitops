@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres-test-client
+  namespace: database
+spec:
+  containers:
+    - name: postgres-client
+      image: alpine:3.22
+      command:
+        - /bin/sh
+        - -c
+        - |
+          # Install postgresql-client
+          apk add --no-cache postgresql-client curl
+
+          # Decode PGPASSWORD from environment variable
+          echo "Decoding PGPASSWORD for database connection..."
+          DECODED_PGPASSWORD=$(echo $PGPASSWORD | base64 -d 2>/dev/null || echo $PGPASSWORD)
+          export PGPASSWORD=$DECODED_PGPASSWORD
+
+          # Download RDS CA certificate for SSL connection
+          echo "Downloading RDS CA certificate..."
+          curl -o /tmp/rds-ca.pem https://truststore.pki.rds.amazonaws.com/ap-southeast-3/ap-southeast-3-bundle.pem
+
+          # Set SSL environment variables for psql
+          export PGSSLMODE=verify-ca
+          export PGSSLROOTCERT=/tmp/rds-ca.pem
+
+          echo "Connecting to PostgreSQL database..."
+          echo "Database Host: $DB_HOST"
+          echo "Database User: $DB_ADMIN_USER"
+          echo "Database Name: $DATABASE_NAME"
+
+          # Test connection and list users
+          echo "=== Testing database connection ==="
+          psql -h $DB_HOST -U $DB_ADMIN_USER -d $DATABASE_NAME -c "SELECT version();"
+
+          echo ""
+          echo "=== Listing all database users/roles ==="
+          psql -h $DB_HOST -U $DB_ADMIN_USER -d $DATABASE_NAME -c "\du"
+
+          echo ""
+          echo "=== Detailed user information ==="
+          psql -h $DB_HOST -U $DB_ADMIN_USER -d $DATABASE_NAME -c "
+          SELECT 
+              rolname as role_name,
+              rolcanlogin as can_login,
+              rolcreatedb as can_create_db,
+              rolcreaterole as can_create_role,
+              rolsuper as is_superuser
+          FROM pg_roles 
+          WHERE rolname IN ('argo', 'jupyterhub', 'grafana', 'stacread', 'stac', 'odcread', 'odc')
+          ORDER BY rolname;"
+
+          # Keep the pod running for manual testing
+          echo ""
+          echo "=== Pod ready for manual testing ==="
+          echo "You can now exec into this pod and run additional psql commands"
+          echo "Example: kubectl exec -it postgres-test-client -n database -- /bin/sh"
+
+          # Sleep to keep pod running
+          sleep 3600
+      env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-password
+              key: password
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: db-password
+              key: db_address
+        - name: DB_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-password
+              key: username
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: db-password
+              key: db_name
+  restartPolicy: Never
