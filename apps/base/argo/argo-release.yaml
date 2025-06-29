@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: argo-workflows
-      version: "0.45.18"
+      version: "0.40.14"
       sourceRef:
         kind: HelmRepository
         name: argo-repository
@@ -15,26 +15,15 @@ spec:
   values:
     singleNamespace: true
     server:
-      # SSO
-      sso:
-        enabled: true
-        issuer: <YOUR_AUTH0_ISSUER_URL> # e.g., https://your-tenant.auth0.com/
-        clientId:
-          name: argo-client-secret
-          key: client-id
-        clientSecret:
-          name: argo-client-secret
-          key: client-secret
-        redirectUrl: <YOUR_ARGO_UI_URL>/oauth2/callback # e.g., https://argo.your-domain.com/oauth2/callback
-        scopes:
-          - openid
-          - profile
-          - email
-          - groups
       # Logging configuration
       logging:
         level: info
         globallevel: "0"
+      readinessProbe:
+        initialDelaySeconds: 60
+        periodSeconds: 20
+        timeoutSeconds: 5
+        failureThreshold: 5
 
     # Workflow Controller
     controller:

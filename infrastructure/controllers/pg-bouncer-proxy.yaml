@@ -16,7 +16,7 @@ data:
     auth_type = plain
     auth_file = /etc/pgbouncer/userlist.txt
     listen_addr = *
-    listen_port = 5432
+    listen_port = 6432
     logfile = /var/log/pgbouncer/pgbouncer.log
     pidfile = /tmp/pgbouncer.pid
     sslcert = /etc/pgbouncer/certs/rds-ca.pem
@@ -122,7 +122,7 @@ spec:
           image: bitnami/pgbouncer:1.24.1
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5432
+            - containerPort: 6432
               protocol: TCP
           env:
             # Bitnami PgBouncer specific environment variables
@@ -211,6 +211,6 @@ spec:
   ports:
     - name: pgbouncer
       protocol: TCP
-      port: 5432 # External port (what clients will connect to)
+      port: 6432 # External port (what clients will connect to)
       targetPort: 6432 # Internal port (what PgBouncer is listening on)
   type: ClusterIP

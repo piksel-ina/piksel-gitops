@@ -18,16 +18,27 @@ spec:
           - hosts:
               - argo.dev.pik-sel.id
             secretName: argo-ingress
-      extraArgs:
-        - "--auth-mode=sso"
-      logging:
         level: debug
+      authModes: [sso]
       sso:
+        enabled: true
         issuer: "https://dev-yqkhkttr7nx6u7o4.us.auth0.com/"
+        clientId:
+          name: argo-client-secret
+          key: client-id
+        clientSecret:
+          name: argo-client-secret
+          key: client-secret
         redirectUrl: https://argo.dev.pik-sel.id/oauth2/callback
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
         customGroupClaimName: "groups"
         rbac:
           enabled: true
+
     artifactRepository:
       archiveLogs: true
       s3:
