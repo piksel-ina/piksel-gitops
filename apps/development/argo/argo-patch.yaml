@@ -22,9 +22,23 @@ spec:
         - "--auth-mode=sso"
       logging:
         level: debug
+      server:
+      # SSO
       sso:
+        enabled: true
         issuer: "https://dev-yqkhkttr7nx6u7o4.us.auth0.com/"
+        clientId:
+          name: argo-client-secret
+          key: client-id
+        clientSecret:
+          name: argo-client-secret
+          key: client-secret
         redirectUrl: https://argo.dev.pik-sel.id/oauth2/callback
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
         customGroupClaimName: "groups"
         rbac:
           enabled: true
