@@ -6,6 +6,9 @@ spec:
   values:
     useStaticCredentials: false
     server:
+      logging:
+        level: debug
+        globallevel: "9"
       ingress:
         enabled: true
         ingressClassName: nginx
@@ -21,6 +24,7 @@ spec:
         level: debug
       authModes: [sso]
       sso:
+        secure: true
         enabled: true
         issuer: "https://dev-yqkhkttr7nx6u7o4.us.auth0.com/"
         clientId:
@@ -30,11 +34,6 @@ spec:
           name: argo-client-secret
           key: client-secret
         redirectUrl: https://argo.dev.pik-sel.id/oauth2/callback
-        scopes:
-          - openid
-          - profile
-          - email
-          - groups
         customGroupClaimName: "groups"
         rbac:
           enabled: true

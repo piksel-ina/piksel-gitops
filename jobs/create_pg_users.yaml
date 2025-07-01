@@ -8,16 +8,31 @@ data:
     #!/bin/bash
     set -e
 
+    # Function to create database if it doesn't exist
+    create_database_if_not_exists() {
+        local db_name=$1
+        
+        echo "Checking/Creating database: $db_name"
+        
+        psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d postgres << EOF
+    SELECT 'CREATE DATABASE $db_name' 
+    WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$db_name')\gexec
+    EOF
+        
+        echo "Database $db_name is ready"
+    }
+
     # Function to create or update user
     create_or_update_user() {
         local username=$1
         local password=$2
-        local permissions=$3
+        local target_db=$3
+        local permissions=$4
         
-        echo "Processing user: $username"
+        echo "Processing user: $username for database: $target_db"
         
-        # Use psql with environment variables - no sed needed!
-        psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d "$DATABASE_NAME" << EOF
+        # Create/update user in the main postgres database
+        psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d postgres << EOF
     DO \$\$
     DECLARE
         user_exists boolean;
@@ -31,37 +46,49 @@ data:
             RAISE NOTICE 'Updated password for user: $username';
         END IF;
     END \$\$;
+    EOF
 
-    GRANT CONNECT ON DATABASE $DATABASE_NAME TO $username;
+        # Grant permissions on the target database
+        psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d "$target_db" << EOF
+    GRANT CONNECT ON DATABASE $target_db TO $username;
     GRANT USAGE ON SCHEMA public TO $username;
     $permissions
     EOF
         
-        echo "User $username processed"
+        echo "User $username processed for database $target_db"
     }
 
-    echo "Starting database user creation process..."
+    echo "Starting database and user creation process..."
 
-    # Create users with their specific permissions
-    create_or_update_user "argo" "$ARGO_PASSWORD" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO argo;"
+    # Create databases first
+    create_database_if_not_exists "argo"
+    create_database_if_not_exists "jupyterhub" 
+    create_database_if_not_exists "grafana"
+    create_database_if_not_exists "stac"  # shared by stac and stacread
+    create_database_if_not_exists "odc"   # shared by odc and odcread
 
-    create_or_update_user "jupyterhub" "$JUPYTERHUB_PASSWORD" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO jupyterhub;"
+    # Create users with their specific permissions on their respective databases
+    create_or_update_user "argo" "$ARGO_PASSWORD" "argo" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO argo; GRANT CREATE ON SCHEMA public TO argo;"
 
-    create_or_update_user "grafana" "$GRAFANA_PASSWORD" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana;"
+    create_or_update_user "jupyterhub" "$JUPYTERHUB_PASSWORD" "jupyterhub" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO jupyterhub; GRANT CREATE ON SCHEMA public TO jupyterhub;"
 
-    create_or_update_user "stacread" "$STACREAD_PASSWORD" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO stacread;"
+    create_or_update_user "grafana" "$GRAFANA_PASSWORD" "grafana" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana;"
 
-    create_or_update_user "stac" "$STAC_PASSWORD" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO stac;"
+    # STAC users share the same database
+    create_or_update_user "stacread" "$STACREAD_PASSWORD" "stac" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO stacread;"
+    create_or_update_user "stac" "$STAC_PASSWORD" "stac" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO stac; GRANT CREATE ON SCHEMA public TO stac;"
 
-    create_or_update_user "odcread" "$ODCREAD_PASSWORD" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO odcread;"
+    # ODC users share the same database  
+    create_or_update_user "odcread" "$ODCREAD_PASSWORD" "odc" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO odcread;"
+    create_or_update_user "odc" "$ODC_PASSWORD" "odc" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO odc; GRANT CREATE ON SCHEMA public TO odc;"
 
-    create_or_update_user "odc" "$ODC_PASSWORD" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO odc;"
+    echo "Database and user creation process completed successfully!"
 
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: db-user-creation-v4
+  name: db-user-creation-job
   namespace: database
 spec:
   template:
