@@ -26,15 +26,20 @@ spec:
       sso:
         secure: true
         enabled: true
-        issuer: "https://dev-yqkhkttr7nx6u7o4.us.auth0.com/"
+        issuer: "https://cognito-idp.ap-southeast-3.amazonaws.com/ap-southeast-3_ZFzkRhjdu"
+        sessionExpiry: 240h
         clientId:
           name: argo-client-secret
           key: client-id
         clientSecret:
           name: argo-client-secret
           key: client-secret
+        scopes:
+          - openid
+          - email
+          - profile
         redirectUrl: https://argo.dev.pik-sel.id/oauth2/callback
-        customGroupClaimName: "groups"
+        customGroupClaimName: "cognito:groups"
         rbac:
           enabled: true
 
