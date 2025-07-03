@@ -38,6 +38,7 @@ spec:
       serviceAccount:
         create: true
         name: "argo-workflows-executor"
+        namespace: argo-workflows
         annotations:
           workflows.argoproj.io/rbac-rule: "true"
           workflows.argoproj.io/rbac-rule-precedence: "1"

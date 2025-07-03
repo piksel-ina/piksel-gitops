@@ -3,6 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: executor
+  namespace: argo-workflows
 rules:
   - apiGroups:
       - argoproj.io
@@ -17,6 +18,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: argo-workflow-executor-default-binding
+  namespace: argo-workflows
 subjects:
   - kind: ServiceAccount
     name: argo-workflows-executor
@@ -30,6 +32,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: argo-workflow-admin-role
+  namespace: argo-workflows
 rules:
   - apiGroups:
       - ""
@@ -75,6 +78,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: argo-workflow-viewer-role
+  namespace: argo-workflows
 rules:
   - apiGroups:
       - ""
@@ -124,6 +128,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: argo-workflow-admin-role-binding
+  namespace: argo-workflows
 subjects:
   - kind: ServiceAccount
     name: argo-admin-login
@@ -137,6 +142,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: argo-workflow-viewer-role-binding
+  namespace: argo-workflows
 subjects:
   - kind: ServiceAccount
     name: argo-user-login
@@ -150,6 +156,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: workflows-defaults-role
+  namespace: argo-workflows
 rules:
   # --- Core Kubernetes Resources ---
   # Allow reading configuration and secrets, which is a very common need.
@@ -211,6 +218,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: argo-workflow-executor-defaults-binding
+  namespace: argo-workflows
 subjects:
   - kind: ServiceAccount
     name: argo-workflows-executor
