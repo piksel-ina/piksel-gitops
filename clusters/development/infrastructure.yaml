@@ -6,6 +6,9 @@ metadata:
   name: infra-controllers
   namespace: flux-system
 spec:
+  # Ensure jobs are applied before controllers
+  dependsOn:
+    - name: infra-jobs
   # How often Flux checks for changes (every 1 hour)
   interval: 1h
   retryInterval: 1m
