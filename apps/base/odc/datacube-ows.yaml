@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datacube-ows
+  namespace: odc
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: datacube-ows
+  template:
+    metadata:
+      labels:
+        app: datacube-ows
+    spec:
+      serviceAccountName: data-reader
+      containers:
+        - name: datacube-ows
+          image: ghcr.io/opendatacube/datacube-ows:1.9.2
+          imagePullPolicy: IfNotPresent
+          command:
+            [
+              "gunicorn",
+              "-b",
+              "0.0.0.0:8000",
+              "-w",
+              "4",
+              "--keep-alive",
+              "50",
+              "--timeout",
+              "120",
+              "--log-level",
+              "debug",
+              "datacube_ows.wsgi",
+            ]
+          resources:
+            requests:
+              cpu: 1
+              memory: 2Gi
+            limits:
+              cpu: 2
+              memory: 2Gi
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            # Database stuff
+            - name: ODC_DEFAULT_DB_HOSTNAME
+              value: "pg-proxy-service.database.svc.cluster.local"
+            - name: ODC_DEFAULT_DB_PORT
+              value: "6432"
+            - name: ODC_DEFAULT_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: odcread-secret
+                  key: username
+            - name: ODC_DEFAULT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odcread-secret
+                  key: password
+            - name: ODC_DEFAULT_DB_DATABASE
+              value: odc
+            - name: ODC_DEFAULT_INDEX_DRIVER
+              value: "postgis"
+            - name: ODC_CONFIG_PATH
+              value: /tmp/datacube.conf
+            # OWS config stuff
+            - name: PYTHONPATH
+              value: "/env/config"
+            - name: DATACUBE_OWS_CFG
+              value: ows_config.ows.ows_cfg
+            - name: WMS_CONFIG_PATH
+              value: /env/config/ows_config/ows.py
+            - name: PROXY_FIX
+              value: "yes"
+            - name: AWS_NO_SIGN_REQUEST
+              value: "no"
+            # GDAL stuff...
+            - name: AWS_REQUEST_PAYER
+              value: "requester"
+            - name: AWS_DEFAULT_REGION
+              value: "ap-southeast-3"
+            - name: VSI_CACHE
+              value: "TRUE"
+            - name: VSI_CACHE_SIZE
+              value: "536870912"
+            - name: GDAL_HTTP_MERGE_CONSECUTIVE_RANGES
+              value: "YES"
+          livenessProbe:
+            httpGet:
+            path: /
+            port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+            path: /
+            port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
