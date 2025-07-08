@@ -6,7 +6,7 @@ metadata:
 data:
   pgbouncer.ini: |
     [databases]
-    * = host=db-endpoint.database.svc.cluster.local port=5432
+    * = host=db-endpoint.database.svc.cluster.local port=5432 sslmode=require
 
     [pgbouncer]
     listen_port = 6432
@@ -21,6 +21,10 @@ data:
     pidfile = /tmp/pgbouncer.pid
     admin_users = postgres
     stats_users = postgres
+
+    # SSL Configuration for connecting to RDS through the service
+    server_tls_sslmode = require
+    server_tls_ca_file = /etc/ssl/certs/rds-ca-2019-root.pem
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -54,6 +58,22 @@ spec:
                     app: pg-proxy
                 topologyKey: "kubernetes.io/hostname"
       initContainers:
+        # Download RDS CA certificate
+        - name: download-rds-ca
+          image: curlimages/curl:8.5.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Downloading RDS CA certificate for ap-southeast-3..."
+              curl -o /ssl-certs/rds-ca-2019-root.pem https://truststore.pki.rds.amazonaws.com/ap-southeast-3/ap-southeast-3-bundle.pem
+              echo "RDS CA certificate downloaded successfully"
+              ls -la /ssl-certs/
+              echo "Certificate info:"
+              head -5 /ssl-certs/rds-ca-2019-root.pem
+          volumeMounts:
+            - name: ssl-certs
+              mountPath: /ssl-certs
         - name: generate-userlist
           image: busybox:1.36
           command:
@@ -145,6 +165,9 @@ spec:
             - name: userlist
               mountPath: /etc/pgbouncer/userlist.txt
               subPath: userlist.txt
+            - name: ssl-certs
+              mountPath: /etc/ssl/certs
+              readOnly: true
           livenessProbe:
             tcpSocket:
               port: 6432
@@ -157,6 +180,8 @@ spec:
             periodSeconds: 5
       volumes:
         - name: userlist
+          emptyDir: {}
+        - name: ssl-certs
           emptyDir: {}
         - name: pgbouncer-config
           configMap:
