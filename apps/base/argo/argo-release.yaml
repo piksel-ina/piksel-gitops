@@ -15,6 +15,12 @@ spec:
   values:
     singleNamespace: true
     server:
+      # Allow UI to retrieve objects from AWS S3 bucker
+      serviceAccount:
+        create: true
+        name: "argo-workflows-server"
+        annotations:
+          eks.amazonaws.com/role-arn: "arn:aws:iam::236122835646:role/iam-role-for-argo-workflow-service-account"
       # Logging configuration
       logging:
         level: info
