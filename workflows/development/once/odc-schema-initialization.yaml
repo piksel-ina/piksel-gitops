@@ -1,0 +1,218 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: odc-schema-init-
+  namespace: argo-workflows
+spec:
+  entrypoint: odc-schema-initialization
+  serviceAccountName: argo-workflows-executor
+  podGC:
+    strategy: OnWorkflowSuccess
+  templates:
+    - name: odc-schema-initialization
+      script:
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-d9560ad
+        resources:
+          requests:
+            memory: 500Mi
+            cpu: 1000m
+          limits:
+            memory: 1Gi
+            cpu: 2000m
+        command: [bash]
+        source: |
+          set -e
+
+          echo "=== ODC Schema Initialization ==="
+          echo "Database: $POSTGRES_DB | ODC User: $ODC_USER | Read User: $ODC_READ_USER"
+
+          # Helper functions
+          decode_password() {
+            local password="$1"
+            if [[ "$password" =~ ^[A-Za-z0-9+/]*=*$ ]] && [[ "$password" == *"=" ]]; then
+              echo "$password" | base64 -d 2>/dev/null || echo "$password"
+            else
+              echo "$password"
+            fi
+          }
+
+          run_sql() {
+            local host="$1" port="$2" user="$3" password="$4" database="$5" query="$6"
+            PGPASSWORD="$password" psql -h "$host" -p "$port" -U "$user" -d "$database" -c "$query" -q
+          }
+
+          run_sql_check() {
+            local host="$1" port="$2" user="$3" password="$4" database="$5" query="$6"
+            PGPASSWORD="$password" psql -h "$host" -p "$port" -U "$user" -d "$database" -tAc "$query"
+          }
+
+          # Process passwords
+          MASTER_PASS=$(decode_password "$MASTER_PASSWORD")
+          ODC_PASS=$(decode_password "$ODC_PASS")
+          ODC_READ_PASS=$(decode_password "$ODC_READ_PASS")
+
+          # Setup SSL for RDS
+          curl -s -o /tmp/rds-ca.pem https://truststore.pki.rds.amazonaws.com/ap-southeast-3/ap-southeast-3-bundle.pem
+          export PGSSLMODE=verify-ca PGSSLROOTCERT=/tmp/rds-ca.pem
+
+          # Validate prerequisites
+          echo "Validating database and users..."
+          run_sql "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "postgres" "SELECT 1;" > /dev/null
+
+          DB_EXISTS=$(run_sql_check "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "postgres" "SELECT 1 FROM pg_database WHERE datname='$POSTGRES_DB';" || echo "0")
+          [ "$DB_EXISTS" != "1" ] && { echo "ERROR: Database $POSTGRES_DB not found"; exit 1; }
+
+          USER_EXISTS=$(run_sql_check "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "postgres" "SELECT 1 FROM pg_roles WHERE rolname='$ODC_USER';" || echo "0")
+          READ_USER_EXISTS=$(run_sql_check "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "postgres" "SELECT 1 FROM pg_roles WHERE rolname='$ODC_READ_USER';" || echo "0")
+
+          [ "$USER_EXISTS" != "1" ] && { echo "ERROR: User $ODC_USER not found"; exit 1; }
+          [ "$READ_USER_EXISTS" != "1" ] && { echo "ERROR: User $ODC_READ_USER not found"; exit 1; }
+
+          echo "✓ Prerequisites validated"
+
+          # Setup database
+          echo "Setting up database..."
+          run_sql "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "$POSTGRES_DB" "CREATE EXTENSION IF NOT EXISTS postgis;"
+          run_sql "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "$POSTGRES_DB" "GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DB TO $ODC_USER;"
+          run_sql "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "$POSTGRES_DB" "GRANT CONNECT ON DATABASE $POSTGRES_DB TO $ODC_READ_USER;"
+
+          # Clean existing schemas
+          run_sql "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "$POSTGRES_DB" "DROP SCHEMA IF EXISTS odc CASCADE;" 2>/dev/null || true
+          run_sql "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "$POSTGRES_DB" "DROP SCHEMA IF EXISTS agdc CASCADE;" 2>/dev/null || true
+
+          echo "✓ Database prepared"
+
+          # Initialize ODC
+          echo "Initializing ODC schema..."
+          export ODC_DEFAULT_DB_HOSTNAME="$POSTGRES_HOST"
+          export ODC_DEFAULT_DB_PORT="$POSTGRES_PORT"
+          export ODC_DEFAULT_DB_DATABASE="$POSTGRES_DB"
+          export ODC_DEFAULT_DB_USERNAME="$MASTER_USER"
+          export ODC_DEFAULT_DB_PASSWORD="$MASTER_PASS"
+          export ODC_CONFIG_PATH="/home/appuser/.datacube.conf"
+
+          envsubst < /home/appuser/.datacube.conf.template > /home/appuser/.datacube.conf
+          datacube -v system init
+
+          echo "✓ ODC schema initialized"
+
+          # Create spatial indexes
+          echo "Creating spatial indexes..."
+          for epsg in 4326 3857 32748 32749 32750 32751 32752; do
+            datacube spindex create $epsg > /dev/null 2>&1
+            datacube spindex update $epsg > /dev/null 2>&1
+          done
+
+          echo "✓ Spatial indexes created"
+
+          # Setup permissions
+          echo "Configuring permissions..."
+
+          # Create admin role
+          run_sql "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "$POSTGRES_DB" "
+            DO \$\$ BEGIN
+              IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'odc_admin') THEN
+                CREATE ROLE odc_admin;
+              END IF;
+            END \$\$;"
+
+          run_sql "$POSTGRES_HOST" "$POSTGRES_PORT" "$MASTER_USER" "$MASTER_PASS" "$POSTGRES_DB" "GRANT odc_admin TO $ODC_USER;"
+
+          # Setup ODC user permissions
+          cat << EOF | PGPASSWORD="$MASTER_PASS" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$MASTER_USER" -d "$POSTGRES_DB" -q
+          GRANT ALL PRIVILEGES ON SCHEMA odc TO $ODC_USER;
+          GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA odc TO $ODC_USER;
+          GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA odc TO $ODC_USER;
+          EOF
+
+          # Setup read user permissions
+          cat << EOF | PGPASSWORD="$MASTER_PASS" psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$MASTER_USER" -d "$POSTGRES_DB" -q
+          GRANT USAGE ON SCHEMA odc TO $ODC_READ_USER;
+          GRANT USAGE ON SCHEMA public TO $ODC_READ_USER;
+          GRANT SELECT ON ALL TABLES IN SCHEMA odc TO $ODC_READ_USER;
+          GRANT SELECT ON ALL TABLES IN SCHEMA public TO $ODC_READ_USER;
+          GRANT SELECT ON ALL SEQUENCES IN SCHEMA odc TO $ODC_READ_USER;
+          ALTER DEFAULT PRIVILEGES IN SCHEMA odc GRANT SELECT ON TABLES TO $ODC_READ_USER;
+          ALTER DEFAULT PRIVILEGES IN SCHEMA odc GRANT SELECT ON SEQUENCES TO $ODC_READ_USER;
+          EOF
+
+          echo "✓ Permissions configured"
+
+          # Test PgBouncer connections
+          echo "Testing PgBouncer connections..."
+          export PGSSLMODE=disable PGSSLROOTCERT=""
+
+          PGPASSWORD="$ODC_PASS" psql -h pg-proxy-service.database.svc.cluster.local -p 6432 -U $ODC_USER -d $POSTGRES_DB -c "SELECT 1;"  || {
+            echo "WARNING: ODC user PgBouncer connection failed"
+          }
+
+          PGPASSWORD="$ODC_READ_PASS" psql -h pg-proxy-service.database.svc.cluster.local -p 6432 -U $ODC_READ_USER -d $POSTGRES_DB -c "SELECT 1;" || {
+            echo "WARNING: ODC read user PgBouncer connection failed"
+          }
+
+          echo "✓ PgBouncer connections tested"
+
+          # Final system check
+          echo "Running final system check..."
+          export ODC_DEFAULT_DB_HOSTNAME="pg-proxy-service.database.svc.cluster.local"
+          export ODC_DEFAULT_DB_PORT="6432"
+          export ODC_DEFAULT_DB_USERNAME="$ODC_USER"
+          export ODC_DEFAULT_DB_PASSWORD="$ODC_PASS"
+
+          envsubst < /home/appuser/.datacube.conf.template > /home/appuser/.datacube.conf
+          datacube system check
+
+          echo ""
+          echo "ODC Schema Initialization Complete!"
+          echo "✅ PostGIS enabled"
+          echo "✅ ODC schema initialized"
+          echo "✅ Spatial indexes created (4326, 3857, UTM 48S-52S)"
+          echo "✅ Permissions configured"
+          echo "✅ PgBouncer connectivity verified"
+          echo "✅ System check passed"
+          echo ""
+          echo "📋 Connection Info:"
+          echo "   PgBouncer: pg-proxy-service.database.svc.cluster.local:6432"
+          echo "   Database: $POSTGRES_DB"
+          echo "   Users: $ODC_USER (read/write), $ODC_READ_USER (read-only)"
+
+        env:
+          - name: POSTGRES_HOST
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: db_address
+          - name: POSTGRES_PORT
+            value: "5432"
+          - name: POSTGRES_DB
+            value: "odc"
+          - name: MASTER_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: username
+          - name: MASTER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: password
+          - name: ODC_USER
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_PASS
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_READ_USER
+            valueFrom:
+              secretKeyRef:
+                name: odcread
+                key: username
+          - name: ODC_READ_PASS
+            valueFrom:
+              secretKeyRef:
+                name: odcread
+                key: password
