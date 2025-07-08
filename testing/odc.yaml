@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odc-app
+  namespace: database
+spec:
+  selector:
+    matchLabels:
+      app: odc
+  template:
+    metadata:
+      labels:
+        app: odc
+    spec:
+      containers:
+        - name: odc
+          image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-011a691
+          env:
+            - name: ODC_DEFAULT_DB_HOSTNAME
+              value: "pg-proxy-service.database.svc.cluster.local"
+            - name: ODC_DEFAULT_DB_PORT
+              value: "6432" # PgBouncer port
+            - name: ODC_DEFAULT_DB_DATABASE
+              value: "odc"
+            - name: ODC_DEFAULT_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: odc
+                  key: username
+            - name: ODC_DEFAULT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odc
+                  key: password

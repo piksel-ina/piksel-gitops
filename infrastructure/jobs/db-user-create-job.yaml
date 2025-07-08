@@ -5,6 +5,7 @@ metadata:
   name: db-user-creation-job
   namespace: database
 spec:
+  backoffLimit: 3
   template:
     spec:
       containers:
@@ -14,10 +15,15 @@ spec:
             - /bin/sh
             - -c
             - |
+              set -e  # Exit on any error
+
+              echo "Starting database user creation job..."
+
               # Install packages
+              echo "Installing required packages..."
               apk add --no-cache bash curl postgresql-client
 
-              # Check if PGPASSWORD needs base64 decoding (try decode, fallback to original)
+              # Check if PGPASSWORD needs base64 decoding
               if echo "$PGPASSWORD" | base64 -d >/dev/null 2>&1; then
                   DECODED_PGPASSWORD=$(echo "$PGPASSWORD" | base64 -d)
                   echo "Admin password was base64 encoded, decoded successfully"
@@ -27,18 +33,51 @@ spec:
               fi
               export PGPASSWORD="$DECODED_PGPASSWORD"
 
-              # User passwords - assume they are plain text (no base64 decoding)
+              # User passwords - assume they are plain text
               echo "Using user passwords as plain text (no base64 decoding)"
 
-              # Download SSL cert
-              curl -o /tmp/rds-ca.pem https://truststore.pki.rds.amazonaws.com/ap-southeast-3/ap-southeast-3-bundle.pem
+              # Download SSL cert with retry logic
+              echo "Downloading SSL certificate..."
+              for i in 1 2 3; do
+                  if curl -o /tmp/rds-ca.pem https://truststore.pki.rds.amazonaws.com/ap-southeast-3/ap-southeast-3-bundle.pem; then
+                      echo "SSL certificate downloaded successfully"
+                      break
+                  else
+                      echo "SSL certificate download attempt $i failed"
+                      if [ $i -eq 3 ]; then
+                          echo "Failed to download SSL certificate after 3 attempts"
+                          exit 1
+                      fi
+                      sleep 5
+                  fi
+              done
+
               export PGSSLMODE=verify-ca
               export PGSSLROOTCERT=/tmp/rds-ca.pem
 
+              # Test database connection first
+              echo "Testing database connection..."
+              if ! psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d postgres -c "SELECT version();" >/dev/null; then
+                  echo "ERROR: Cannot connect to database"
+                  exit 1
+              fi
+              echo "Database connection successful"
+
               # Copy script to writable location and run it
+              echo "Preparing and executing user creation script..."
               cp /scripts/create_users.sh /tmp/create_users.sh
               chmod +x /tmp/create_users.sh
-              /tmp/create_users.sh
+
+              # Execute the script
+              if /tmp/create_users.sh; then
+                  echo "User creation script completed successfully"
+                  # Create completion marker for potential health checks
+                  touch /tmp/job-completed
+                  echo "Job completed successfully at $(date)"
+              else
+                  echo "User creation script failed"
+                  exit 1
+              fi
           env:
             - name: PGPASSWORD
               valueFrom:
@@ -98,15 +137,17 @@ spec:
           volumeMounts:
             - name: script
               mountPath: /scripts
+              readOnly: true
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
       volumes:
         - name: script
           configMap:
             name: db-user-creation-script
             defaultMode: 0755
       restartPolicy: OnFailure
-      livenessProbe:
-        exec:
-          command:
-            - /bin/sh
-            - -c
-            - "test -f /tmp/job-completed"

@@ -50,9 +50,15 @@ data:
 
         # Grant permissions on the target database
         psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d "$target_db" << EOF
+    -- Basic database access
     GRANT CONNECT ON DATABASE $target_db TO $username;
     GRANT USAGE ON SCHEMA public TO $username;
+
+    -- Apply specific permissions
     $permissions
+
+    -- Set default privileges for future objects (important!)
+    $(echo "$permissions" | sed 's/ON ALL TABLES/ON TABLES/' | sed 's/TO [^;]*/TO $username/' | sed 's/^/ALTER DEFAULT PRIVILEGES IN SCHEMA public /')
     EOF
         
         echo "User $username processed for database $target_db"
@@ -64,22 +70,56 @@ data:
     create_database_if_not_exists "argo"
     create_database_if_not_exists "jupyterhub" 
     create_database_if_not_exists "grafana"
-    create_database_if_not_exists "stac"  # shared by stac and stacread
-    create_database_if_not_exists "odc"   # shared by odc and odcread
+    create_database_if_not_exists "stac"
+    create_database_if_not_exists "odc"
 
-    # Create users with their specific permissions on their respective databases
-    create_or_update_user "argo" "$ARGO_PASSWORD" "argo" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO argo; GRANT CREATE ON SCHEMA public TO argo;"
+    # Create users with their specific permissions
+    create_or_update_user "argo" "$ARGO_PASSWORD" "argo" \
+        "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO argo;
+         GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO argo;
+         GRANT CREATE ON SCHEMA public TO argo;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO argo;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO argo;"
 
-    create_or_update_user "jupyterhub" "$JUPYTERHUB_PASSWORD" "jupyterhub" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO jupyterhub; GRANT CREATE ON SCHEMA public TO jupyterhub;"
+    create_or_update_user "jupyterhub" "$JUPYTERHUB_PASSWORD" "jupyterhub" \
+        "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO jupyterhub;
+         GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO jupyterhub;
+         GRANT CREATE ON SCHEMA public TO jupyterhub;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO jupyterhub;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO jupyterhub;"
 
-    create_or_update_user "grafana" "$GRAFANA_PASSWORD" "grafana" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana;"
+    create_or_update_user "grafana" "$GRAFANA_PASSWORD" "grafana" \
+        "GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana;
+         GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO grafana;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO grafana;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO grafana;"
 
-    # STAC users share the same database
-    create_or_update_user "stacread" "$STACREAD_PASSWORD" "stac" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO stacread;"
-    create_or_update_user "stac" "$STAC_PASSWORD" "stac" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO stac; GRANT CREATE ON SCHEMA public TO stac;"
+    # STAC users (shared database)
+    create_or_update_user "stacread" "$STACREAD_PASSWORD" "stac" \
+        "GRANT SELECT ON ALL TABLES IN SCHEMA public TO stacread;
+         GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO stacread;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO stacread;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO stacread;"
 
-    # ODC users share the same database  
-    create_or_update_user "odcread" "$ODCREAD_PASSWORD" "odc" "GRANT SELECT ON ALL TABLES IN SCHEMA public TO odcread;"
-    create_or_update_user "odc" "$ODC_PASSWORD" "odc" "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO odc; GRANT CREATE ON SCHEMA public TO odc;"
+    create_or_update_user "stac" "$STAC_PASSWORD" "stac" \
+        "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO stac;
+         GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO stac;
+         GRANT CREATE ON SCHEMA public TO stac;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO stac;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO stac;"
+
+    # ODC users (shared database)
+    create_or_update_user "odcread" "$ODCREAD_PASSWORD" "odc" \
+        "GRANT SELECT ON ALL TABLES IN SCHEMA public TO odcread;
+         GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO odcread;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO odcread;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO odcread;"
+
+    create_or_update_user "odc" "$ODC_PASSWORD" "odc" \
+        "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO odc;
+         GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO odc;
+         GRANT CREATE ON SCHEMA public TO odc;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO odc;
+         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO odc;"
 
     echo "Database and user creation process completed successfully!"
