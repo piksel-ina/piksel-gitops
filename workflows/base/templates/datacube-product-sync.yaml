@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: datacube-product-sync
+  namespace: argo-workflows
+spec:
+  entrypoint: product-sync
+  podGC:
+    strategy: OnWorkflowSuccess
+  ttlStrategy:
+    secondsAfterCompletion: 300
+  arguments:
+    parameters:
+      - name: product-list
+        value: "https://raw.githubusercontent.com/piksel-ina/piksel-core/main/products.csv"
+  templates:
+    - name: product-sync
+      inputs:
+        parameters:
+          - name: product-list
+            value: "{{workflow.parameters.product-list}}"
+      container:
+        name: indexing-container
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-b8f23f1
+        command:
+          - bash
+        args:
+          - "-c"
+          - |
+            datacube --version
+            dc-sync-products {{inputs.parameters.product-list}} --update-if-exists
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
