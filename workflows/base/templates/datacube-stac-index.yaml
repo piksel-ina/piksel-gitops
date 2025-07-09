@@ -49,6 +49,7 @@ spec:
             # Check if grid-id is provided and not empty
             if [ "{{inputs.parameters.grid-id}}" != "" ]; then
               echo "🌍 Processing grid cell: {{inputs.parameters.grid-id}}"
+              echo "📅 Datetime: {{inputs.parameters.datetime}}"
               echo "📍 Bbox: {{inputs.parameters.bbox}}"
             else
               echo "🌍 Processing STAC indexing"

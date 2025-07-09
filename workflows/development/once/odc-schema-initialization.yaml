@@ -166,7 +166,7 @@ spec:
           echo "ODC Schema Initialization Complete!"
           echo "✅ PostGIS enabled"
           echo "✅ ODC schema initialized"
-          echo "✅ Spatial indexes created (4326, 3857, UTM 48S-52S)"
+          echo "✅ Spatial indexes created (4326, 3857)"
           echo "✅ Permissions configured"
           echo "✅ PgBouncer connectivity verified"
           echo "✅ System check passed"
