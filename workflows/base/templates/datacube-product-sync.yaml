@@ -31,6 +31,7 @@ spec:
           - |
             datacube --version
             dc-sync-products {{inputs.parameters.product-list}} --update-if-exists
+            datacube product list
         env:
           - name: ODC_DEFAULT_DB_HOSTNAME
             value: "pg-proxy-service.database.svc.cluster.local"

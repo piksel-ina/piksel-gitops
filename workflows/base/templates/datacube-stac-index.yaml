@@ -1,0 +1,99 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: datacube-stac-indexer
+  namespace: argo-workflows
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: stac-indexing
+  podGC:
+    strategy: OnWorkflowCompletion
+  ttlStrategy:
+    secondsAfterCompletion: 300
+  arguments:
+    parameters:
+      - name: catalog
+        value: "https://stac.staging.example.com"
+      - name: arguments
+        value: "" # '--rename-product=ls8_c2l2_sr --options="query={\"platform\":{\"in\":[\"landsat-8\"]}}"'
+      - name: bbox
+        value: "-180.0,-70,180.0,70"
+      - name: datetime
+        value: "2025"
+      - name: collections
+        value: "example-collection"
+  templates:
+    - name: stac-indexing
+      inputs:
+        parameters:
+          - name: catalog
+            value: "{{workflow.parameters.catalog}}"
+          - name: collections
+            value: "{{workflow.parameters.collections}}"
+          - name: bbox
+            value: "{{workflow.parameters.bbox}}"
+          - name: datetime
+            value: "{{workflow.parameters.datetime}}"
+          - name: arguments
+            value: "{{workflow.parameters.arguments}}"
+          - name: grid-id
+            value: "{{workflow.parameters.grid-id}}"
+      container:
+        name: odc-container
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-b8f23f1
+        command:
+          - bash
+        args:
+          - "-c"
+          - |
+            # Check if grid-id is provided and not empty
+            if [ "{{inputs.parameters.grid-id}}" != "" ]; then
+              echo "🌍 Processing grid cell: {{inputs.parameters.grid-id}}"
+              echo "📍 Bbox: {{inputs.parameters.bbox}}"
+            else
+              echo "🌍 Processing STAC indexing"
+              echo "📍 Bbox: {{inputs.parameters.bbox}}"
+            fi
+
+            stac-to-dc \
+            --catalog-href={{inputs.parameters.catalog}} \
+            --collections={{inputs.parameters.collections}} \
+            --bbox={{inputs.parameters.bbox}} \
+            --datetime={{inputs.parameters.datetime}} \
+            {{inputs.parameters.arguments}}
+
+            # Success message with conditional grid info
+            if [ "{{inputs.parameters.grid-id}}" != "" ]; then
+              echo "✅ Completed grid cell: {{inputs.parameters.grid-id}}"
+            else
+              echo "✅ Completed STAC indexing"
+            fi
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2"

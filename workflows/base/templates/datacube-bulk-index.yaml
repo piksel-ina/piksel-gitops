@@ -1,0 +1,269 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: datacube-bulk-indexer
+  namespace: argo-workflows
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: grid-bulk-indexing
+  parallelism: 10
+
+  arguments:
+    parameters:
+      - name: catalog
+        value: "https://stac.staging.example.com"
+      - name: collections
+        value: "example-collection"
+      - name: datetime
+        value: "2020-01-01/2024-12-31"
+      - name: arguments
+        value: '--rename-product=ls8_c2l2_sr --options="query={\"platform\":{\"in\":[\"landsat-8\"]}}"'
+      - name: time-chunks
+        value: "6" # process 6 months at a time
+
+  templates:
+    - name: grid-bulk-indexing
+      steps:
+        # Step 1: Generate time chunks
+        - - name: generate-time-chunks
+            template: gen-time-chunks-artifact
+            arguments:
+              parameters:
+                - name: datetime
+                  value: "{{workflow.parameters.datetime}}"
+                - name: chunk-months
+                  value: "{{workflow.parameters.time-chunks}}"
+
+        # Step 2: Generate grid cells dynamically
+        - - name: generate-grid
+            template: gen-grid-cells-artifact
+            arguments:
+              parameters:
+                - name: min-lon
+                  value: "95"
+                - name: max-lon
+                  value: "141"
+                - name: min-lat
+                  value: "-11"
+                - name: max-lat
+                  value: "6"
+                - name: cell-size
+                  value: "5"
+
+        # Step 3: Generate task chunks
+        - - name: generate-task-chunks
+            template: gen-combined-tasks-artifacts
+            arguments:
+              artifacts:
+                - name: time-chunks-file
+                  from: "{{steps.generate-time-chunks.outputs.artifacts.result}}"
+                - name: grid-cells-file
+                  from: "{{steps.generate-grid.outputs.artifacts.result}}"
+
+        # Step 4: Process each chunk in parallel
+        - - name: process-chunk
+            template: process-task-chunk
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "{{workflow.parameters.catalog}}"
+                - name: collections
+                  value: "{{workflow.parameters.collections}}"
+                - name: arguments
+                  value: "{{workflow.parameters.arguments}}"
+                - name: chunk-tasks
+                  value: "{{item.tasks}}"
+                - name: chunk-id
+                  value: "{{item.id}}"
+            withParam: "{{steps.generate-task-chunks.outputs.parameters.chunk-list}}"
+
+    # Process individual chunk of tasks
+    - name: process-task-chunk
+      inputs:
+        parameters:
+          - name: catalog
+          - name: collections
+          - name: arguments
+          - name: chunk-tasks
+          - name: chunk-id
+      steps:
+        - - name: index-grid-cell
+            templateRef:
+              name: datacube-stac-indexer
+              template: stac-indexing
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "{{inputs.parameters.catalog}}"
+                - name: collections
+                  value: "{{inputs.parameters.collections}}"
+                - name: datetime
+                  value: "{{item.datetime}}"
+                - name: bbox
+                  value: "{{item.bbox}}"
+                - name: grid-id
+                  value: "{{item.grid_id}}"
+                - name: arguments
+                  value: "{{inputs.parameters.arguments}}"
+            withParam: "{{inputs.parameters.chunk-tasks}}"
+
+    - name: gen-time-chunks-artifact
+      inputs:
+        parameters:
+          - name: datetime
+          - name: chunk-months
+      outputs:
+        artifacts:
+          - name: result
+            path: /tmp/time-chunks.json
+      script:
+        image: python:3.9-alpine
+        command: [python]
+        source: |
+          import subprocess
+          import sys
+
+          # Install dateutil
+          subprocess.check_call([sys.executable, "-m", "pip", "install", "python-dateutil"])
+
+          import json
+          from datetime import datetime
+          from dateutil.relativedelta import relativedelta
+
+          datetime_param = "{{inputs.parameters.datetime}}"
+          chunk_months = int("{{inputs.parameters.chunk-months}}")
+
+          # Parse datetime parameter 
+          start_str, end_str = datetime_param.split('/')
+          start_date = datetime.strptime(start_str, "%Y-%m-%d")
+          end_date = datetime.strptime(end_str, "%Y-%m-%d")
+
+          time_chunks = []
+          current_date = start_date
+
+          while current_date < end_date:
+            # Add months using relativedelta
+            chunk_end = current_date + relativedelta(months=chunk_months)
+
+            # Don't exceed the overall end date
+            if chunk_end > end_date:
+                chunk_end = end_date
+
+            period_str = f"{current_date.strftime('%Y-%m-%d')}/{chunk_end.strftime('%Y-%m-%d')}"
+            time_id = f"{current_date.strftime('%Y%m')}_{chunk_end.strftime('%Y%m')}"
+
+            time_chunks.append({
+              "id": time_id,
+              "datetime": period_str,
+              "start": current_date.strftime('%Y-%m-%d'),
+              "end": chunk_end.strftime('%Y-%m-%d')
+            })
+
+            current_date = chunk_end
+
+          with open('/tmp/time-chunks.json', 'w') as f:
+            json.dump(time_chunks, f)
+
+          print(f"Generated {len(time_chunks)} time chunks", file=sys.stderr)
+
+    - name: gen-grid-cells-artifact
+      inputs:
+        parameters:
+          - name: min-lon
+          - name: max-lon
+          - name: min-lat
+          - name: max-lat
+          - name: cell-size
+      outputs:
+        artifacts:
+          - name: result
+            path: /tmp/grid-cells.json
+      script:
+        image: python:3.9-alpine
+        command: [python]
+        source: |
+          import json
+          import sys
+
+          min_lon = float("{{inputs.parameters.min-lon}}")
+          max_lon = float("{{inputs.parameters.max-lon}}")
+          min_lat = float("{{inputs.parameters.min-lat}}")
+          max_lat = float("{{inputs.parameters.max-lat}}")
+          cell_size = float("{{inputs.parameters.cell-size}}")
+
+          grid_cells = []
+
+          # Generate grid cells
+          lon = min_lon
+          while lon < max_lon:
+            lat = min_lat
+            while lat < max_lat:
+              # Create bbox: west,south,east,north
+              bbox = f"{lon},{lat},{min(lon + cell_size, max_lon)},{min(lat + cell_size, max_lat)}"
+              grid_id = f"grid_{int(lon)}_{int(lat)}"
+              
+              grid_cells.append({
+                "id": grid_id,
+                "bbox": bbox,
+              })
+              
+              lat += cell_size
+            lon += cell_size
+
+          with open('/tmp/grid-cells.json', 'w') as f:
+            json.dump(grid_cells, f)
+
+          print(f"Generated {len(grid_cells)} grid cells", file=sys.stderr)
+
+    - name: gen-combined-tasks-artifacts
+      inputs:
+        artifacts:
+          - name: time-chunks-file
+            path: /tmp/time-chunks.json
+          - name: grid-cells-file
+            path: /tmp/grid-cells.json
+      outputs:
+        parameters:
+          - name: chunk-list
+            valueFrom:
+              path: /tmp/chunks.json
+      script:
+        image: python:3.9-alpine
+        command: [python]
+        source: |
+          import json
+          import math
+
+          # Read inputs
+          with open('/tmp/time-chunks.json', 'r') as f:
+              time_chunks = json.load(f)
+          with open('/tmp/grid-cells.json', 'r') as f:
+              grid_cells = json.load(f)
+
+          # Generate all tasks
+          all_tasks = []
+          for time_chunk in time_chunks:
+              for grid_cell in grid_cells:
+                  task = {
+                      "id": f"{grid_cell['id']}_{time_chunk['id']}",
+                      "bbox": grid_cell["bbox"],
+                      "datetime": time_chunk["datetime"],
+                      "grid_id": grid_cell["id"]
+                  }
+                  all_tasks.append(task)
+
+          # Split into chunks of 50 tasks each
+          chunk_size = 50
+          chunks = []
+          for i in range(0, len(all_tasks), chunk_size):
+              chunk = {
+                  "id": f"chunk_{i//chunk_size}",
+                  "tasks": all_tasks[i:i+chunk_size]
+              }
+              chunks.append(chunk)
+
+          # Write chunks
+          with open('/tmp/chunks.json', 'w') as f:
+              json.dump(chunks, f)
+
+          print(f"Created {len(chunks)} chunks from {len(all_tasks)} tasks")

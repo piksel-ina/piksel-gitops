@@ -98,7 +98,7 @@ spec:
 
           # Create spatial indexes
           echo "Creating spatial indexes..."
-          for epsg in 4326 3857 32748 32749 32750 32751 32752; do
+          for epsg in 4326 3857; do
             datacube spindex create $epsg > /dev/null 2>&1
             datacube spindex update $epsg > /dev/null 2>&1
           done
