@@ -1,37 +1,49 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: datacube-product-sync
+  name: datacube-delete-product
   namespace: argo-workflows
 spec:
   serviceAccountName: argo-workflows-executor
-  entrypoint: product-sync
+  entrypoint: datacube-delete-product
   podGC:
-    strategy: OnWorkflowSuccess
+    strategy: OnWorkflowCompletion
   ttlStrategy:
     secondsAfterCompletion: 300
   arguments:
     parameters:
-      - name: product-list
-        value: "https://raw.githubusercontent.com/piksel-ina/piksel-core/main/products.csv"
+      - name: product
+        value: example_product
   templates:
-    - name: product-sync
+    - name: datacube-delete-product
       serviceAccountName: argo-workflows-executor
+      metadata:
+        labels:
+          app: argo-delete-product
       inputs:
         parameters:
-          - name: product-list
-            value: "{{workflow.parameters.product-list}}"
+          - name: product
+            value: "{{workflow.parameters.product}}"
       container:
         name: odc-container
         image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-b8f23f1
-        command:
-          - bash
+        command: ["bash", "-c"]
         args:
-          - "-c"
           - |
-            datacube --version
-            dc-sync-products {{inputs.parameters.product-list}} --update-if-exists
+            set -e
+            echo "Starting product deletion for: {{ inputs.parameters.product }}"
+
+            # Check if product exists first
+            if datacube product list | grep -q "{{ inputs.parameters.product }}"; then
+              echo "Product {{ inputs.parameters.product }} found. Proceeding with deletion..."
+              datacube product delete --force "{{ inputs.parameters.product }}"
+            else
+              echo "Product {{ inputs.parameters.product }} not found in datacube"
+              exit 1
+            fi
         env:
+          - name: PRODUCT_NAME
+            value: "{{inputs.parameters.product}}"
           - name: ODC_DEFAULT_DB_HOSTNAME
             value: "pg-proxy-service.database.svc.cluster.local"
           - name: ODC_DEFAULT_DB_PORT
