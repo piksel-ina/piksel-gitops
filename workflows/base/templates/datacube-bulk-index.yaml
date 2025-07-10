@@ -11,16 +11,26 @@ spec:
   arguments:
     parameters:
       - name: catalog
-        value: "https://stac.staging.example.com"
+        value: "https://earth-search.aws.element84.com/v1/"
       - name: collections
-        value: "example-collection"
+        value: "sentinel-2-c1-l2a"
       - name: datetime
-        value: "2020-01-01/2024-12-31"
+        value: "2020-04-01/2020-09-30"
       - name: arguments
-        value: '--rename-product=ls8_c2l2_sr --options="query={\"platform\":{\"in\":[\"landsat-8\"]}}"'
+        value: "--rename-product=s2_l2a"
       - name: time-chunks
-        value: "6" # process 6 months at a time
-
+        value: "3" # process 3 months at a time
+      # Grid parameters
+      - name: min-lon
+        value: "114"
+      - name: max-lon
+        value: "116"
+      - name: min-lat
+        value: "-9"
+      - name: max-lat
+        value: "-7"
+      - name: cell-size
+        value: "1"
   templates:
     - name: grid-bulk-indexing
       steps:
@@ -40,19 +50,19 @@ spec:
             arguments:
               parameters:
                 - name: min-lon
-                  value: "95"
+                  value: "{{workflow.parameters.min-lon}}"
                 - name: max-lon
-                  value: "141"
+                  value: "{{workflow.parameters.max-lon}}"
                 - name: min-lat
-                  value: "-11"
+                  value: "{{workflow.parameters.min-lat}}"
                 - name: max-lat
-                  value: "6"
+                  value: "{{workflow.parameters.max-lat}}"
                 - name: cell-size
-                  value: "5"
+                  value: "{{workflow.parameters.cell-size}}"
 
-        # Step 3: Generate task chunks
-        - - name: generate-task-chunks
-            template: gen-combined-tasks-artifacts
+        # Step 3: Generate all individual tasks
+        - - name: generate-all-tasks
+            template: generate-all-tasks
             arguments:
               artifacts:
                 - name: time-chunks-file
@@ -60,9 +70,9 @@ spec:
                 - name: grid-cells-file
                   from: "{{steps.generate-grid.outputs.artifacts.result}}"
 
-        # Step 4: Process each chunk in parallel
-        - - name: process-chunk
-            template: process-task-chunk
+        # Step 4: Process each task individually
+        - - name: indexing-tasks
+            template: indexing-tasks
             arguments:
               parameters:
                 - name: catalog
@@ -71,42 +81,15 @@ spec:
                   value: "{{workflow.parameters.collections}}"
                 - name: arguments
                   value: "{{workflow.parameters.arguments}}"
-                - name: chunk-tasks
-                  value: "{{item.tasks}}"
-                - name: chunk-id
-                  value: "{{item.id}}"
-            withParam: "{{steps.generate-task-chunks.outputs.parameters.chunk-list}}"
-
-    # Process individual chunk of tasks
-    - name: process-task-chunk
-      inputs:
-        parameters:
-          - name: catalog
-          - name: collections
-          - name: arguments
-          - name: chunk-tasks
-          - name: chunk-id
-      steps:
-        - - name: index-grid-cell
-            templateRef:
-              name: datacube-stac-indexer
-              template: stac-indexing
-            arguments:
-              parameters:
-                - name: catalog
-                  value: "{{inputs.parameters.catalog}}"
-                - name: collections
-                  value: "{{inputs.parameters.collections}}"
                 - name: datetime
                   value: "{{item.datetime}}"
                 - name: bbox
                   value: "{{item.bbox}}"
                 - name: grid-id
                   value: "{{item.grid_id}}"
-                - name: arguments
-                  value: "{{inputs.parameters.arguments}}"
-            withParam: "{{inputs.parameters.chunk-tasks}}"
+            withParam: "{{steps.generate-all-tasks.outputs.parameters.all-tasks}}"
 
+    # Generate time chunks
     - name: gen-time-chunks-artifact
       inputs:
         parameters:
@@ -166,6 +149,7 @@ spec:
 
           print(f"Generated {len(time_chunks)} time chunks", file=sys.stderr)
 
+    # Generate grid cells dynamically
     - name: gen-grid-cells-artifact
       inputs:
         parameters:
@@ -200,7 +184,7 @@ spec:
             while lat < max_lat:
               # Create bbox: west,south,east,north
               bbox = f"{lon},{lat},{min(lon + cell_size, max_lon)},{min(lat + cell_size, max_lat)}"
-              grid_id = f"grid_{int(lon)}_{int(lat)}"
+              grid_id = f"grid_{lon}_{lat}".replace(".", "_").replace("-", "minus")
               
               grid_cells.append({
                 "id": grid_id,
@@ -215,7 +199,7 @@ spec:
 
           print(f"Generated {len(grid_cells)} grid cells", file=sys.stderr)
 
-    - name: gen-combined-tasks-artifacts
+    - name: generate-all-tasks
       inputs:
         artifacts:
           - name: time-chunks-file
@@ -224,15 +208,15 @@ spec:
             path: /tmp/grid-cells.json
       outputs:
         parameters:
-          - name: chunk-list
+          - name: all-tasks
             valueFrom:
-              path: /tmp/chunks.json
+              path: /tmp/all-tasks.json
       script:
         image: python:3.9-alpine
         command: [python]
         source: |
           import json
-          import math
+          import sys
 
           # Read inputs
           with open('/tmp/time-chunks.json', 'r') as f:
@@ -240,30 +224,82 @@ spec:
           with open('/tmp/grid-cells.json', 'r') as f:
               grid_cells = json.load(f)
 
-          # Generate all tasks
+          # Generate all individual tasks
           all_tasks = []
           for time_chunk in time_chunks:
               for grid_cell in grid_cells:
                   task = {
-                      "id": f"{grid_cell['id']}_{time_chunk['id']}",
-                      "bbox": grid_cell["bbox"],
                       "datetime": time_chunk["datetime"],
-                      "grid_id": grid_cell["id"]
+                      "bbox": grid_cell["bbox"],
+                      "grid_id": grid_cell["id"] 
                   }
                   all_tasks.append(task)
 
-          # Split into chunks of 50 tasks each
-          chunk_size = 50
-          chunks = []
-          for i in range(0, len(all_tasks), chunk_size):
-              chunk = {
-                  "id": f"chunk_{i//chunk_size}",
-                  "tasks": all_tasks[i:i+chunk_size]
-              }
-              chunks.append(chunk)
+          # Write as JSON
+          with open('/tmp/all-tasks.json', 'w') as f:
+              json.dump(all_tasks, f, ensure_ascii=False)
 
-          # Write chunks
-          with open('/tmp/chunks.json', 'w') as f:
-              json.dump(chunks, f)
+          # Also print to stdout for parameter capture
+          print(json.dumps(all_tasks, ensure_ascii=False))
 
-          print(f"Created {len(chunks)} chunks from {len(all_tasks)} tasks")
+          print(f"Generated {len(all_tasks)} individual tasks", file=sys.stderr)
+
+    # Main indexing task template
+    - name: indexing-tasks
+      inputs:
+        parameters:
+          - name: catalog
+          - name: collections
+          - name: arguments
+          - name: datetime
+          - name: bbox
+          - name: grid-id
+      container:
+        name: odc-container
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-b8f23f1
+        command:
+          - bash
+        args:
+          - "-c"
+          - |
+            echo "🌍 Processing grid cell: {{inputs.parameters.grid-id}}"
+            echo "📅 Datetime: {{inputs.parameters.datetime}}"
+            echo "📍 Bbox: {{inputs.parameters.bbox}}"
+
+            stac-to-dc \
+            --catalog-href={{inputs.parameters.catalog}} \
+            --collections={{inputs.parameters.collections}} \
+            --bbox={{inputs.parameters.bbox}} \
+            --datetime={{inputs.parameters.datetime}} \
+            {{inputs.parameters.arguments}} \
+
+            echo "Completed grid cell: {{inputs.parameters.grid-id}}"
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2"

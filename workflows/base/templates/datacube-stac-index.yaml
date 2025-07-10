@@ -36,8 +36,6 @@ spec:
             value: "{{workflow.parameters.datetime}}"
           - name: arguments
             value: "{{workflow.parameters.arguments}}"
-          - name: grid-id
-            value: "{{workflow.parameters.grid-id}}"
       container:
         name: odc-container
         image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-b8f23f1
@@ -46,15 +44,9 @@ spec:
         args:
           - "-c"
           - |
-            # Check if grid-id is provided and not empty
-            if [ "{{inputs.parameters.grid-id}}" != "" ]; then
-              echo "🌍 Processing grid cell: {{inputs.parameters.grid-id}}"
-              echo "📅 Datetime: {{inputs.parameters.datetime}}"
-              echo "📍 Bbox: {{inputs.parameters.bbox}}"
-            else
-              echo "🌍 Processing STAC indexing"
-              echo "📍 Bbox: {{inputs.parameters.bbox}}"
-            fi
+            echo "🌍 Processing STAC indexing"
+            echo "📍 Bbox: {{inputs.parameters.bbox}}"
+            echo "🗓️ Datetime: {{inputs.parameters.datetime}}"
 
             stac-to-dc \
             --catalog-href={{inputs.parameters.catalog}} \
@@ -63,12 +55,8 @@ spec:
             --datetime={{inputs.parameters.datetime}} \
             {{inputs.parameters.arguments}}
 
-            # Success message with conditional grid info
-            if [ "{{inputs.parameters.grid-id}}" != "" ]; then
-              echo "✅ Completed grid cell: {{inputs.parameters.grid-id}}"
-            else
-              echo "✅ Completed STAC indexing"
-            fi
+            echo "✅ Completed STAC indexing"
+
         env:
           - name: ODC_DEFAULT_DB_HOSTNAME
             value: "pg-proxy-service.database.svc.cluster.local"
@@ -93,8 +81,8 @@ spec:
             value: "postgis"
         resources:
           requests:
-            memory: "2Gi"
-            cpu: "1"
+            memory: "1Gi"
+            cpu: "500m"
           limits:
             memory: "4Gi"
             cpu: "2"
