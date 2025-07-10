@@ -1,23 +1,25 @@
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: datacube-explorer
+  name: datacube-explorer-ingress
   namespace: open-datacube
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    external-dns.alpha.kubernetes.io/hostname: explorer.dev.pik-sel.id
 spec:
-  values:
-    # Ingress configuration
-    ingress:
-      enabled: true
-      className: "nginx"
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        external-dns.alpha.kubernetes.io/hostname: grafana.dev.pik-sel.id
-      hosts:
-        - host: explorer.pik-sel.id
-          paths:
-            - path: /
-              pathType: Prefix
-      tls:
-        - secretName: explorer-ingress
-          hosts:
-            - explorer.domain.com
+  tls:
+    - hosts:
+        - explorer.dev.pik-sel.id
+      secretName: explorer-ingress
+  rules:
+    - host: explorer.dev.pik-sel.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: datacube-explorer-service
+                port:
+                  number: 8080

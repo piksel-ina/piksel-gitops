@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datacube-explorer
+  namespace: open-datacube
+  labels:
+    app: datacube-explorer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datacube-explorer
+  template:
+    metadata:
+      labels:
+        app: datacube-explorer
+    spec:
+      initContainers:
+        - name: datacube-explorer-init
+          image: opendatacube/explorer:3.0.0-71-g2379acdd
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              echo "Checking if initialization is needed..."
+              if ! cubedash-gen --help > /dev/null 2>&1; then
+                echo "cubedash-gen not available, skipping init"
+                exit 0
+              fi
+              echo "Running datacube explorer initialization..."
+              cubedash-gen --init --all || echo "Init completed or already done"
+          env:
+            - name: DB_HOSTNAME
+              value: "pg-proxy-service.database.svc.cluster.local"
+            - name: DB_PORT
+              value: "6432"
+            - name: DB_DATABASE
+              value: "odc"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: odcread-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odcread-secret
+                  key: password
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+      containers:
+        - name: datacube-explorer
+          image: opendatacube/explorer:3.0.0-71-g2379acdd
+          command: ["cubedash-run"]
+          args: ["--host", "0.0.0.0", "--port", "8080"]
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: DB_HOSTNAME
+              value: "pg-proxy-service.database.svc.cluster.local"
+            - name: DB_PORT
+              value: "6432"
+            - name: DB_DATABASE
+              value: "odc"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: odcread-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odcread-secret
+                  key: password
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datacube-explorer-service
+  namespace: open-datacube
+  labels:
+    app: datacube-explorer
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: datacube-explorer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: datacube-explorer-ingress
+  namespace: open-datacube
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+    - hosts:
+        - explorer.domain.com
+      secretName: datacube-explorer-tls
+  rules:
+    - host: explorer.domain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: datacube-explorer-service
+                port:
+                  number: 8080
