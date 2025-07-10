@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stac-browser
+  namespace: odc-stac
+spec:
+  selector:
+    matchLabels:
+      app: stac-browser
+  template:
+    metadata:
+      labels:
+        app: stac-browser
+    spec:
+      containers:
+        - name: stac-browser
+          image: ghcr.io/radiantearth/stac-browser:3.2.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "0.5"
+              memory: "500Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SB_catalogUrl
+              value: "https://stac.dep.datacube.world"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stac-browser
+  namespace: odc-stac
+spec:
+  selector:
+    app: stac-browser
+  ports:
+    - port: 8080
+      targetPort: 8080

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stac-fastapi
+  namespace: odc-stac
+spec:
+  selector:
+    matchLabels:
+      app: stac-fastapi
+  template:
+    metadata:
+      labels:
+        app: stac-fastapi
+    spec:
+      containers:
+        - name: stac-fastapi
+          image: ghcr.io/stac-utils/stac-fastapi-pgstac:3.0.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: FORWARDED_ALLOW_IPS
+              value: "*"
+            - name: POSTGRES_PORT
+              value: "6432"
+            - name: POSTGRES_DBNAME
+              value: "stac"
+            - name: POSTGRES_HOST_READER
+              value: "pg-proxy-service.database.svc.cluster.local"
+            - name: POSTGRES_HOST_WRITER
+              value: "pg-proxy-service.database.svc.cluster.local"
+            - name: WEB_CONCURRENCY
+              value: "10"
+            - name: VSI_CACHE
+              value: "TRUE"
+            - name: GDAL_HTTP_MERGE_CONSECUTIVE_RANGES
+              value: "YES"
+            - name: GDAL_DISABLE_READDIR_ON_OPEN
+              value: "EMPTY_DIR"
+            - name: DB_MIN_CONN_SIZE
+              value: "1"
+            - name: DB_MAX_CONN_SIZE
+              value: "10"
+            - name: USE_API_HYDRATE
+              value: "false"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stac-fastapi
+  namespace: odc-stac
+spec:
+  selector:
+    app: stac-fastapi
+  ports:
+    - port: 8080
+      targetPort: 8080

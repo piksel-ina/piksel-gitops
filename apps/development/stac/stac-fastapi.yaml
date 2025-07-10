@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stac-fastapi
+  namespace: stac
+spec:
+  template:
+    spec:
+      containers:
+        - name: stac-fastapi
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: stacread-secret
+                  key: username
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: stacread-secret
+                  key: password
+            - name: POSTGRES_DBNAME
+              value: stac
+            - name: POSTGRES_HOST_READER
+              value: db-endpoint.db.svc.cluster.local
+            - name: POSTGRES_HOST_WRITER
+              value: db-endpoint.db.svc.cluster.local

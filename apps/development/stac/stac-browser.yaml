@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stac-browser
+  namespace: stac
+spec:
+  template:
+    spec:
+      containers:
+        - name: stac-browser
+          env:
+            - name: SB_catalogUrl
+              value: "https://stac.dev.pik-sel.id"
