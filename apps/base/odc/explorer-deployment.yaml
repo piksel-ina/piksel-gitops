@@ -21,11 +21,6 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-              echo "Checking if initialization is needed..."
-              if ! cubedash-gen --help > /dev/null 2>&1; then
-                echo "cubedash-gen not available, skipping init"
-                exit 0
-              fi
               echo "Running datacube explorer initialization..."
               cubedash-gen --init --all || echo "Init completed or already done"
           env:
@@ -38,12 +33,12 @@ spec:
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: odcread-secret
+                  name: odc-secret
                   key: username
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: odcread-secret
+                  name: odc-secret
                   key: password
           resources:
             limits:
@@ -110,28 +105,3 @@ spec:
       name: http
   selector:
     app: datacube-explorer
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: datacube-explorer-ingress
-  namespace: open-datacube
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/rewrite-target: /
-spec:
-  tls:
-    - hosts:
-        - explorer.domain.com
-      secretName: datacube-explorer-tls
-  rules:
-    - host: explorer.domain.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: datacube-explorer-service
-                port:
-                  number: 8080

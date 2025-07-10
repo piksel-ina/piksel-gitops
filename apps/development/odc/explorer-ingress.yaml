@@ -8,6 +8,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-production
     external-dns.alpha.kubernetes.io/hostname: explorer.dev.pik-sel.id
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - explorer.dev.pik-sel.id
