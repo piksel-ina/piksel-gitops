@@ -15,16 +15,6 @@ spec:
         name: jupyterhub
   interval: 5m0s
   values:
-    hub:
-      # JupyterHub and OAuth Configuration
-      config:
-        JupyterHub:
-          authenticator_class: oauthenticator.generic.GenericOAuthenticator
-          admin_access: true
-          admin_users:
-            - muhammad.taufik@big.go.id
-      # GenericOAuthenticator will get valuefrom terraform in each environment patch
-
     # This is the default configuration for single user pods
     singleuser:
       # Use the piksel-core image from ECR
@@ -59,10 +49,10 @@ spec:
     # Proxy Configuration
     proxy:
       service:
-        type: LoadBalancer
-        annotations:
-          service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-          service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+        type: ClusterIP
+      https:
+        enabled: true
+        type: offload # Let ingress handle SSL termination
 
     # Culling Configuration
     cull:
