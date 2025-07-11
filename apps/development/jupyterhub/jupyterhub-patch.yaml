@@ -16,3 +16,7 @@ spec:
       name: hub-db-secret
       valuesKey: password
       targetPath: hub.db.password
+    - kind: Secret
+      name: jupyterhub
+      valuesKey: values.yaml
+      optional: false

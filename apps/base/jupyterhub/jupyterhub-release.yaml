@@ -16,17 +16,56 @@ spec:
   interval: 5m0s
   values:
     hub:
+      # JupyterHub and OAuth Configuration
       config:
-        DummyAuthenticator:
-          password: test123
         JupyterHub:
-          authenticator_class: dummy
+          authenticator_class: oauthenticator.generic.GenericOAuthenticator
+          admin_access: true
+          admin_users:
+            - muhammad.taufik@big.go.id
+      # GenericOAuthenticator will get valuefrom terraform in each environment patch
+
+    # This is the default configuration for single user pods
     singleuser:
+      # Use the piksel-core image from ECR
+      image:
+        name: "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core"
+        tag: "jupyter-7b35f73"
+        pullPolicy: "Always"
+
+      # Resource allocation
       memory:
-        limit: 2G
+        limit: 4G
         guarantee: 1G
+      cpu:
+        limit: 2
+        guarantee: 1
+
+      # Persistent storage configuration
       storage:
-        type: none
+        type: dynamic
+        capacity: 10Gi
+        homeMountPath: /home/jovyan
+        dynamic:
+          storageClass: gp3-csi
+          pvcNameTemplate: claim-{username}
+          volumeNameTemplate: volume-{username}
+          storageAccessModes:
+            - ReadWriteOnce
+
+      # Start with JupyterLab
+      defaultUrl: "/lab"
+
+    # Proxy Configuration
     proxy:
       service:
         type: LoadBalancer
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+          service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+
+    # Culling Configuration
+    cull:
+      enabled: true
+      timeout: 3600 # 1 hour idle timeout
+      every: 600 # Check every 10 minutes
