@@ -14,3 +14,8 @@ patches:
       kind: HelmRelease
       name: jupyterhub
       namespace: jupyterhub
+  - path: authentication.yaml
+    target:
+      kind: HelmRelease
+      name: jupyterhub
+      namespace: jupyterhub

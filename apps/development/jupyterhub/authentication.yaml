@@ -1,0 +1,54 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: jupyterhub
+  namespace: jupyterhub
+spec:
+  values:
+    hub:
+      config:
+        GenericOAuthenticator:
+          allow_all: true
+          auto_login: true
+          enable_auth_state: true
+          userdata_from_id_token: true
+          oauth_callback_url: "https://sandbox.dev.pik-sel.id/hub/oauth_callback"
+          authorize_url: "https://PLACEHOLDER_OAUTH_TENANT/oauth2/authorize"
+          token_url: "https://PLACEHOLDER_OAUTH_TENANT/oauth2/token"
+          logout_redirect_url: "https://sandbox.dev.pik-sel.id/hub/home"
+          login_service: "AWS Cognito"
+          username_claim: email
+          scope:
+            - openid
+            - email
+            - profile
+            - aws.cognito.signin.user.admin
+          auth_state_groups_key: cognito:groups
+          admin_groups:
+            - "jhub-admin"
+          manage_groups: true
+  valuesFrom:
+    - kind: Secret
+      name: jhub-oauth
+      valuesKey: client_id
+      targetPath: hub.config.GenericOAuthenticator.client_id
+    - kind: Secret
+      name: jhub-oauth
+      valuesKey: client_secret
+      targetPath: hub.config.GenericOAuthenticator.client_secret
+    - kind: Secret
+      name: jhub-oauth
+      valuesKey: oauth_tenant
+      targetPath: hub.config.GenericOAuthenticator.authorize_url
+      transformers:
+        - template: "https://{{ .Value }}/oauth2/authorize"
+    - kind: Secret
+      name: jhub-oauth
+      valuesKey: oauth_tenant
+      targetPath: hub.config.GenericOAuthenticator.token_url
+      transformers:
+        - template: "https://{{ .Value }}/oauth2/token"
+    # - kind: Secret
+    #   name: jhub-proxy
+    #   valuesKey: secret_token
+    #   targetPath: proxy.secretToken
