@@ -1,0 +1,17 @@
+hub:
+  config:
+    DummyAuthenticator:
+      password: test123
+    JupyterHub:
+      authenticator_class: dummy
+  db:
+    type: sqlite-memory
+singleuser:
+  memory:
+    limit: 2G
+    guarantee: 1G
+  storage:
+    type: none
+proxy:
+  service:
+    type: LoadBalancer

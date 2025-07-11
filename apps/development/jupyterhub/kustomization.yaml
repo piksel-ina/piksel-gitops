@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: jupyterhub
+resources:
+  - ../../base/jupyterhub
+patches:
+  - path: jupyterhub-patch.yaml
+    target:
+      kind: HelmRelease
+      name: jupyterhub
+      namespace: jupyterhub
