@@ -10,6 +10,9 @@ spec:
         type: postgres
         upgrade: true
         url: postgresql://jupyterhub@pg-proxy-service.database.svc.cluster.local:6432/jupyterhub
-        password:
-          secretName: hub-db-secret
-          secretKey: password
+        password: "${JUPYTERHUB_DB_PASSWORD}"
+  valuesFrom:
+    - kind: Secret
+      name: hub-db-secret
+      valuesKey: password
+      targetPath: hub.db.password
