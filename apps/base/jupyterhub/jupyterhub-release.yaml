@@ -15,6 +15,12 @@ spec:
         name: jupyterhub
   interval: 5m0s
   values:
+    hub:
+      extraConfig:
+        debug: |
+          c.Application.log_level = 'DEBUG'
+          c.OAuthenticator.debug = True
+
     # This is the default configuration for single user pods
     singleuser:
       # Use the piksel-core image from ECR
