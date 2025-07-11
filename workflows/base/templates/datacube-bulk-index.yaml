@@ -7,7 +7,8 @@ spec:
   serviceAccountName: argo-workflows-executor
   entrypoint: grid-bulk-indexing
   parallelism: 10
-
+  ttlStrategy:
+    secondsAfterCompletion: 300
   arguments:
     parameters:
       - name: catalog
