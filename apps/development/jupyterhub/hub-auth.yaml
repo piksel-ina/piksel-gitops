@@ -50,7 +50,7 @@ spec:
       name: jhub-token
       valuesKey: cookie_token
       targetPath: hub.cookieSecret
-    # - kind: Secret
-    #   name: jhub-token
-    #   valuesKey: proxy_token
-    #   targetPath: proxy.secretToken
+    - kind: Secret
+      name: jhub-token
+      valuesKey: proxy_token
+      targetPath: proxy.secretToken
