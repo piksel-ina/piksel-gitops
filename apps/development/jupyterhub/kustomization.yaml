@@ -4,12 +4,7 @@ namespace: jupyterhub
 resources:
   - ../../base/jupyterhub
 patches:
-  - path: hub-db.yaml
-    target:
-      kind: HelmRelease
-      name: jupyterhub
-      namespace: jupyterhub
-  - path: hub-auth.yaml
+  - path: hub-patch.yaml
     target:
       kind: HelmRelease
       name: jupyterhub
