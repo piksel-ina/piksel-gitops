@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-etc-singleuser
+  namespace: jupyterhub
+# This ConfigMap contains the post-start lifecycle hook script for JupyterHub single-user pods.
+data:
+  k8s-lifecycle-hook-post-start.sh: |
+    #!/bin/bash
+    set -e
+
+    # Function for logging with timestamps
+    log() {
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+
+    log "Running post-start hook"
+
+    # Configuration variables
+    GITHUB_REPO="${GITHUB_REPO:-https://github.com/piksel-ina/piksel-notebooks.git}"
+    BRANCH="${BRANCH:-main}"
+    TARGET_DIR="${TARGET_DIR:-/home/jovyan/examples}"
+    CONDA_ENV="${CONDA_ENV:-notebook}"
+
+    # Sync the examples folder, but don't stop the launch if this fails.
+    log "Syncing notebooks from ${GITHUB_REPO}"
+    if /srv/conda/envs/${CONDA_ENV}/bin/gitpuller "${GITHUB_REPO}" "${BRANCH}" "${TARGET_DIR}"; then
+      log "Successfully synced notebooks"
+
+      # Set proper permissions
+      chown -R jovyan:jovyan "${TARGET_DIR}" || true
+      chmod -R 755 "${TARGET_DIR}" || true
+    else
+      log "Warning: Failed to sync notebooks, but continuing..."
+    fi
+
+    # Markdown preview settings
+    if [ ! -f ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/plugin.jupyterlab-settings ]; then
+      cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/plugin.jupyterlab-settings
+    {
+      "defaultViewers": {
+          "markdown": "Markdown Preview"
+      }
+    }
+    EOF
+      log "Set markdown preview as default"
+    fi
+
+    # Disable news notifications
+    cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/notification.jupyterlab-settings
+    {
+        "fetchNews": "false"
+    }
+    EOF
+    log "Disabled JupyterLab news notifications"
+
+    # Auto-save settings
+    cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/plugin.jupyterlab-settings
+    {
+      "autosave": true,
+      "autosaveInterval": 120
+    }
+    EOF
+
+    echo "Removing lost+found"
+    # Remove empty lost+found directories
+    rmdir ~/lost+found/ || true
+
+    log "Post-start hook completed"

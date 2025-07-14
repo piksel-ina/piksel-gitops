@@ -23,6 +23,17 @@ spec:
         tag: "jupyter-7b35f73"
         pullPolicy: "Always"
 
+      # Start with JupyterLab
+      defaultUrl: "/lab"
+
+      #  Run bash script define in singleuser.yaml
+      lifecycleHooks:
+        postStart:
+          exec:
+            command:
+              - "bash"
+              - "/etc/singleuser/k8s-lifecycle-hook-post-start.sh"
+
       # Resource allocation
       memory:
         limit: 4G
@@ -43,8 +54,16 @@ spec:
           storageAccessModes:
             - ReadWriteOnce
 
-      # Start with JupyterLab
-      defaultUrl: "/lab"
+        # Mount the custom Configmap as a volume
+        extraVolumes:
+          - name: lifecycle-hook-script
+            configMap:
+              name: user-etc-singleuser
+              defaultMode: 0755
+        extraVolumeMounts:
+          - name: lifecycle-hook-script
+            mountPath: /etc/singleuser
+            readOnly: true
 
     # Proxy Configuration
     proxy:

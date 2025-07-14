@@ -4,3 +4,4 @@ namespace: jupyterhub
 resources:
   - repository.yaml
   - jupyterhub-release.yaml
+  - singleuser.yaml
