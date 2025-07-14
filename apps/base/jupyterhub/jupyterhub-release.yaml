@@ -65,6 +65,27 @@ spec:
             mountPath: /etc/singleuser
             readOnly: true
 
+      # Extra environment variables for single user pods
+      extraEnv:
+        # // AWS Configuration
+        AWS_NO_SIGN_REQUEST: "YES"
+        # // GDAL / Rasterio environment variables
+        GDAL_DISABLE_READDIR_ON_OPEN: "EMPTY_DIR"
+        GDAL_HTTP_MAX_RETRY: "10"
+        GDAL_HTTP_RETRY_DELAY: "1"
+        GDAL_HTTP_MERGE_CONSECUTIVE_RANGES: "YES"
+        # // Dask configuration
+        DASK_LABEXTENSION__FACTORY__MODULE: "dask_gateway"
+        DASK_LABEXTENSION__FACTORY__CLASS: "GatewayCluster"
+        # DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE: "{JUPYTER_IMAGE}"
+        # DASK_DISTRIBUTED__DASHBOARD__LINK: "{JUPYTERHUB_SERVICE_PREFIX}proxy/{port}/status"
+        # // OpenDataCube configuration
+        ODC_DEFAULT_DB_HOSTNAME: "pg-proxy-service.database.svc.cluster.local"
+        ODC_DEFAULT_DB_PORT: "6432"
+        ODC_DEFAULT_DB_USERNAME: "odcread"
+        ODC_DEFAULT_DB_DATABASE: "odc"
+        ODC_DEFAULT_INDEX_DRIVER: "postgis"
+
     # Proxy Configuration
     proxy:
       service:
@@ -78,3 +99,4 @@ spec:
       enabled: true
       timeout: 3600 # 1 hour idle timeout
       every: 600 # Check every 10 minutes
+
