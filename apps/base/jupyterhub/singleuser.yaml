@@ -9,6 +9,8 @@ data:
     #!/bin/bash
     set -e
 
+    # --- Step 1 - Setup ---
+
     # Function for logging with timestamps
     log() {
       echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
@@ -22,45 +24,47 @@ data:
     TARGET_DIR="${TARGET_DIR:-/home/jovyan/examples}"
     CONDA_ENV="${CONDA_ENV:-notebook}"
 
-    # Sync the examples folder, but don't stop the launch if this fails.
-    log "Syncing notebooks from ${GITHUB_REPO}"
-    if /srv/conda/envs/${CONDA_ENV}/bin/gitpuller "${GITHUB_REPO}" "${BRANCH}" "${TARGET_DIR}"; then
-      log "Successfully synced notebooks"
+    # Create necessary directories
 
-      # Set proper permissions
-      chown -R jovyan:jovyan "${TARGET_DIR}" || true
-      chmod -R 755 "${TARGET_DIR}" || true
+    log "Initializing directories"
+    mkdir -p ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/
+    mkdir -p ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/
+
+
+    # --- Step 2 - Sync Notebooks --- 
+
+    # Sync with gitpuller
+    log "Syncing notebook examples from ${GITHUB_REPO}"
+    if /srv/conda/envs/${CONDA_ENV}/bin/gitpuller "${GITHUB_REPO}" "${BRANCH}" "${TARGET_DIR}"; then
+      log "Successfully synced clean examples to ${TARGET_DIR}"
     else
-      log "Warning: Failed to sync notebooks, but continuing..."
+      log "Warning: Failed to sync examples repository"
     fi
 
-    # Markdown preview settings
-    if [ ! -f ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/plugin.jupyterlab-settings ]; then
-      cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/plugin.jupyterlab-settings
+
+    # --- Step 3 - Update JupyterLab settings ---
+
+    log "Updating JupyterLab settings"
+
+    # Markdown preview and autosave settings
+    cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/plugin.jupyterlab-settings
     {
-      "defaultViewers": {
-          "markdown": "Markdown Preview"
-      }
+    "defaultViewers": {
+        "markdown": "Markdown Preview"
+    },
+    "autosave": true,
+    "autosaveInterval": 120
     }
     EOF
-      log "Set markdown preview as default"
-    fi
+    log "Set markdown preview and autosave settings"    
 
     # Disable news notifications
     cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/notification.jupyterlab-settings
     {
-        "fetchNews": "false"
+      "fetchNews": "false"
     }
     EOF
     log "Disabled JupyterLab news notifications"
-
-    # Auto-save settings
-    cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/plugin.jupyterlab-settings
-    {
-      "autosave": true,
-      "autosaveInterval": 120
-    }
-    EOF
 
     echo "Removing lost+found"
     # Remove empty lost+found directories
