@@ -21,7 +21,7 @@ data:
     # Configuration variables
     GITHUB_REPO="${GITHUB_REPO:-https://github.com/piksel-ina/piksel-notebooks.git}"
     BRANCH="${BRANCH:-main}"
-    TARGET_DIR="${TARGET_DIR:-/home/jovyan/examples}"
+    TARGET_DIR="${TARGET_DIR:-/home/jovyan/notebooks}"
     CONDA_ENV="${CONDA_ENV:-notebook}"
 
     # Create necessary directories
@@ -34,11 +34,11 @@ data:
     # --- Step 2 - Sync Notebooks --- 
 
     # Sync with gitpuller
-    log "Syncing notebook examples from ${GITHUB_REPO}"
+    log "Syncing notebooks from ${GITHUB_REPO}"
     if /srv/conda/envs/${CONDA_ENV}/bin/gitpuller "${GITHUB_REPO}" "${BRANCH}" "${TARGET_DIR}"; then
-      log "Successfully synced clean examples to ${TARGET_DIR}"
+      log "Successfully synced notebooks to ${TARGET_DIR}"
     else
-      log "Warning: Failed to sync examples repository"
+      log "Warning: Failed to sync repository"
     fi
 
 
@@ -66,8 +66,8 @@ data:
     EOF
     log "Disabled JupyterLab news notifications"
 
-    echo "Removing lost+found"
+    # --- Step 4 - Clean up ---
     # Remove empty lost+found directories
-    rmdir ~/lost+found/ || true
+    rmdir ~/lost+found/ && log "lost+found directory removed" || true
 
     log "Post-start hook completed"

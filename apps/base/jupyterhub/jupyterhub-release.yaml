@@ -32,19 +32,7 @@ spec:
           exec:
             command:
               - "bash"
-              - "-c"
-              - |
-                echo "=== POST-START HOOK DEBUG ==="
-                echo "Current user: $(whoami)"
-                echo "Current directory: $(pwd)"
-                echo "Home directory contents:"
-                ls -la /home/jovyan/ || echo "Cannot list /home/jovyan/"
-                echo "Checking if script exists:"
-                ls -la /etc/singleuser/ || echo "/etc/singleuser/ does not exist"
-                echo "Environment variables:"
-                env | grep -E "(JUPYTER|CONDA|PATH)" | head -10
-                echo "=== END DEBUG ==="
-              # - "/etc/singleuser/k8s-lifecycle-hook-post-start.sh"
+              - "/etc/singleuser/k8s-lifecycle-hook-post-start.sh"
 
       # Resource allocation
       memory:
