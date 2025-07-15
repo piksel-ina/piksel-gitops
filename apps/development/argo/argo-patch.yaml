@@ -40,7 +40,7 @@ spec:
           - profile
         redirectUrl: https://argo.dev.pik-sel.id/oauth2/callback
         customGroupClaimName: "cognito:groups"
-        userInfoPath: "/oauth2/userInfo"
+        # userInfoPath: "/oauth2/userInfo"
         rbac:
           enabled: true
 
