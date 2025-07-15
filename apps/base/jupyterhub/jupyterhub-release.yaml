@@ -35,12 +35,12 @@ spec:
               - "/etc/singleuser/k8s-lifecycle-hook-post-start.sh"
 
       # Resource allocation
-      memory:
-        limit: 4G
-        guarantee: 1G
-      cpu:
-        limit: 2
-        guarantee: 1
+      # memory:
+      #   limit: 4G
+      #   guarantee: 1G
+      # cpu:
+      #   limit: 2
+      #   guarantee: 1
 
       # Persistent storage configuration
       storage:
@@ -64,6 +64,15 @@ spec:
           - name: lifecycle-hook-script
             mountPath: /etc/singleuser
             readOnly: true
+      profileList:
+        - display_name: "Standard Environment"
+          description: "Jupyter environment with 2 CPUs and 8GB RAM"
+          default: true # This makes it the default
+          kubespawner_override:
+            cpu_guarantee: 1
+            cpu_limit: 2
+            mem_guarantee: 8G
+            mem_limit: 8G
 
       # Extra environment variables for single user pods
       extraEnv:
