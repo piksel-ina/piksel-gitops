@@ -15,6 +15,22 @@ spec:
         name: jupyterhub
   interval: 5m0s
   values:
+    hub:
+      extraConfig:
+        profiles: |
+          exec(open('/usr/local/etc/jupyterhub/profiles.py').read())
+
+      extraVolumes:
+        - name: hub-profile-config
+          configMap:
+            name: hub-profile-config
+
+      extraVolumeMounts:
+        - name: hub-profile-config
+          mountPath: /usr/local/etc/jupyterhub/profiles.py
+          subPath: profiles.py
+          readOnly: true
+
     # This is the default configuration for single user pods
     singleuser:
       # Use the piksel-core image from ECR
@@ -60,10 +76,13 @@ spec:
             configMap:
               name: user-etc-singleuser
               defaultMode: 0755
+
         extraVolumeMounts:
           - name: lifecycle-hook-script
             mountPath: /etc/singleuser
             readOnly: true
+
+      # Default user profile
       profileList:
         - display_name: "Standard Environment"
           description: "Jupyter environment with 2 CPUs and 8GB RAM"

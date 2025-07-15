@@ -1,0 +1,140 @@
+from tornado import web
+import os
+
+c.JupyterHub.log_level = "INFO"
+
+async def get_user_groups(self, user):
+    """Extract user groups from AWS Cognito authentication state"""
+    try:
+        # Retrieve user authentication info
+        auth_state = await user.get_auth_state()
+        self.log.info(f"Auth state for {user.name}: {auth_state}")
+        
+        # Extract Cognito groups from the token
+        if auth_state and 'oauth_user' in auth_state:
+            cognito_info = auth_state['oauth_user']
+            groups = cognito_info.get('cognito:groups', [])
+        elif auth_state and 'cognito:groups' in auth_state:
+            groups = auth_state['cognito:groups']
+        else:
+            self.log.warning(f"Could not find cognito:groups for user {user.name}")
+            groups = []
+            
+        self.log.info(f"User {user.name} belongs to groups: {groups}")
+        return groups
+        
+    except Exception as e:
+        self.log.error(f"Error retrieving groups for {user.name}: {e}")
+        return []
+
+async def custom_options_form(self):
+    """Generate dynamic profile options based on user groups"""
+    self.log.info(f"Generating profiles for user: {self.user.name}")
+    
+    # Base profiles for all users (Standard is already set as default)
+    base_profiles = [
+        {
+            "display_name": "Standard Environment",
+            "description": "Standard environment - 2 CPUs, 8GB RAM, 10GB storage",
+            "slug": "standard",
+            "default": True,
+            "kubespawner_override": {
+                "cpu_guarantee": 1,
+                "cpu_limit": 2,
+                "mem_guarantee": "4G",
+                "mem_limit": "8G",
+                "storage_capacity": "10Gi"
+            }
+        }
+    ]
+    
+    # Power user profiles for admin/power users
+    power_user_profiles = [
+        {
+            "display_name": "Medium Environment",
+            "description": "Medium environment - 4 CPUs, 16GB RAM, 20GB storage",
+            "slug": "medium",
+            "kubespawner_override": {
+                "cpu_guarantee": 2,
+                "cpu_limit": 4,
+                "mem_guarantee": "8G",
+                "mem_limit": "16G",
+                "storage_capacity": "20Gi"
+            }
+        },
+        {
+            "display_name": "Large Environment", 
+            "description": "Large environment - 8 CPUs, 32GB RAM, 20GB storage",
+            "slug": "large",
+            "kubespawner_override": {
+                "cpu_guarantee": 4,
+                "cpu_limit": 8,
+                "mem_guarantee": "16G",
+                "mem_limit": "32G",
+                "storage_capacity": "20Gi"
+            }
+        },
+        {
+            "display_name": "GPU Environment",
+            "description": "GPU environment - 4 CPUs, 16GB RAM, 20GB storage, 1 NVIDIA GPU",
+            "slug": "gpu",
+            "kubespawner_override": {
+                "cpu_guarantee": 2,
+                "cpu_limit": 4,
+                "mem_guarantee": "8G", 
+                "mem_limit": "16G",
+                "storage_capacity": "20Gi",
+                "extra_resource_limits": {
+                    "nvidia.com/gpu": "1"
+                },
+                "extra_resource_guarantees": {
+                    "nvidia.com/gpu": "1"
+                },
+                "tolerations": [
+                    {
+                        "key": "nvidia.com/gpu",
+                        "operator": "Exists",
+                        "effect": "NoSchedule"
+                    }
+                ],
+                "node_selector": {
+                    "karpenter.sh/nodepool": "gpu"
+                }
+            }
+        }
+    ]
+    
+    # Start with base profiles
+    self.profile_list = base_profiles.copy()
+    
+    try:
+        # Get user groups from Cognito
+        user_groups = await get_user_groups(self, self.user)
+        
+        # Check if user is admin or in power user groups
+        power_user_groups = ['admin', 'power-users']
+        
+        if any(group in user_groups for group in power_user_groups):
+            self.log.info(f"User {self.user.name} is a power user, adding additional profiles")
+            self.profile_list.extend(power_user_profiles)
+        else:
+            self.log.info(f"User {self.user.name} is a standard user, using base profiles only")
+        
+        # Set extra labels for tracking
+        self.extra_labels = {
+            "user-type": "power-user" if any(group in user_groups for group in power_user_groups) else "standard-user",
+            "cognito-groups": ",".join(user_groups)
+        }
+        
+        return self._options_form_default()
+        
+    except Exception as e:
+        self.log.error(f"Error in custom_options_form for {self.user.name}: {e}")
+        # Fallback to base profiles if there's an error
+        self.profile_list = base_profiles
+        return self._options_form_default()
+
+# Apply the custom options form
+c.KubeSpawner.options_form = custom_options_form
+
+c.Spawner.debug = True
