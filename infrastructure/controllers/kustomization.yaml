@@ -6,4 +6,4 @@ resources:
   - notifications.yaml
   - nvidia-device-plugin.yaml
   - pg-bouncer-proxy.yaml
-  - ../jobs
+  - storage-class.yaml
