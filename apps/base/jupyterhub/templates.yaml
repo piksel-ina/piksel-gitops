@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jupyterhub-custom-templates
+  namespace: jupyterhub # Change to your namespace
+data:
+  page.html: |
+    {% extends "templates/page.html" %}
+
+    {% block favicon %}
+    <link rel="icon" type="image/x-icon" href="https://github.com/piksel-ina/piksel-document/blob/5e5627adf1e4353b15e3d073bdde3e05109e49d8/assets/logo/Piksel%20(500%20x%20500%20px)%20(1).ico?raw=true">
+    {% endblock %}
+
+    {% block stylesheet %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    {{ super() }}
+    <style>
+      :root {
+        --primary-color: #1971c2;
+        --secondary-color: #0ca678;
+        --primary-hover: #1864ab;
+        --secondary-hover: #099268;
+        --background-color: #ffffff;
+        --card-background: #ffffff;
+        --text-primary: #212529;
+        --text-secondary: #6c757d;
+        --border-color: #dee2e6;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: 'Open Sans', sans-serif;
+        background: var(--background-color);
+        color: var(--text-primary);
+      }
+      
+    </style>
+    {% endblock %}

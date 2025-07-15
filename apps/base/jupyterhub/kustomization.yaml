@@ -6,3 +6,4 @@ resources:
   - jupyterhub-release.yaml
   - singleuser.yaml
   - profiles-config.yaml
+  - templates.yaml

@@ -19,16 +19,25 @@ spec:
       extraConfig:
         profiles: |
           exec(open('/usr/local/etc/jupyterhub/profiles.py').read())
+        customTemplate: |
+          import os
+          c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates']
 
       extraVolumes:
         - name: hub-profile-config
           configMap:
             name: hub-profile-config
+        - name: custom-templates
+          configMap:
+            name: jupyterhub-custom-templates
 
       extraVolumeMounts:
         - name: hub-profile-config
           mountPath: /usr/local/etc/jupyterhub/profiles.py
           subPath: profiles.py
+          readOnly: true
+        - name: custom-templates
+          mountPath: /usr/local/share/jupyterhub/custom_templates
           readOnly: true
 
     # This is the default configuration for single user pods
@@ -77,13 +86,13 @@ spec:
       # Default user profile
       profileList:
         - display_name: "Standard Environment"
-          description: "Jupyter environment with 2 CPUs and 8GB RAM"
+          description: "Jupyter environment with 2 CPUs and 12GB RAM"
           default: true # This makes it the default
           kubespawner_override:
             cpu_guarantee: 1
             cpu_limit: 2
-            mem_guarantee: 8G
-            mem_limit: 8G
+            mem_guarantee: 12G
+            mem_limit: 12G
 
       # Extra environment variables for single user pods
       extraEnv:
