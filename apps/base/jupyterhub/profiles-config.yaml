@@ -40,14 +40,14 @@ data:
         base_profiles = [
             {
                 "display_name": "Standard Environment",
-                "description": "Standard environment - 2 CPUs, 8GB RAM, 10GB storage",
+                "description": "2 CPUs, 12GB RAM, 10GB storage",
                 "slug": "standard",
                 "default": True,
                 "kubespawner_override": {
-                    "cpu_guarantee": 1,
+                    "cpu_guarantee": 2,
                     "cpu_limit": 2,
-                    "mem_guarantee": "4G",
-                    "mem_limit": "8G",
+                    "mem_guarantee": "12G",
+                    "mem_limit": "12G",
                     "storage_capacity": "10Gi"
                 }
             }
@@ -57,36 +57,36 @@ data:
         power_user_profiles = [
             {
                 "display_name": "Medium Environment",
-                "description": "Medium environment - 4 CPUs, 16GB RAM, 20GB storage",
+                "description": "4 CPUs, 16GB RAM, 20GB storage",
                 "slug": "medium",
                 "kubespawner_override": {
-                    "cpu_guarantee": 2,
+                    "cpu_guarantee": 4,
                     "cpu_limit": 4,
-                    "mem_guarantee": "8G",
+                    "mem_guarantee": "16G",
                     "mem_limit": "16G",
                     "storage_capacity": "20Gi"
                 }
             },
             {
                 "display_name": "Large Environment", 
-                "description": "Large environment - 8 CPUs, 32GB RAM, 20GB storage",
+                "description": "8 CPUs, 32GB RAM, 20GB storage",
                 "slug": "large",
                 "kubespawner_override": {
-                    "cpu_guarantee": 4,
+                    "cpu_guarantee": 8,
                     "cpu_limit": 8,
-                    "mem_guarantee": "16G",
+                    "mem_guarantee": "32G",
                     "mem_limit": "32G",
                     "storage_capacity": "20Gi"
                 }
             },
             {
                 "display_name": "GPU Environment",
-                "description": "GPU environment - 4 CPUs, 16GB RAM, 20GB storage, 1 NVIDIA GPU",
+                "description": "4 CPUs, 16GB RAM, 20GB storage, 1 NVIDIA GPU",
                 "slug": "gpu",
                 "kubespawner_override": {
-                    "cpu_guarantee": 2,
+                    "cpu_guarantee": 4,
                     "cpu_limit": 4,
-                    "mem_guarantee": "8G", 
+                    "mem_guarantee": "16G", 
                     "mem_limit": "16G",
                     "storage_capacity": "20Gi",
                     "extra_resource_limits": {

@@ -4,6 +4,217 @@ metadata:
   name: jupyterhub-custom-templates
   namespace: jupyterhub # Change to your namespace
 data:
+  spawn.html: |
+    {% extends "page.html" %}
+    {% if announcement_spawn is string %}
+      {% set announcement = announcement_spawn %}
+    {% endif %}
+
+    {% block main %}
+      <div class="container">
+        {% block heading %}
+          <div class="row text-center mb-4">
+            <h2>Welcome to Piksel Sandbox</h2>
+          </div>
+        {% endblock heading %}
+        
+        <div class="row">
+          <!-- Left Column - Welcome Content -->
+          <div class="col-lg-7 col-md-12 mb-4">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h4 class="card-title text-primary mb-3">
+                  <i class="fa fa-rocket me-2"></i>Get Started
+                </h4>
+                <p class="card-text lead">
+                  Piksel Sandbox is a cloud-based Jupyter Notebook environment designed for learning and experimenting with our geospatial datasets.
+                </p>
+                
+                <h5 class="mt-4 mb-3">What you can find here:</h5>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">
+                    <i class="fa fa-check-circle text-success me-2"></i>
+                    <strong>Data Science Tools </strong>
+                    <p class="ms-4 mt-2 mb-2">
+                      This sandbox includes many essential tools for data science, such as geopandas and other libraries for geospatial data analysis.</p>
+                  </li>
+                  <li class="list-group-item">
+                    <i class="fa fa-check-circle text-success me-2"></i>
+                    <strong>Learning Examples</strong>
+                    <p class="ms-4 mt-2">
+                      Explore various examples and understand how to work with geospatial data effectively.
+                    <ul class="mb-2">
+                      <li class="mb-2">Begin with the basics, such as loading, analyzing, and plotting earth observation data using Datacube.</li>
+                      <li>Explore practical applications, like coastline mapping. </li>
+                    </ul>
+                  </li> 
+                  <li class="list-group-item">
+                    <i class="fa fa-check-circle text-success me-2"></i>
+                    <strong>Guaranteed Resources</strong>
+                    <p class="ms-4 mt-2">
+                      Every user receives dedicated resources to support their work. 
+                    <ul class="mb-2">
+                      <li class="mb-1">2 Cores of CPU</li>
+                      <li class="mb-1">12 GB of memory</li>
+                      <li class="mb-1">10 GB of storage</li>
+                    </ul>
+                  </li> 
+                </ul>              
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Column - Server Options -->
+          <div class="col-lg-5 col-md-12">
+            <div class="card shadow-sm">
+              <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                  <i class="fa fa-cog me-2"></i>Environments
+                </h4>
+              </div>
+              <div class="card-body">
+                {% if for_user and user.name != for_user.name -%}
+                  <div class="alert alert-info">
+                    <i class="fa fa-user me-2"></i>Spawning server for <strong>{{ for_user.name }}</strong>
+                  </div>
+                {% endif -%}
+                
+                {% if error_message -%}
+                  <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    <strong>Error:</strong> {{ error_message }}
+                  </div>
+                {% endif %}
+                
+                <form enctype="multipart/form-data"
+                      id="spawn_form"
+                      action="{{ url | safe }}"
+                      method="post"
+                      role="form">
+                  {{ spawner_options_form | safe }}
+                  
+                  <div class="mt-4 p-3 bg-light rounded">
+                    <small class="text-muted mb-0" style="display: inline-block; text-align: center;">
+                      <p class="text-center mb-0">If you need more resources or have any questions, please do not hesitate to contact us at: <span class="fw-medium">piksel@big.go.id</span></p> 
+                    </small>
+                  </div>
+
+                  <div class="d-grid gap-2">
+                    <div class="feedback-container">
+                      <button type="submit" class="btn btn-primary btn-lg form-control">
+                        <i class="fa fa-play me-2"></i>Start Server
+                      </button>
+                      <div class="feedback-widget hidden text-center mt-3">
+                        <i class="fa fa-spinner fa-2x text-primary"></i>
+                        <p class="mt-2 text-muted">Starting your server...</p>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <style>
+      /* Custom styling for kubespawner profiles */
+      #kubespawner-profiles-list .profile {
+        display: flex;
+        flex-direction: row;
+        font-weight: normal;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        margin-bottom: 0.75rem;
+        padding: 0;
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      #kubespawner-profiles-list .profile:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      #kubespawner-profiles-list .profile:has(input:checked) {
+        border-color: #0d6efd;
+        background-color: #f8f9ff;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+      }
+
+      #kubespawner-profiles-list .profile .radio {
+        padding: 1rem;
+        padding-right: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      #kubespawner-profiles-list .profile .radio input[type="radio"] {
+        margin: 0;
+        transform: scale(1.2);
+      }
+
+      #kubespawner-profiles-list .profile > div:last-child {
+        padding: 1rem;
+        flex: 1;
+      }
+
+      /* Fix the h3 styling - make it more compact */
+      #kubespawner-profiles-list .profile h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+        color: #212529;
+      }
+
+      #kubespawner-profiles-list .profile p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #6c757d;
+        line-height: 1.4;
+      }
+
+      /* Option styling for dropdowns within profiles */
+      #kubespawner-profiles-list .profile .option {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-bottom: 0.75rem;
+        margin-top: 0.5rem;
+      }
+
+      #kubespawner-profiles-list .profile .option label {
+        font-weight: 500;
+        margin-right: 0.5rem;
+        min-width: 96px;
+        font-size: 0.9rem;
+      }
+
+      #kubespawner-profiles-list .profile .option select {
+        flex: 1;
+        font-size: 0.9rem;
+      }
+    </style>
+
+
+    {% endblock main %}
+
+    {% block script %}
+    {{ super() }}
+    <script>
+    // setup onSubmit feedback
+    $('form').submit((e) => {
+      var form = $(e.target);
+      form.find('.feedback-container>button').attr('disabled', true);
+      form.find('.feedback-container>*').toggleClass('hidden');
+      form.find('.feedback-widget .fa-spinner').toggleClass('fa-pulse');
+    });
+    </script>
+    {% endblock script %}
+  ####################################################################################################
+  ######################### page.html ################################################################
+  ####################################################################################################
   page.html: |
     {% extends "templates/page.html" %}
 
@@ -38,10 +249,8 @@ data:
       }
 
       html, body {
-        height: 100vh;
         margin: 0;
         padding: 0;
-        overflow: hidden;
         font-family: 'Open Sans', sans-serif;
         background: var(--background-color);
         color: var(--text-primary);
