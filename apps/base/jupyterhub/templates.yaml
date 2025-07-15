@@ -11,6 +11,8 @@ data:
     <link rel="icon" type="image/x-icon" href="https://github.com/piksel-ina/piksel-document/blob/5e5627adf1e4353b15e3d073bdde3e05109e49d8/assets/logo/Piksel%20(500%20x%20500%20px)%20(1).ico?raw=true">
     {% endblock %}
 
+    {% block title %} Sandbox - Piksel {% endblock %}
+
     {% block stylesheet %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,6 +46,91 @@ data:
         background: var(--background-color);
         color: var(--text-primary);
       }
-      
+
+      .navbar {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #dee2e6; /* Optional: add subtle border */
+      }
+
+      /* Ensure text is dark on white background */
+      .navbar .navbar-brand, 
+      .navbar .nav-link {
+        color: #212529 !important;
+      }
+
+      .navbar .nav-link:hover {
+        color: #0d6efd !important;
+      }
+
+      .jpy-logo { 
+        height: 2.5rem !important; 
+        width: auto; 
+        }
+
     </style>
     {% endblock %}
+
+    {% block nav_bar %}
+      <div class="container">
+      <nav class="navbar navbar-expand-sm navbar-light mb-4">
+        <div class="container-fluid">
+          {% block logo %}
+            <span id="jupyterhub-logo" class="navbar-brand">
+              <a href="https://pik-sel.id">
+                <img src='https://github.com/piksel-ina/piksel-document/raw/5e5627adf1e4353b15e3d073bdde3e05109e49d8/assets/logo/JOURNAL%20(3).svg'
+                  alt='Piksel logo'
+                  class='jpy-logo'
+                  title='Home'
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+                  <span style="display:none;">Piksel</span>
+              </a>
+            </span>
+          {% endblock logo %}
+
+          {% if user %}
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#thenavbar"
+                    aria-controls="thenavbar"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          {% endif %}
+          <div class="collapse navbar-collapse" id="thenavbar">
+            <ul class="navbar-nav me-auto mb-0">
+              {% if user %}
+                {% block nav_bar_left_items %}
+                {% endblock nav_bar_left_items %}
+              {% endif %}
+            </ul>
+            <ul class="nav navbar-nav me-2">
+              {% block nav_bar_right_items %}
+                <li class="nav-item">
+                  {% block login_widget %}
+                    <span id="login_widget">
+                      {% if user %}
+                        <span class="me-1">{{ user.name }}</span>
+                        <a id="logout"
+                          role="button"
+                          class="btn btn-sm btn-outline-contrast"
+                          href="{{ logout_url }}"> <i aria-hidden="true" class="fa fa-sign-out"></i> Logout</a>
+                      {% else %}
+                        <a id="login"
+                          role="button"
+                          class="btn btn-sm btn-outline-contrast"
+                          href="{{ login_url }}">Login</a>
+                      {% endif %}
+                    </span>
+                  {% endblock login_widget %}
+                </li>
+              {% endblock nav_bar_right_items %}
+            </ul>
+          </div>
+          {% block header %}
+          {% endblock header %}
+        </div>
+      </nav>
+      <div>
+    {% endblock nav_bar %}
