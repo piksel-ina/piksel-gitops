@@ -143,3 +143,7 @@ data:
     c.KubeSpawner.options_form = custom_options_form
     c.Spawner.debug = True
     c.JupyterHub.log_level = "INFO"
+    # Set cookies to less than a day
+    c.Jupyterhub.cookie_max_age_days = 0.90
+    c.JupyterHub.tornado_settings["cookie_options"] = dict(expires_days=0.90)
+    c.LocalProcessSpawner.debug = True

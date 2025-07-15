@@ -50,21 +50,13 @@ spec:
               - "bash"
               - "/etc/singleuser/k8s-lifecycle-hook-post-start.sh"
 
-      # Resource allocation
-      # memory:
-      #   limit: 4G
-      #   guarantee: 1G
-      # cpu:
-      #   limit: 2
-      #   guarantee: 1
-
       # Persistent storage configuration
       storage:
         type: dynamic
         capacity: 10Gi
         homeMountPath: /home/jovyan
         dynamic:
-          storageClass: gp2
+          storageClass: gp3
           pvcNameTemplate: claim-{username}
           volumeNameTemplate: volume-{username}
           storageAccessModes:
