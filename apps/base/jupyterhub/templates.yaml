@@ -24,7 +24,7 @@ data:
             <div class="card h-100 shadow-sm">
               <div class="card-body">
                 <h4 class="card-title text-primary mb-3">
-                  <i class="fa fa-rocket me-2"></i>Get Started
+                  <i class="fa fa-rocket me-3"></i>Get Started
                 </h4>
                 <p class="card-text lead">
                   Piksel Sandbox is a cloud-based Jupyter Notebook environment designed for learning and experimenting with our geospatial datasets.
@@ -33,25 +33,25 @@ data:
                 <h5 class="mt-4 mb-3">What you can find here:</h5>
                 <ul class="list-group list-group-flush">
                   <li class="list-group-item">
-                    <i class="fa fa-check-circle text-success me-2"></i>
+                    <i class="fa fa-bar-chart  text-primary me-2"></i>
                     <strong>Data Science Tools </strong>
                     <p class="ms-4 mt-2 mb-2">
                       This sandbox includes many essential tools for data science, such as geopandas and other libraries for geospatial data analysis.</p>
                   </li>
                   <li class="list-group-item">
-                    <i class="fa fa-check-circle text-success me-2"></i>
+                    <i class="fa fa-graduation-cap text-primary me-2"></i>
                     <strong>Learning Examples</strong>
-                    <p class="ms-4 mt-2">
-                      Explore various examples and understand how to work with geospatial data effectively.
+                    <p class="ms-4 mt-2 mb-1">
+                      Explore various examples and understand how to work with geospatial data.
                     <ul class="mb-2">
                       <li class="mb-2">Begin with the basics, such as loading, analyzing, and plotting earth observation data using Datacube.</li>
                       <li>Explore practical applications, like coastline mapping. </li>
                     </ul>
                   </li> 
                   <li class="list-group-item">
-                    <i class="fa fa-check-circle text-success me-2"></i>
+                    <i class="fa fa-desktop text-primary me-2"></i>
                     <strong>Guaranteed Resources</strong>
-                    <p class="ms-4 mt-2">
+                    <p class="ms-4 mt-2 mb-1">
                       Every user receives dedicated resources to support their work. 
                     <ul class="mb-2">
                       <li class="mb-1">2 Cores of CPU</li>
@@ -69,7 +69,7 @@ data:
             <div class="card shadow-sm">
               <div class="card-header bg-primary text-white">
                 <h4 class="card-title mb-0">
-                  <i class="fa fa-cog me-2"></i>Environments
+                  <i class="fa fa-cog me-3"></i>Environments
                 </h4>
               </div>
               <div class="card-body">
@@ -148,11 +148,14 @@ data:
         padding-right: 0;
         display: flex;
         align-items: center;
+        color-scheme: light !important;
       }
 
       #kubespawner-profiles-list .profile .radio input[type="radio"] {
         margin: 0;
         transform: scale(1.2);
+        color-scheme: light !important;
+        accent-color: #1864ab !important;
       }
 
       #kubespawner-profiles-list .profile > div:last-child {
@@ -195,6 +198,54 @@ data:
         flex: 1;
         font-size: 0.9rem;
       }
+
+      /* Force light theme for cards */
+      .card {
+        background-color: #ffffff !important;
+        color: #343a40 !important;
+        border-color: #dee2e6 !important;
+      }
+
+      .card-header {
+        background-color: #1864ab !important;
+        color: #ffffff !important;
+        border-bottom-color: #dee2e6 !important;
+      }
+
+      .card-body {
+        background-color: #ffffff !important;
+        color: #343a40 !important;
+      }
+
+      .list-group-item {
+        background-color: #ffffff !important;
+        color: #343a40 !important;
+        border-color: #dee2e6 !important;
+      }
+
+      .bg-light {
+        background-color: #f8f9fa !important;
+        color: #1864ab !important;
+      }
+
+      /* Override any dark mode text colors */
+      .text-muted {
+        color: #6c757d !important;
+      }
+
+      .text-primary {
+        color: #1864ab !important;
+      }
+
+      .text-success {
+        color: #2b8a3e !important;
+      }
+
+      .btn-primary {
+        background-color: #1864ab !important;
+        border-color: #0d6efd !important;
+      }
+
     </style>
 
 
@@ -275,7 +326,26 @@ data:
         height: 2.5rem !important; 
         width: auto; 
         }
+      
+      /* Force logout button to always use light theme */
+      .btn-outline-contrast {
+        color: #6c757d !important;
+        border-color: #6c757d !important;
+        background-color: transparent !important;
+      }
 
+      .btn-outline-contrast:hover,
+      .btn-outline-contrast:focus {
+        color: #ffffff !important;
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+      }
+
+      .btn-outline-contrast:active {
+        color: #ffffff !important;
+        background-color: #5c636a !important;
+        border-color: #565e64 !important;
+      }
     </style>
     {% endblock %}
 
