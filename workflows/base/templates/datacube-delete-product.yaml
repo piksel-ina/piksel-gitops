@@ -26,7 +26,7 @@ spec:
             value: "{{workflow.parameters.product}}"
       container:
         name: odc-container
-        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-b8f23f1
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-v0.2.0
         command: ["bash", "-c"]
         args:
           - |
