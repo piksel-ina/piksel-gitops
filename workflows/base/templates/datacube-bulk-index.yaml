@@ -7,6 +7,8 @@ spec:
   serviceAccountName: argo-workflows-executor
   entrypoint: grid-bulk-indexing
   parallelism: 10
+  podGC:
+    strategy: OnWorkflowCompletion
   ttlStrategy:
     secondsAfterCompletion: 300
   arguments:

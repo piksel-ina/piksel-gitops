@@ -12,7 +12,7 @@ spec:
   templates:
     - name: odc-schema-initialization
       script:
-        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-d9560ad
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-v0.2.0
         resources:
           requests:
             memory: 500Mi
