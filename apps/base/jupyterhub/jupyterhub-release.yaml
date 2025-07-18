@@ -115,6 +115,9 @@ spec:
         ODC_DEFAULT_DB_DATABASE: "odc"
         ODC_DEFAULT_INDEX_DRIVER: "postgis"
 
+      # set ServiceAccount to assume IAM role
+      serviceAccountName: user-read
+
     # Proxy Configuration
     proxy:
       service:
