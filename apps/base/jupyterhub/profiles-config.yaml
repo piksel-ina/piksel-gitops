@@ -32,6 +32,53 @@ data:
             self.log.error(f"Error retrieving groups for {user.name}: {e}")
             return []
 
+    async def get_efs_volume_mounts(user_groups):
+        """Generate EFS volume mounts based on user groups"""
+        volume_mounts = []
+
+        # Base public data mount for all users (read-only)
+        volume_mounts.append({
+            "name": "efs-public-data",
+            "mountPath": "/home/jovyan/public",
+            "readOnly": True
+        })
+
+        # Admin users get full read-write access to all EFS areas
+        if 'admin' in user_groups:
+            volume_mounts = [
+                {
+                    "name": "efs-public-data",
+                    "mountPath": "/home/jovyan/public",
+                    "readOnly": False
+                },
+                {
+                    "name": "efs-coastline-data",
+                    "mountPath": "/home/jovyan/coastline-data",
+                    "readOnly": False
+                }
+            ]
+
+        # Coastline-changes group gets read-write access to their specific area
+        elif 'coastline-changes' in user_groups:
+            volume_mounts.append({
+                "name": "efs-coastline-data",
+                "mountPath": "/home/jovyan/coastline-data",
+                "readOnly": False
+            })
+
+        return volume_mounts
+
+    def determine_efs_access_level(user_groups):
+        """Determine EFS access level based on user groups""" 
+        if 'admin' in user_groups:
+            return "admin"
+        elif 'coastline-changes' in user_groups:
+            return "coastline-changes" 
+        # Extend as needed
+        else:
+            return "public-readonly"
+
+
     async def custom_options_form(self):
         """Generate dynamic profile options based on user groups"""
         self.log.info(f"Generating profiles for user: {self.user.name}")
@@ -115,23 +162,42 @@ data:
         try:
             # Get user groups from Cognito
             user_groups = await get_user_groups(self, self.user)
+
+            # Mount volumes based on user groups
+            efs_volume_mounts = await get_efs_volume_mounts(user_groups)
+
+            # Add the volume mounts to all profiles
+            for profile in self.profile_list:
+                if "kubespawner_override" not in profile:
+                    profile["kubespawner_override"] = {}
+                profile["kubespawner_override"]["extra_volume_mounts"] = efs_volume_mounts
             
             # Check if user is admin or in power user groups
             power_user_groups = ['admin', 'power-users']
             
             if any(group in user_groups for group in power_user_groups):
                 self.log.info(f"User {self.user.name} is a power user, adding additional profiles")
+
+                # Add EFS mounts to power user profiles
+                for profile in power_user_profiles:
+                    if "kubespawner_override" not in profile:
+                        profile["kubespawner_override"] = {}
+                    profile["kubespawner_override"]["extra_volume_mounts"] = efs_volume_mounts
+
                 self.profile_list.extend(power_user_profiles)
             else:
                 self.log.info(f"User {self.user.name} is a standard user, using base profiles only")
+
+            efs_access_level = determine_efs_access_level(user_groups)
             
             # Set extra labels for tracking
             self.extra_labels = {
                 "user-type": "power-user" if any(group in user_groups for group in power_user_groups) else "standard-user",
-                "cognito-groups": ",".join(user_groups)
+                "cognito-groups": ",".join(user_groups),
+                "efs-access": efs_access_level
             }
             
-            return self._options_form_default()
+            return self._options_form_default()      
             
         except Exception as e:
             self.log.error(f"Error in custom_options_form for {self.user.name}: {e}")
@@ -144,6 +210,6 @@ data:
     c.Spawner.debug = True
     c.JupyterHub.log_level = "INFO"
     # Set cookies to less than a day
-    c.Jupyterhub.cookie_max_age_days = 0.90
+    c.JupyterHub.cookie_max_age_days = 0.90
     c.JupyterHub.tornado_settings["cookie_options"] = dict(expires_days=0.90)
     c.LocalProcessSpawner.debug = True
