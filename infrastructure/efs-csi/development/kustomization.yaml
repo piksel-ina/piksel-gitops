@@ -3,6 +3,8 @@ kind: Kustomization
 
 resources:
   - ../base
+  - sc-coastline-changes.yaml
+  - sc-public-data.yaml
 
 patchesStrategicMerge:
   - values.yaml
