@@ -15,3 +15,17 @@ parameters:
   directoryPerms: "775"
 mountOptions:
   - tls
+---
+# Create a PersistentVolumeClaim for Coastline Changes Projects in EFS
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-coastline-data
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-coastline-changes
+  resources:
+    requests:
+      storage: 500Mi
