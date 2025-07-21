@@ -77,6 +77,12 @@ spec:
             configMap:
               name: user-etc-singleuser
               defaultMode: 0755
+          - name: efs-public-data
+            persistentVolumeClaim:
+              claimName: efs-public-data
+          - name: efs-coastline-data
+            persistentVolumeClaim:
+              claimName: efs-coastline-data
 
         extraVolumeMounts:
           - name: lifecycle-hook-script
@@ -93,7 +99,10 @@ spec:
             cpu_limit: 2
             mem_guarantee: 12G
             mem_limit: 12G
-
+            extra_volume_mounts:
+              - name: efs-public-data
+                mount_path: /home/jovyan/public
+                read_only: true
       # Extra environment variables for single user pods
       extraEnv:
         # // AWS Configuration
