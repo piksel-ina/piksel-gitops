@@ -42,3 +42,20 @@ spec:
   path: ./infrastructure/configs
   prune: true
   wait: true
+---
+# --- EFS CSI ---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: infra-efs-csi
+  namespace: flux-system
+spec:
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./infrastructure/efs-csi/development
+  prune: true
+  wait: true

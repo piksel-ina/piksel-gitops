@@ -1,0 +1,11 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: aws-efs-csi-driver
+  namespace: filesystem
+spec:
+  values:
+    controller:
+      serviceAccount:
+        annotations:
+          eks.amazonaws.com/role-arn: arn:aws:iam::236122835646:role/piksel-dev-efs-csi
