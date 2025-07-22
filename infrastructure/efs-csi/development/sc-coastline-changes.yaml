@@ -1,3 +1,19 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-coastline-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-coastline-changes
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-087c5ed794f5c6cd9::fsap-01ab873361c534e91
+---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -5,10 +21,6 @@ metadata:
 provisioner: efs.csi.aws.com
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
-parameters:
-  provisioningMode: efs-ap-static
-  fileSystemId: fs-087c5ed794f5c6cd9
-  accessPointId: fsap-01ab873361c534e91
 ---
 # Create a PersistentVolumeClaim for Coastline Changes Projects in EFS
 apiVersion: v1
@@ -22,4 +34,4 @@ spec:
   storageClassName: efs-coastline-changes
   resources:
     requests:
-      storage: 500Mi
+      storage: 2Gi

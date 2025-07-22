@@ -1,3 +1,19 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-public-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-public-data
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-087c5ed794f5c6cd9::fsap-0949bf9a21008aba1
+---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -5,12 +21,6 @@ metadata:
 provisioner: efs.csi.aws.com
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
-parameters:
-  provisioningMode: efs-ap
-  fileSystemId: fs-087c5ed794f5c6cd9
-  accessPointId: fsap-0949bf9a21008aba1
-mountOptions:
-  - tls
 ---
 # Create a PersistentVolumeClaim for JupyterLab to use the EFS
 apiVersion: v1
