@@ -2,17 +2,13 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: efs-public-data
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "false"
 provisioner: efs.csi.aws.com
-reclaimPolicy: Retain
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
 parameters:
   provisioningMode: efs-ap
   fileSystemId: fs-087c5ed794f5c6cd9
   accessPointId: fsap-0949bf9a21008aba1
-  directoryPerms: "755"
 mountOptions:
   - tls
 ---

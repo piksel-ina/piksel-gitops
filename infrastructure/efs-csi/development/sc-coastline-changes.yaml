@@ -2,19 +2,13 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: efs-coastline-changes
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "false"
 provisioner: efs.csi.aws.com
-reclaimPolicy: Retain
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
 parameters:
-  provisioningMode: efs-ap
+  provisioningMode: efs-ap-static
   fileSystemId: fs-087c5ed794f5c6cd9
   accessPointId: fsap-01ab873361c534e91
-  directoryPerms: "775"
-mountOptions:
-  - tls
 ---
 # Create a PersistentVolumeClaim for Coastline Changes Projects in EFS
 apiVersion: v1
