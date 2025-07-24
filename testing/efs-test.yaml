@@ -5,10 +5,6 @@ metadata:
   name: efs-coastline-test
   namespace: jupyterhub
 spec:
-  securityContext:
-    runAsUser: 1000
-    runAsGroup: 2000
-    fsGroup: 2000
   containers:
     - name: test-container
       image: alpine:3.22

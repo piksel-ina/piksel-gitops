@@ -12,9 +12,9 @@ spec:
   storageClassName: efs-coastline-changes
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-087c5ed794f5c6cd9
+    volumeHandle: fs-087c5ed794f5c6cd9::fsap-01ab873361c534e91
     volumeAttributes:
-      path: "/tides-data"
+      path: "/coastline-changes"
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -24,6 +24,7 @@ provisioner: efs.csi.aws.com
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
 ---
+# Create a PersistentVolumeClaim for Coastline Changes Projects in EFS
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -35,4 +36,4 @@ spec:
   storageClassName: efs-coastline-changes
   resources:
     requests:
-      storage: 5Gi
+      storage: 2Gi
