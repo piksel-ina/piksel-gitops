@@ -1,0 +1,43 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: aws-efs-csi-driver
+  namespace: kube-system
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: aws-efs-csi-driver
+      version: "3.1.7" # check https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases for updates
+      sourceRef:
+        kind: HelmRepository
+        name: aws-efs-csi-driver
+        namespace: flux-system
+      interval: 1m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    controller:
+      serviceAccount:
+        create: true
+        name: efs-csi-controller-sa # Matches IRSA namespace_service_accounts
+        annotations:
+          eks.amazonaws.com/role-arn: "arn:aws:iam::326641642924:role/piksel-staging-efs-csi"
+      # Add tolerations to allow scheduling on tainted nodes
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
+          effect: "NoSchedule"
+    node:
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
+          effect: "NoSchedule"
+        - operator: Exists
+      serviceAccount:
+        create: true
+        name: efs-csi-node-sa
