@@ -34,3 +34,32 @@ spec:
       retries: 3
   values:
     installCRDs: true
+
+    # Make sure Cert-manager deployed to high available instances
+    nodeSelector:
+      karpenter.sh/controller: "true"
+    tolerations:
+      - key: "CriticalAddonsOnly"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+    # Webhook component
+    webhook:
+      nodeSelector:
+        karpenter.sh/controller: "true"
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+
+    # CA Injector component
+    cainjector:
+      nodeSelector:
+        karpenter.sh/controller: "true"
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
