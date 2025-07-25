@@ -45,11 +45,11 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: "letsencrypt-staging"
-    external-dns.alpha.kubernetes.io/hostname: test-app.dev.pik-sel.id
+    external-dns.alpha.kubernetes.io/hostname: test-app.staging.pik-sel.id
 spec:
   ingressClassName: nginx
   rules:
-    - host: test-app.dev.pik-sel.id
+    - host: test-app.staging.pik-sel.id
       http:
         paths:
           - path: /
@@ -61,5 +61,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - test-app.dev.pik-sel.id
+        - test-app.staging.pik-sel.id
       secretName: test-app-tls
