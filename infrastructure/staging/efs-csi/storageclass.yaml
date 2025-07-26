@@ -13,5 +13,3 @@ parameters:
 reclaimPolicy: Retain
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
-mountOptions:
-  - tls

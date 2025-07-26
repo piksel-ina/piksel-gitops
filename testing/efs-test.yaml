@@ -1,27 +1,63 @@
-# test-pod-coastline.yaml
 apiVersion: v1
-kind: Pod
+kind: Namespace
 metadata:
-  name: efs-coastline-test
-  namespace: jupyterhub
+  name: test
+---
+# Add PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-coastline-data
+  namespace: test
 spec:
-  containers:
-    - name: test-container
-      image: alpine:3.22
-      command: ["/bin/sh"]
-      args: ["-c", "while true; do sleep 30; done"]
-      volumeMounts:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-data
+  resources:
+    requests:
+      storage: 5Gi # Arbitrary size; EFS doesn't enforce quotas here
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: efs-test-deployment
+  namespace: test
+  labels:
+    app: efs-test
+spec:
+  replicas: 2 # Two pods for shared access testing
+  selector:
+    matchLabels:
+      app: efs-test
+  template:
+    metadata:
+      labels:
+        app: efs-test
+    spec:
+      containers:
+        - name: test-container
+          image: alpine:3.22
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do sleep 30; done"]
+          volumeMounts:
+            - name: efs-coastline-data
+              mountPath: /mnt/efs-coastline
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
         - name: efs-coastline-data
-          mountPath: /mnt/efs-coastline
-      resources:
-        requests:
-          cpu: 10m
-          memory: 32Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
-  volumes:
-    - name: efs-coastline-data
-      persistentVolumeClaim:
-        claimName: efs-coastline-data
-  restartPolicy: Never
+          persistentVolumeClaim:
+            claimName: efs-coastline-data
+      restartPolicy: Always
+      nodeSelector:
+        karpenter.sh/controller: "true"
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
