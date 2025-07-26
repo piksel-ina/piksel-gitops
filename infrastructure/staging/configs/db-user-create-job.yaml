@@ -152,3 +152,10 @@ spec:
             name: db-user-creation-script
             defaultMode: 0755
       restartPolicy: OnFailure
+      # Run job on system nodegroup
+      nodeSelector:
+        karpenter.sh/controller: "true"
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
+          effect: "NoSchedule"
