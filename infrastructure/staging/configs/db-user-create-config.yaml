@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-user-creation-script
+  namespace: database
+data:
+  create_users.sh: |
+    #!/bin/bash
+    set -e
+
+    # Function to create database if it doesn't exist
+    create_database_if_not_exists() {
+        local db_name=$1
+        
+        echo "Checking/Creating database: $db_name"
+        
+        psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d postgres << EOF
+    SELECT 'CREATE DATABASE $db_name' 
+    WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$db_name')\gexec
+    EOF
+        
+        echo "Database $db_name is ready"
+    }
+
+    # Function to create or update user
+    create_or_update_user() {
+        local username=$1
+        local password=$2
+        local target_db=$3
+        local permissions_type=$4  # 'full', 'readonly', or 'grafana'
+        
+        echo "Processing user: $username for database: $target_db with permissions: $permissions_type"
+        
+        # Create/update user in the main postgres database
+        psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d postgres << EOF
+    DO \$\$
+    DECLARE
+        user_exists boolean;
+    BEGIN
+        SELECT EXISTS(SELECT FROM pg_roles WHERE rolname = '$username') INTO user_exists;
+        IF NOT user_exists THEN
+            EXECUTE 'CREATE ROLE $username WITH LOGIN PASSWORD ' || quote_literal('$password');
+            RAISE NOTICE 'Created user: $username';
+        ELSE
+            EXECUTE 'ALTER ROLE $username WITH PASSWORD ' || quote_literal('$password');
+            RAISE NOTICE 'Updated password for user: $username';
+        END IF;
+    END \$\$;
+    EOF
+
+        # Grant permissions on the target database
+        psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d "$target_db" << EOF
+    -- Basic database access
+    GRANT CONNECT ON DATABASE $target_db TO $username;
+    GRANT USAGE ON SCHEMA public TO $username;
+    EOF
+
+        # Apply specific permissions based on type
+        case "$permissions_type" in
+            "full")
+                psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d "$target_db" << EOF
+    -- Full permissions for application users
+    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO $username;
+    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO $username;
+    GRANT CREATE ON SCHEMA public TO $username;
+
+    -- Default privileges for future objects
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO $username;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO $username;
+    EOF
+                ;;
+            "readonly")
+                psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d "$target_db" << EOF
+    -- Read-only permissions
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO $username;
+    GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO $username;
+
+    -- Default privileges for future objects
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO $username;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO $username;
+    EOF
+                ;;
+            "grafana")
+                psql -h "$DB_HOST" -U "$DB_ADMIN_USER" -d "$target_db" << EOF
+    -- Grafana specific permissions (read-only but might need some writes for sessions)
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO $username;
+    GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO $username;
+
+    -- Default privileges for future objects
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO $username;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO $username;
+    EOF
+                ;;
+        esac
+        
+        echo "User $username processed successfully for database $target_db"
+    }
+
+    echo "Starting database and user creation process..."
+
+    # Create databases first
+    create_database_if_not_exists "argo"
+    create_database_if_not_exists "jupyterhub" 
+    create_database_if_not_exists "grafana"
+    create_database_if_not_exists "stac"
+    create_database_if_not_exists "odc"
+
+    # Create users with their specific permissions
+    create_or_update_user "argo" "$ARGO_PASSWORD" "argo" "full"
+    create_or_update_user "jupyterhub" "$JUPYTERHUB_PASSWORD" "jupyterhub" "full"
+    create_or_update_user "grafana" "$GRAFANA_PASSWORD" "grafana" "grafana"
+
+    # STAC users (shared database)
+    create_or_update_user "stacread" "$STACREAD_PASSWORD" "stac" "readonly"
+    create_or_update_user "stac" "$STAC_PASSWORD" "stac" "full"
+
+    # ODC users (shared database)
+    create_or_update_user "odcread" "$ODCREAD_PASSWORD" "odc" "readonly"
+    create_or_update_user "odc" "$ODC_PASSWORD" "odc" "full"
+
+    echo "Database and user creation process completed successfully!"
