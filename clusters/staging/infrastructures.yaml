@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/base/controllers
+  path: ./infrastructure/controllers
   prune: true
   wait: true
 ---
@@ -42,7 +42,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infra-controllers
+    - name: infra-configs
   interval: 1h
   retryInterval: 1m
   timeout: 5m

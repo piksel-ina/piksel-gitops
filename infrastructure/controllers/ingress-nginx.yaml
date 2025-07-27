@@ -29,6 +29,7 @@ spec:
         name: ingress-nginx
         namespace: ingress-nginx
       interval: 12h
+
   values:
     controller:
       service:
@@ -39,5 +40,15 @@ spec:
       use-forwarded-headers: "true"
       config:
         annotations-risk-level: Critical
+
+      # Make sure nginx-ingress deployed to high available instances
+      nodeSelector:
+        karpenter.sh/controller: "true"
+      tolerations:
+        - key: "CriticalAddonsOnly"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+
     admissionWebhooks:
       enabled: false

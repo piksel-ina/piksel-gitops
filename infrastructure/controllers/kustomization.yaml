@@ -3,7 +3,4 @@ kind: Kustomization
 resources:
   - cert-manager.yaml
   - ingress-nginx.yaml
-  - notifications.yaml
   - nvidia-device-plugin.yaml
-  - pg-bouncer-proxy.yaml
-  - storage-class.yaml
