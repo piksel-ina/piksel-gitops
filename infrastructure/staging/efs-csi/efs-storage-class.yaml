@@ -1,0 +1,101 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-public-readonly
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: "fs-01ee336c8673d11e9"
+  directoryPerms: "755"
+  gidRangeStart: "1000"
+  gidRangeEnd: "2000"
+  basePath: "/data/public"
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+
+---
+# Coastline group read-write storage class
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-coastline-rw
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: "fs-01ee336c8673d11e9"
+  directoryPerms: "770"
+  gidRangeStart: "2000"
+  gidRangeEnd: "3000"
+  basePath: "/data/coastline"
+  uid: "1000"
+  gid: "2000"
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+
+# Admin full access storage class
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-full-access
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: "fs-01ee336c8673d11e9"
+  directoryPerms: "770"
+  gidRangeStart: "3000"
+  gidRangeEnd: "4000"
+  basePath: "/data"
+  uid: "1000"
+  gid: "3000"
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+
+# Public read-only PVC - available to all users
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-public-data
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: efs-public-readonly
+  resources:
+    requests:
+      storage: 1Gi
+
+# Coastline read-write PVC - for coastline-changes group
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-coastline-data
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-coastline-rw
+  resources:
+    requests:
+      storage: 1Gi
+
+# Admin full access PVC - for admin group
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-all-data-rw
+  namespace: jupyterhub
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-full-access
+  resources:
+    requests:
+      storage: 1Gi

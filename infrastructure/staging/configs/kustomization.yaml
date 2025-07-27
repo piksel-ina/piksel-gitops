@@ -4,3 +4,4 @@ resources:
   - cluster-issuers.yaml
   - db-user-create-job.yaml
   - db-user-create-config.yaml
+  - storage-class.yaml

@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - repository.yaml
   - release-efs-csi.yaml
-  - storageclass.yaml
+  - efs-storage-class.yaml

@@ -11,6 +11,7 @@ spec:
       config:
         GenericOAuthenticator:
           oauth_callback_url: "https://sandbox.staging.pik-sel.id/hub/oauth_callback"
+          logout_redirect_url: "https://sandbox.dev.pik-sel.id/hub/home"
   valuesFrom:
     - kind: Secret
       name: jupyterhub
