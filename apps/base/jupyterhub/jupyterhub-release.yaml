@@ -77,12 +77,17 @@ spec:
             configMap:
               name: user-etc-singleuser
               defaultMode: 0755
+
+          # EFS ExtraVolume, but mountVolume based on user's group
           - name: efs-public-data
             persistentVolumeClaim:
               claimName: efs-public-data
           - name: efs-coastline-data
             persistentVolumeClaim:
               claimName: efs-coastline-data
+          - name: efs-all-data-rw
+            persistentVolumeClaim:
+              claimName: efs-all-data-rw
 
         extraVolumeMounts:
           - name: lifecycle-hook-script

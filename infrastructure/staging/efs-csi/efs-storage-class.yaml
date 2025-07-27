@@ -64,7 +64,7 @@ metadata:
   namespace: jupyterhub
 spec:
   accessModes:
-    - ReadOnlyMany
+    - ReadWriteMany
   storageClassName: efs-public-readonly
   resources:
     requests:

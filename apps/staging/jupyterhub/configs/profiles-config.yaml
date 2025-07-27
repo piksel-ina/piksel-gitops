@@ -39,7 +39,7 @@ data:
         # Base public data mount for all users (read-only)
         volume_mounts.append({
             "name": "efs-public-data",
-            "mountPath": "/home/jovyan/public",
+            "mountPath": "/home/jovyan/data/public",
             "readOnly": True
         })
 
@@ -47,13 +47,8 @@ data:
         if 'admin' in user_groups:
             volume_mounts = [
                 {
-                    "name": "efs-public-data",
-                    "mountPath": "/home/jovyan/public",
-                    "readOnly": False
-                },
-                {
-                    "name": "efs-coastline-data",
-                    "mountPath": "/home/jovyan/coastline-data",
+                    "name": "efs-all-data-rw",
+                    "mountPath": "/home/jovyan/data",
                     "readOnly": False
                 }
             ]
@@ -62,11 +57,24 @@ data:
         elif 'coastline-changes' in user_groups:
             volume_mounts.append({
                 "name": "efs-coastline-data",
-                "mountPath": "/home/jovyan/coastline-data",
+                "mountPath": "/home/jovyan/data/coastline-data",
                 "readOnly": False
             })
 
         return volume_mounts
+
+    def get_supplemental_groups(user_groups):
+        """Generate supplemental groups based on user groups to match EFS GIDs"""
+        supplemental_groups = [100]  # Always include default fsGroup (users)
+
+        if 'admin' in user_groups:
+            supplemental_groups.append(3000)  # Matches efs-full-access gid
+        if 'coastline-changes' in user_groups: 
+            supplemental_groups.append(2000)  # Matches efs-coastline-rw gid
+        # Add more for future groups
+
+        return supplemental_groups
+
 
     def determine_efs_access_level(user_groups):
         """Determine EFS access level based on user groups""" 
@@ -166,11 +174,19 @@ data:
             # Mount volumes based on user groups
             efs_volume_mounts = await get_efs_volume_mounts(user_groups)
 
+            # Get supplemental groups for SecurityContext
+            supp_groups = get_supplemental_groups(user_groups)
+
             # Add the volume mounts to all profiles
             for profile in self.profile_list:
                 if "kubespawner_override" not in profile:
                     profile["kubespawner_override"] = {}
                 profile["kubespawner_override"]["extra_volume_mounts"] = efs_volume_mounts
+                profile["kubespawner_override"]["security_context"] = {
+                        "runAsUser": 1000,  
+                        "fsGroup": 100,
+                        "supplementalGroups": supp_groups 
+                    }
             
             # Check if user is admin or in power user groups
             power_user_groups = ['admin', 'power-users']
