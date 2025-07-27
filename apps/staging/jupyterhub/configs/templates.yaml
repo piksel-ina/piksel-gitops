@@ -270,7 +270,7 @@ data:
     {% extends "templates/page.html" %}
 
     {% block favicon %}
-    <link rel="icon" type="image/x-icon" href="https://github.com/piksel-ina/piksel-document/blob/5e5627adf1e4353b15e3d073bdde3e05109e49d8/assets/logo/Piksel%20(500%20x%20500%20px)%20(1).ico?raw=true">
+    <link rel="icon" type="image/x-icon" href="https://github.com/piksel-ina/piksel-document/blob/main/assets/logo/piksel-logo%20(2000%20x%202000%20px).ico?raw=true">
     {% endblock %}
 
     {% block title %} Sandbox - Piksel {% endblock %}
@@ -356,7 +356,7 @@ data:
           {% block logo %}
             <span id="jupyterhub-logo" class="navbar-brand">
               <a href="https://pik-sel.id">
-                <img src='https://github.com/piksel-ina/piksel-document/raw/5e5627adf1e4353b15e3d073bdde3e05109e49d8/assets/logo/JOURNAL%20(3).svg'
+                <img src='https://raw.githubusercontent.com/piksel-ina/piksel-document/5024fb9c5383bda3835e17ab7545a5fb875d70c3/assets/logo/piksel-sandbox.svg'
                   alt='Piksel logo'
                   class='jpy-logo'
                   title='Home'
