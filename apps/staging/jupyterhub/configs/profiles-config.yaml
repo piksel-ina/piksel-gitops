@@ -130,7 +130,7 @@ data:
             # Set extra labels for tracking
             self.extra_labels = {
                 "user-type": "extended-user" if any(group in user_groups for group in power_user_groups) else "standard-user",
-                "cognito-groups": ",".join(user_groups),
+                "cognito-groups": "-".join(user_groups)
             }
             
             return self._options_form_default()      
