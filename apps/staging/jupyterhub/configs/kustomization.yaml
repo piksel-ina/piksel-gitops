@@ -5,3 +5,4 @@ resources:
   - profiles-config.yaml
   - singleuser.yaml
   - templates.yaml
+  - efs-mount.yaml

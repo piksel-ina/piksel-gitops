@@ -22,6 +22,29 @@ spec:
         customTemplate: |
           import os
           c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates']
+        pre-spawn-hook: |
+          # Load the pre-spawn hook from the ConfigMap
+          import os
+          import logging
+
+          # Get logger
+          log = logging.getLogger('jupyterhub.config')
+
+          # Read the hook from the mounted ConfigMap
+          hook_path = '/usr/local/etc/jupyterhub/mount-efs.py'
+
+          if os.path.exists(hook_path):
+              with open(hook_path, 'r') as f:
+                  hook_code = f.read()
+              
+              # Execute the hook code to define the function
+              exec(hook_code, globals())
+              
+              # Set the pre-spawn hook
+              c.KubeSpawner.pre_spawn_hook = pre_spawn_hook
+              log.info("Pre-spawn hook loaded successfully")
+          else:
+              log.warning(f"Pre-spawn hook file not found at {hook_path}")
 
       extraVolumes:
         - name: hub-profile-config
@@ -30,6 +53,9 @@ spec:
         - name: custom-templates
           configMap:
             name: jupyterhub-custom-templates
+        - name: pre-spawn-hook
+          configMap:
+            name: pre-spawn-hook
 
       extraVolumeMounts:
         - name: hub-profile-config
@@ -38,6 +64,10 @@ spec:
           readOnly: true
         - name: custom-templates
           mountPath: /usr/local/share/jupyterhub/custom_templates
+          readOnly: true
+        - name: pre-spawn-hook
+          mountPath: /usr/local/etc/jupyterhub/mount-efs.py
+          subPath: mount-efs.py
           readOnly: true
 
     # This is the default configuration for single user pods
@@ -77,17 +107,6 @@ spec:
             configMap:
               name: user-etc-singleuser
               defaultMode: 0755
-
-          # EFS ExtraVolume, but mountVolume based on user's group
-          - name: efs-public-data
-            persistentVolumeClaim:
-              claimName: efs-public-data
-          - name: efs-coastline-data
-            persistentVolumeClaim:
-              claimName: efs-coastline-data
-          - name: efs-all-data-rw
-            persistentVolumeClaim:
-              claimName: efs-all-data-rw
 
         extraVolumeMounts:
           - name: lifecycle-hook-script
