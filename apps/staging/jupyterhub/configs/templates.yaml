@@ -17,7 +17,7 @@ data:
             <h2>Welcome to Piksel Sandbox</h2>
           </div>
         {% endblock heading %}
-        
+
         <div class="row">
           <!-- Left Column - Welcome Content -->
           <div class="col-lg-7 col-md-12 mb-4">
@@ -29,7 +29,7 @@ data:
                 <p class="card-text lead">
                   Piksel Sandbox is a cloud-based Jupyter Notebook environment designed for learning and experimenting with our geospatial datasets.
                 </p>
-                
+
                 <h5 class="mt-4 mb-3">What you can find here:</h5>
                 <ul class="list-group list-group-flush">
                   <li class="list-group-item">
@@ -47,23 +47,23 @@ data:
                       <li class="mb-2">Begin with the basics, such as loading, analyzing, and plotting earth observation data using Datacube.</li>
                       <li>Explore practical applications, like coastline mapping. </li>
                     </ul>
-                  </li> 
+                  </li>
                   <li class="list-group-item">
                     <i class="fa fa-desktop text-primary me-2"></i>
                     <strong>Guaranteed Resources</strong>
                     <p class="ms-4 mt-2 mb-1">
-                      Every user receives dedicated resources to support their work. 
+                      Every user receives dedicated resources to support their work.
                     <ul class="mb-2">
                       <li class="mb-1">2 Cores of CPU</li>
                       <li class="mb-1">12 GB of memory</li>
                       <li class="mb-1">10 GB of storage</li>
                     </ul>
-                  </li> 
-                </ul>              
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
-          
+
           <!-- Right Column - Server Options -->
           <div class="col-lg-5 col-md-12">
             <div class="card shadow-sm">
@@ -78,24 +78,24 @@ data:
                     <i class="fa fa-user me-2"></i>Spawning server for <strong>{{ for_user.name }}</strong>
                   </div>
                 {% endif -%}
-                
+
                 {% if error_message -%}
                   <div class="alert alert-danger">
                     <i class="fa fa-exclamation-triangle me-2"></i>
                     <strong>Error:</strong> {{ error_message }}
                   </div>
                 {% endif %}
-                
+
                 <form enctype="multipart/form-data"
                       id="spawn_form"
                       action="{{ url | safe }}"
                       method="post"
                       role="form">
                   {{ spawner_options_form | safe }}
-                  
+
                   <div class="mt-4 p-3 bg-light rounded">
                     <small class="text-muted mb-0" style="display: inline-block; text-align: center;">
-                      <p class="text-center mb-0">If you need more resources or have any questions, please do not hesitate to contact us at: <span class="fw-medium">piksel@big.go.id</span></p> 
+                      <p class="text-center mb-0">If you need more resources or have any questions, please do not hesitate to contact us at: <span class="fw-medium">piksel@big.go.id</span></p>
                     </small>
                   </div>
 
@@ -313,7 +313,7 @@ data:
       }
 
       /* Ensure text is dark on white background */
-      .navbar .navbar-brand, 
+      .navbar .navbar-brand,
       .navbar .nav-link {
         color: #212529 !important;
       }
@@ -322,11 +322,11 @@ data:
         color: #0d6efd !important;
       }
 
-      .jpy-logo { 
-        height: 2.5rem !important; 
-        width: auto; 
+      .jpy-logo {
+        height: 2.5rem !important;
+        width: auto;
         }
-      
+
       /* Force logout button to always use light theme */
       .btn-outline-contrast {
         color: #6c757d !important;

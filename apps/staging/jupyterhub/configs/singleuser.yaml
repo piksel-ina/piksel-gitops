@@ -31,7 +31,7 @@ data:
     mkdir -p ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/
 
 
-    # --- Step 2 - Sync Notebooks --- 
+    # --- Step 2 - Sync Notebooks ---
 
     # Sync with gitpuller
     log "Syncing notebooks from ${GITHUB_REPO}"
@@ -56,7 +56,7 @@ data:
     "autosaveInterval": 120
     }
     EOF
-    log "Set markdown preview and autosave settings"    
+    log "Set markdown preview and autosave settings"
 
     # Disable news notifications
     cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/notification.jupyterlab-settings

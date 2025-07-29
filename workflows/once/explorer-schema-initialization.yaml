@@ -34,7 +34,7 @@ spec:
           # Setup SSL for RDS
           echo "Setting up SSL connection for RDS..."
           curl -s -o /tmp/rds-ca.pem https://truststore.pki.rds.amazonaws.com/ap-southeast-3/ap-southeast-3-bundle.pem
-          export PGSSLMODE=verify-ca 
+          export PGSSLMODE=verify-ca
           export PGSSLROOTCERT=/tmp/rds-ca.pem
 
           # Decode base64 encoded password
@@ -77,7 +77,7 @@ spec:
 
           # Initialize Cubedash (will use the same PostGIS configuration)
           echo "Running cubedash initialization with PostGIS backend..."
-          cubedash-gen --init 
+          cubedash-gen --init
 
           cubedash-gen --all
 

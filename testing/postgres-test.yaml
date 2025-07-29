@@ -43,13 +43,13 @@ spec:
           echo ""
           echo "=== Detailed user information ==="
           psql -h $DB_HOST -U $DB_ADMIN_USER -d $DATABASE_NAME -c "
-          SELECT 
+          SELECT
               rolname as role_name,
               rolcanlogin as can_login,
               rolcreatedb as can_create_db,
               rolcreaterole as can_create_role,
               rolsuper as is_superuser
-          FROM pg_roles 
+          FROM pg_roles
           WHERE rolname IN ('argo', 'jupyterhub', 'grafana', 'stacread', 'stac', 'odcread', 'odc')
           ORDER BY rolname;"
 

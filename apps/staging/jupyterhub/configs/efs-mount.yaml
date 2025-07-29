@@ -8,35 +8,35 @@ data:
     async def pre_spawn_hook(spawner):
         """Configure EFS volumes based on user groups before pod creation"""
         import logging
-        
+
         log = logging.getLogger(__name__)
         log.info(f"Pre-spawn hook for user: {spawner.user.name}")
-        
+
         try:
             # Get user groups from auth state
             auth_state = await spawner.user.get_auth_state()
             user_groups = []
-            
+
             if auth_state:
                 if 'oauth_user' in auth_state:
                     cognito_info = auth_state['oauth_user']
                     user_groups = cognito_info.get('cognito:groups', [])
                 elif 'cognito:groups' in auth_state:
                     user_groups = auth_state['cognito:groups']
-            
+
             if not user_groups:
                 log.warning(f"No groups found for user {spawner.user.name}")
             log.info(f"User {spawner.user.name} groups: {user_groups}")
-            
+
             # Set environment variable for lifecycle hook (if needed)
             if not hasattr(spawner, 'environment') or not spawner.environment:
                 spawner.environment = {}
             spawner.environment['JUPYTERHUB_USER_GROUPS'] = ','.join(user_groups)
-            
+
             # Configure EFS volumes based on groups
             volumes = []
             volume_mounts = []
-            
+
             # Base public data (will configure RO/RW later)
             public_volume = {
                 "name": "efs-public-data",
@@ -47,7 +47,7 @@ data:
                 "mountPath": "/home/jovyan/data/public",
                 "readOnly": True  # Default to RO
             }
-            
+
             # Group-specific volumes
             if 'coastline' in user_groups or 'admin' in user_groups:
                 volumes.append({
@@ -59,23 +59,23 @@ data:
                     "mountPath": "/home/jovyan/data/coastlines",
                     "readOnly": False
                 })
-            
+
             # Public Directory: Admins get RW, others RO
             volumes.append(public_volume)
             if 'admin' in user_groups:
                 public_mount["readOnly"] = False
             volume_mounts.append(public_mount)
-            
+
             # Extend (add to) any existing volumes/mounts from Helm/config (avoid duplicates if possible)
             spawner.volumes.extend(volumes)
             spawner.volume_mounts.extend(volume_mounts)
-            
+
             # Set security context with supplemental groups (merge with existing if present)
             supp_groups = [100]  # base group
             if 'coastline' in user_groups or 'admin' in user_groups:
                 supp_groups.append(2000)
             supp_groups = list(set(supp_groups))  # Deduplicate
-            
+
             if not hasattr(spawner, 'security_context') or not spawner.security_context:
                 spawner.security_context = {}
             # Merge supplementalGroups if existing
@@ -85,9 +85,9 @@ data:
                 "runAsUser": 1000,
                 "fsGroup": 100,
             })
-            
+
             log.info(f"Added {len(volumes)} EFS volumes for user {spawner.user.name}. Total volumes now: {len(spawner.volumes)}")
-        
+
         except Exception as e:
             log.error(f"Error in pre_spawn_hook for {spawner.user.name}: {e}", exc_info=True)
             # Don't fail spawn if EFS setup fails

@@ -27,4 +27,3 @@ spec:
   secretRef:
     name: slack-webhook-prod
 ---
-

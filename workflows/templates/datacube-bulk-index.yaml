@@ -119,7 +119,7 @@ spec:
           datetime_param = "{{inputs.parameters.datetime}}"
           chunk_months = int("{{inputs.parameters.chunk-months}}")
 
-          # Parse datetime parameter 
+          # Parse datetime parameter
           start_str, end_str = datetime_param.split('/')
           start_date = datetime.strptime(start_str, "%Y-%m-%d")
           end_date = datetime.strptime(end_str, "%Y-%m-%d")
@@ -188,12 +188,12 @@ spec:
               # Create bbox: west,south,east,north
               bbox = f"{lon},{lat},{min(lon + cell_size, max_lon)},{min(lat + cell_size, max_lat)}"
               grid_id = f"grid_{lon}_{lat}".replace(".", "_").replace("-", "minus")
-              
+
               grid_cells.append({
                 "id": grid_id,
                 "bbox": bbox,
               })
-              
+
               lat += cell_size
             lon += cell_size
 
@@ -234,7 +234,7 @@ spec:
                   task = {
                       "datetime": time_chunk["datetime"],
                       "bbox": grid_cell["bbox"],
-                      "grid_id": grid_cell["id"] 
+                      "grid_id": grid_cell["id"]
                   }
                   all_tasks.append(task)
 

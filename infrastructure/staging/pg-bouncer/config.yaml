@@ -23,5 +23,5 @@ data:
     default_pool_size = 15
     reserve_pool_size = 8
     max_db_connections = 80
-    logfile = 
+    logfile =
     pidfile = /tmp/pgbouncer.pid

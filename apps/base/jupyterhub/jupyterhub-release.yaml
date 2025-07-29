@@ -36,10 +36,10 @@ spec:
           if os.path.exists(hook_path):
               with open(hook_path, 'r') as f:
                   hook_code = f.read()
-              
+
               # Execute the hook code to define the function
               exec(hook_code, globals())
-              
+
               # Set the pre-spawn hook
               c.KubeSpawner.pre_spawn_hook = pre_spawn_hook
               log.info("Pre-spawn hook loaded successfully")
@@ -161,4 +161,3 @@ spec:
       enabled: true
       timeout: 3600 # 1 hour idle timeout
       every: 600 # Check every 10 minutes
-
