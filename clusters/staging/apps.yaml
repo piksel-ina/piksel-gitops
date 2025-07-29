@@ -1,22 +1,54 @@
 # --- Applications Kustomization for the staging cluster ---
+# jupyterhub
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: apps
+  name: jhub
   namespace: flux-system
 spec:
-  # How often Flux checks for changes (every 1 minute)
   interval: 1m0s
   dependsOn:
-    # Ensure infra-configs is applied before apps
     - name: infra-configs
   sourceRef:
     kind: GitRepository
     name: flux-system
-  # Path to the kustomization files for staging apps
-  path: ./apps/staging
-  # Remove resources that are no longer defined in the source
+  path: ./apps/staging/jupyterhub
   prune: true
-  # Wait for the resources to be ready before marking the kustomization as ready
+  wait: true
+  timeout: 5m0s
+---
+# argo-workflows
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: argo-workflows
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  dependsOn:
+    - name: infra-configs
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/staging/argo
+  prune: true
+  wait: true
+  timeout: 5m0s
+---
+# the-workflows
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: workflows-templates
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  dependsOn:
+    - name: argo-workflows
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./workflows/templates
+  prune: true
   wait: true
   timeout: 5m0s
