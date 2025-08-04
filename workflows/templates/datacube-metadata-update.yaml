@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: datacube-metadata-update
+  namespace: argo-workflows
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: metadata-update
+  podGC:
+    strategy: OnWorkflowSuccess
+  ttlStrategy:
+    secondsAfterCompletion: 300
+  templates:
+    - name: metadata-update
+      serviceAccountName: argo-workflows-executor
+      #   inputs:
+      #     parameters:
+      #       - name: metadata-file
+      #         value: "https://github.com/piksel-ina/piksel-core/blob/main/metadata/custom_metadata.odc-type.yaml"
+      container:
+        name: odc-container
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-v0.2.0
+        command:
+          - bash
+        args:
+          - "-c"
+          - |
+            datacube --version
+            datacube metadata update --allow-unsafe https://raw.githubusercontent.com/piksel-ina/piksel-core/main/metadata/custom_metadata.odc-type.yaml
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
