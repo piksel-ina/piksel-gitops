@@ -24,12 +24,6 @@ data:
     TARGET_DIR="${TARGET_DIR:-/home/jovyan/notebooks}"
     CONDA_ENV="${CONDA_ENV:-notebook}"
 
-    # Create necessary directories
-
-    log "Initializing directories"
-    mkdir -p ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/
-    mkdir -p ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/
-
 
     # --- Step 2 - Sync Notebooks ---
 
@@ -38,11 +32,23 @@ data:
     if /srv/conda/envs/${CONDA_ENV}/bin/gitpuller "${GITHUB_REPO}" "${BRANCH}" "${TARGET_DIR}"; then
       log "Successfully synced notebooks to ${TARGET_DIR}"
     else
-      log "Warning: Failed to sync repository"
+      log "Warning: Failed to sync repository [1]"
     fi
 
+    # Sync with gitpuller
+    log "Syncing notebooks from ${GITHUB_REPO}"
+    if /opt/conda/bin/gitpuller "${GITHUB_REPO}" "${BRANCH}" "${TARGET_DIR}"; then
+      log "Successfully synced notebooks to ${TARGET_DIR}"
+    else
+      log "Warning: Failed to sync repository [2]"
+    fi
 
     # --- Step 3 - Update JupyterLab settings ---
+
+    # Create necessary directories
+    log "Initializing directories"
+    mkdir -p ~/.jupyter/lab/user-settings/@jupyterlab/docmanager-extension/
+    mkdir -p ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/
 
     log "Updating JupyterLab settings"
 
@@ -61,9 +67,9 @@ data:
     # Disable news notifications
     cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/notification.jupyterlab-settings
     {
-      "fetchNews": false,
       "checkForUpdates": false,
-      "doNotDisturbMode": true
+      "doNotDisturbMode": false,
+      "fetchNews": "false"
     }
     EOF
     log "Disabled JupyterLab news notifications"
@@ -71,5 +77,6 @@ data:
     # --- Step 4 - Clean up ---
     # Remove empty lost+found directories
     rmdir ~/lost+found/ && log "lost+found directory removed" || true
+    rmdir ~/mambauser/ && log "mambauser directory removed" || true
 
     log "Post-start hook completed"

@@ -120,7 +120,8 @@ data:
                     "cpu_limit": 2,
                     "mem_guarantee": "12G",
                     "mem_limit": "12G",
-                    "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:jupyter-v20250805-060537"
+                    "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:jupyter-5a447a3",
+                    "default_url": "/lab/tree/jovyan/notebooks/README.md"
                 }
             }
         ]
