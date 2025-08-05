@@ -61,9 +61,9 @@ data:
     # Disable news notifications
     cat <<EOF > ~/.jupyter/lab/user-settings/@jupyterlab/apputils-extension/notification.jupyterlab-settings
     {
-      "fetchNews": "false"
+      "fetchNews": false,
       "checkForUpdates": false,
-      "doNotDisturbMode": true,
+      "doNotDisturbMode": true
     }
     EOF
     log "Disabled JupyterLab news notifications"
