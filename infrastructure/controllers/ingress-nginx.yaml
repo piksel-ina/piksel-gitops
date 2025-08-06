@@ -32,6 +32,19 @@ spec:
 
   values:
     controller:
+      # Improve performance by using more resources
+      resources:
+        requests:
+          cpu: 250m
+          memory: 256Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+
+      # Minimal high availability configuration
+      replicaCount: 3
+      minAvailable: 2
+
       service:
         type: "LoadBalancer"
       allowSnippetAnnotations: true
@@ -41,14 +54,24 @@ spec:
       config:
         annotations-risk-level: Critical
 
-      # Make sure nginx-ingress deployed to high available instances
-      nodeSelector:
-        karpenter.sh/controller: "true"
+      # Make sure nginx-ingress deployed to system instances, but also allow it to run on karpenter nodes
       tolerations:
         - key: "CriticalAddonsOnly"
           operator: "Equal"
           value: "true"
           effect: "NoSchedule"
+        - operator: "Exists"
+          effect: "NoSchedule"
+
+      # Forces pods deployed to different nodes
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: ingress-nginx
+                  app.kubernetes.io/component: controller
+              topologyKey: kubernetes.io/hostname
 
     admissionWebhooks:
       enabled: false

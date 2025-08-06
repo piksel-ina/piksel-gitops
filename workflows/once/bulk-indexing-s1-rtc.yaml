@@ -1,0 +1,29 @@
+From: "Alex Leith" <alexgleith@gmail.com>
+To: "muhammad taufik" <muhammad.taufik@big.go.id>
+Cc: "Gatot Haryo Pramono" <gatot.haryo@big.go.id>, "Matthew Ellis" <Matthew.Ellis@ga.gov.au>, "Jonah Sullivan" <Jonah.Sullivan@ga.gov.au>, "Astrit Rimayanti, ST, M.Sc." <astrit.rimayanti@big.go.id>, "abed nego" <abed.nego@big.go.id>, "Teguh Sulistian" <teguh.sulistian@big.go.id>
+Sent: Thursday, February 6, 2025 5:49:36 AM
+Subject: Re: BIG / GA ODC Meeting February 2025 [SEC=OFFICIAL]
+
+Thanks, Gatot
+Hi Taufik
+
+Some notes from me for S-1
+You can use this S-1 Product Definition: https://ddei5-0-ctp.trendmicro.com:443/wis/clicktime/v1/query?url=https%3a%2f%2fgithub.com%2fopendatacube%2fdatacube%2ddataset%2dconfig%2fblob%2fmain%2fproducts%2fs1%5frtc.odc%2dproduct.yaml&umid=A0CF4284-2D6C-E206-8A7B-656C28456DA9&auth=8b3118cf8f50db03e96493e8f858448b6b54b1f6-282163a3c3f36c7e19b714619a104998fb7ebe95
+And then just index using the stac-to-dc script, copied below.
+When loading, you need to sign URLs using the `patch_url` function, here: https://ddei5-0-ctp.trendmicro.com:443/wis/clicktime/v1/query?url=https%3a%2f%2fdatacube%2dcore.readthedocs.io%2fen%2flatest%2fapi%2findexed%2ddata%2fgenerate%2fdatacube.Datacube.load.html&umid=A0CF4284-2D6C-E206-8A7B-656C28456DA9&auth=8b3118cf8f50db03e96493e8f858448b6b54b1f6-42b49f1547053fe03a01be97fcd98db142d781c8 and the planetary_computer.sign_url method
+stac-to-dc for s-1
+
+ stac-to-dc \
+--catalog-href='https://planetarycomputer.microsoft.com/api/stac/v1/' \
+--bbox='$(BBOX)' \
+--datetime='2023-01-01/2023-12-31' \
+--collections='sentinel-1-rtc'
+
+For Landsat Surface Reflectance, here's my notes:
+There are products available in the DE Africa Config repo, like this for LS9 https://ddei5-0-ctp.trendmicro.com:443/wis/clicktime/v1/query?url=https%3a%2f%2fgithub.com%2fdigitalearthafrica%2fconfig%2fblob%2fmaster%2fproducts%2fls9%5fst.odc%2dproduct.yaml&umid=A0CF4284-2D6C-E206-8A7B-656C28456DA9&auth=8b3118cf8f50db03e96493e8f858448b6b54b1f6-689a442e1c22e42a34474664a6af3688dc86686f
+Indexing should work fine, but depending on how you handle the dataset documents, you may need to use another patch_url function to change from landsatlook URLs to S3 URLs.
+Another alternative is to index from the Element-84 STAC Catalog, which uses S3 URLs by default, here: https://ddei5-0-ctp.trendmicro.com:443/wis/clicktime/v1/query?url=https%3a%2f%2fearth%2dsearch.aws.element84.com%2fv1%2f&umid=A0CF4284-2D6C-E206-8A7B-656C28456DA9&auth=8b3118cf8f50db03e96493e8f858448b6b54b1f6-419e422a66782d8fa4e287febd6e0e717285e4d6
+(Note that I haven't tested this indexing from E-84, and if there's no surface temperature, then you'll need to use the USGS one: https://landsatlook.usgs.gov/stac-server/collections/landsat-c2l2-st)
+Hopefully these notes are helpful. I can work up examples and test when I have some time supported by GA.
+
+Kind regards,
