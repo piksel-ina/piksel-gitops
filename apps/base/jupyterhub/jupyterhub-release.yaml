@@ -148,6 +148,22 @@ spec:
       # set ServiceAccount to assume IAM role
       serviceAccountName: user-read
 
+      # Additional Configs to be used in pair with the user-scheduler
+      extraPodConfig:
+        topologySpreadConstraints:
+          - maxSkew: 1 # Strict: Keep pod counts within 1 of each other across zones
+            topologyKey: topology.kubernetes.io/zone
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                component: singleuser-server # Matches single-user labels
+          - maxSkew: 2
+            topologyKey: kubernetes.io/hostname # Fallback: Spread across individual nodes to reduce hotspots
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                component: singleuser-server
+
     # Scheduling relates to the user-scheduler pods and user-placeholder pods.
     scheduling:
       userScheduler:
@@ -173,6 +189,8 @@ spec:
                 weight: 50 # Reduce from 121 to de-emphasize resource packing; pairs with LeastAllocated below for spreading
               - name: ImageLocality
                 weight: 50 # Increase from 11 to prioritize nodes where images are pre-pulled—speeds up startups
+              - name: PodTopologySpread
+                weight: 80 # Increase to ensure pods are spread across zones/nodes for better availability
 
         pluginConfig:
           - name: NodeResourcesFit
