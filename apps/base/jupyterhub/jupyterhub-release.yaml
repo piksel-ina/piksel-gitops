@@ -200,9 +200,12 @@ spec:
 
       userPlaceholder:
         enabled: true
-        replicas:
+        replicas: 3
         resources:
           requests:
+            cpu: 2
+            memory: 12Gi
+          limits:
             cpu: 2
             memory: 12Gi
 
