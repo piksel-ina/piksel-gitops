@@ -28,47 +28,79 @@ data:
                 log.warning(f"No groups found for user {spawner.user.name}")
             log.info(f"User {spawner.user.name} groups: {user_groups}")
 
-            # Set environment variable for lifecycle hook (if needed)
-            if not hasattr(spawner, 'environment') or not spawner.environment:
-                spawner.environment = {}
-            spawner.environment['JUPYTERHUB_USER_GROUPS'] = ','.join(user_groups)
-
             # Configure EFS volumes based on groups
             volumes = []
             volume_mounts = []
 
-            # Base public data (will configure RO/RW later)
+            # Base public data 
             public_volume = {
                 "name": "efs-public-data",
                 "persistentVolumeClaim": {"claimName": "efs-public-data"}
             }
-            public_mount = {
-                "name": "efs-public-data",
-                "mountPath": "/home/jovyan/data/public",
-                "readOnly": True  # Default to RO
-            }
+           
+            # Public data mount
+            if 'admin' in user_groups:
+                public_mount = {
+                    "name": "efs-public-data",
+                    "mountPath": "/home/jovyan/data/public",
+                    "readOnly": False  # Admin gets read-write access
+                }
+            else:
+                public_mount = {
+                    "name": "efs-public-data",
+                    "mountPath": "/home/jovyan/data/public", 
+                    "readOnly": True   # Everyone else gets read-only
+                }
 
-            # Group-specific volumes
-            if 'coastline' in user_groups or 'admin' in user_groups:
-                volumes.append({
-                    "name": "efs-coastline-data",
-                    "persistentVolumeClaim": {"claimName": "efs-coastline-data"}
-                })
-                volume_mounts.append({
+            # Base coastline data
+            coastline_volume = {
+                "name": "efs-coastline-data",
+                "persistentVolumeClaim": {"claimName": "efs-coastline-data"}
+            }
+            
+            # Coastline data mount - determine permissions based on user groups
+            if 'admin' in user_groups or 'coastline' in user_groups:
+                coastline_mount = {
                     "name": "efs-coastline-data",
                     "mountPath": "/home/jovyan/data/coastlines",
-                    "readOnly": False
-                })
+                    "readOnly": False  # Admin and coastline group get read-write
+                }
+            else:
+                coastline_mount = {
+                    "name": "efs-coastline-data", 
+                    "mountPath": "/home/jovyan/data/coastlines",
+                    "readOnly": True   # Everyone else gets read-only
+                }
 
-            # Public Directory: Admins get RW, others RO
+            # Add all volumes to all users
             volumes.append(public_volume)
-            if 'admin' in user_groups:
-                public_mount["readOnly"] = False
+            volumes.append(coastline_volume)
             volume_mounts.append(public_mount)
+            volume_mounts.append(coastline_mount)
+            
+            # Handle spawner.volumes or spawner.volume_mounts is None
+            if spawner.volumes is None:
+                spawner.volumes = []
+            if spawner.volume_mounts is None:
+                spawner.volume_mounts = []
 
-            # Extend (add to) any existing volumes/mounts from Helm/config (avoid duplicates if possible)
-            spawner.volumes.extend(volumes)
-            spawner.volume_mounts.extend(volume_mounts)
+            # Check for duplicates before extending to avoid mounting same volume twice
+            existing_volume_names = {v.get('name') for v in spawner.volumes}
+            existing_mount_names = {vm.get('name') for vm in spawner.volume_mounts}
+
+            # Only add volumes that don't already exist
+            for volume in volumes:
+                if volume['name'] not in existing_volume_names:
+                    spawner.volumes.append(volume)
+                else:
+                    log.info(f"Volume {volume['name']} already exists, skipping")
+
+            # Only add mounts that don't already exist
+            for mount in volume_mounts:
+                if mount['name'] not in existing_mount_names:
+                    spawner.volume_mounts.append(mount)
+                else:
+                    log.info(f"Volume mount {mount['name']} already exists, skipping")
 
             # Set security context with supplemental groups (merge with existing if present)
             supp_groups = [100]  # base group
@@ -78,6 +110,7 @@ data:
 
             if not hasattr(spawner, 'security_context') or not spawner.security_context:
                 spawner.security_context = {}
+
             # Merge supplementalGroups if existing
             existing_supp = spawner.security_context.get('supplementalGroups', [])
             spawner.security_context['supplementalGroups'] = list(set(existing_supp + supp_groups))
