@@ -197,7 +197,8 @@ spec:
             args:
               scoringStrategy:
                 type: LeastAllocated # Tweak: Switch from MostAllocated to LeastAllocated. Spreads pods across nodes, reducing contention and improving per-user performance/isolation. UX > cost here!
-
+      podPriority:
+        enabled: true
       userPlaceholder:
         enabled: true
         replicas: 3
