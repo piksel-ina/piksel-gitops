@@ -11,23 +11,12 @@ spec:
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-production
         external-dns.alpha.kubernetes.io/hostname: sandbox.staging.pik-sel.id
-        kubernetes.io/ingress.class: nginx
-        meta.helm.sh/release-name: jupyterhub
-        meta.helm.sh/release-namespace: jupyterhub
-        nginx.ingress.kubernetes.io/proxy-body-size: "0" # Already good; keeps unlimited
-        nginx.ingress.kubernetes.io/proxy-http-version: "1.1" # Required for WebSockets
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600" # Increase from 1800
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600" # Increase from 1800
-        nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600" # Add this for connection establishment
-        nginx.ingress.kubernetes.io/configuration-snippet: |
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade";
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-          proxy_set_header X-Forwarded-Host $host;
-          proxy_set_header X-Forwarded-Port $server_port;
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/client-body-buffer-size: "2m" # Increase buffer size for large requests
+        nginx.ingress.kubernetes.io/proxy-buffers-number: "8" # Response buffering
+        nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
 
       hosts:
         - sandbox.staging.pik-sel.id
