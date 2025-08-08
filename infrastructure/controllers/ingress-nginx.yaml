@@ -42,8 +42,8 @@ spec:
           memory: 1Gi
 
       # Minimal high availability configuration
-      replicaCount: 3
-      minAvailable: 2
+      replicaCount: 2
+      minAvailable: 1
 
       service:
         type: "LoadBalancer"

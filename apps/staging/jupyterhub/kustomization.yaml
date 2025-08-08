@@ -11,11 +11,11 @@ patches:
       kind: HelmRelease
       name: jupyterhub
       namespace: jupyterhub
-  - path: singleuser-patch.yaml
-    target:
-      kind: HelmRelease
-      name: jupyterhub
-      namespace: jupyterhub
+  # - path: singleuser-patch.yaml
+  #   target:
+  #     kind: HelmRelease
+  #     name: jupyterhub
+  #     namespace: jupyterhub
   - path: ingress.yaml
     target:
       kind: HelmRelease

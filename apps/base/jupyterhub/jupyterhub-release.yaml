@@ -127,7 +127,7 @@ spec:
       # Extra environment variables for single user pods
       extraEnv:
         # // Jupyter Environments
-        JUPYTER_TRUST_XHEADERS: "true"
+        # JUPYTER_TRUST_XHEADERS: "true"
         # // AWS Configuration
         AWS_NO_SIGN_REQUEST: "YES"
         # // GDAL / Rasterio environment variables
@@ -216,9 +216,9 @@ spec:
     proxy:
       service:
         type: ClusterIP
-      https:
-        enabled: true
-        type: offload # Let ingress handle SSL termination
+      # https:
+      #   enabled: true
+      #   type: offload # Let ingress handle SSL termination
 
     # Culling Configuration
     cull:
