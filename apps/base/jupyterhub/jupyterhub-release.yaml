@@ -75,11 +75,11 @@ spec:
       # Use the piksel-core image from ECR
       image:
         name: "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core"
-        tag: "jupyter-v1.0"
+        tag: "jupyter-v20250808-132239"
         pullPolicy: "Always"
 
       # Start with JupyterLab
-      defaultUrl: "/lab/tree/jovyan/notebooks/README.md"
+      defaultUrl: "/lab/tree/notebooks/README.md"
 
       #  Run bash script define in singleuser.yaml
       lifecycleHooks:
