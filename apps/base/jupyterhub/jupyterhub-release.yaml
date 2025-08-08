@@ -214,11 +214,54 @@ spec:
 
     # Proxy Configuration
     proxy:
+      secretToken: ""
+      annotations: {}
+      deploymentStrategy:
+        type: Recreate
+        rollingUpdate:
       service:
-        type: ClusterIP
-      # https:
-      #   enabled: true
-      #   type: offload # Let ingress handle SSL termination
+        type: LoadBalancer
+        nodePorts: {}
+        disableHttpPort: false
+        extraPorts: []
+        loadBalancerSourceRanges: []
+      chp:
+        extraCommandLineFlags:
+          - --timeout=3600 # Matches LB idle timeout; prevents proxy from giving up on slow connections
+          - --default-target=http://hub:8081 # Improves fallback routing
+          - --error-target=http://hub:8081/hub/error # Better error handling for debugging
+        livenessProbe:
+          enabled: true
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          failureThreshold: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          enabled: true
+          initialDelaySeconds: 0
+          periodSeconds: 2
+          failureThreshold: 1000
+          timeoutSeconds: 3
+        resources: {}
+        extraEnv: {}
+        nodeSelector: {}
+        tolerations: []
+        networkPolicy:
+          enabled: true # Keep enabled, but relaxed for testing
+          ingress: []
+          egress: []
+          egressAllowRules:
+            cloudMetadataServer: true
+            dnsPortsCloudMetadataServer: true
+            dnsPortsKubeSystemNamespace: true
+            dnsPortsPrivateIPs: true
+            nonPrivateIPs: true
+            privateIPs: true
+          interNamespaceAccessLabels: ignore
+          allowedIngressPorts: [http, https]
+        pdb:
+          enabled: false
+          minAvailable: 1
 
     # Culling Configuration
     cull:
