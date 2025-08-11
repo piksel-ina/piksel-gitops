@@ -81,9 +81,9 @@ spec:
       # Start with JupyterLab
       defaultUrl: "/lab/tree/notebooks/README.md"
 
-      nodeSelector:
-        # Use the user-scheduler node selector
-        karpenter.sh/capacity-type: on-demand
+      # nodeSelector:
+      #   # Use the user-scheduler node selector
+      #   karpenter.sh/capacity-type: on-demand
 
       #  Run bash script define in singleuser.yaml
       lifecycleHooks:
@@ -171,50 +171,50 @@ spec:
       #           component: singleuser-server
 
     # Scheduling relates to the user-scheduler pods and user-placeholder pods.
-    scheduling:
-      userScheduler:
-        enabled: true
-        replicas: 2
-        logLevel: 4
+    # scheduling:
+    #   userScheduler:
+    #     enabled: true
+    #     replicas: 2
+    #     logLevel: 4
 
-        plugins:
-          score:
-            disabled:
-              - name: NodeResourcesBalancedAllocation # Keep disabled: Avoids conflicts with custom fit strategy
-              - name: NodeAffinity
-              - name: InterPodAffinity
-              - name: NodeResourcesFit
-              - name: ImageLocality
+    #     plugins:
+    #       score:
+    #         disabled:
+    #           - name: NodeResourcesBalancedAllocation # Keep disabled: Avoids conflicts with custom fit strategy
+    #           - name: NodeAffinity
+    #           - name: InterPodAffinity
+    #           - name: NodeResourcesFit
+    #           - name: ImageLocality
 
-            enabled: # Tweak weights: Lower NodeResourcesFit, boost ImageLocality and PodTopologySpread for speed/isolation
-              - name: NodeAffinity
-                weight: 14631 # Keep high: Ensures pods go to preferred nodes
-              - name: InterPodAffinity
-                weight: 1331 # Keep high: Helps group related pods, reducing network latency
-              - name: NodeResourcesFit
-                weight: 50 # Reduce from 121 to de-emphasize resource packing; pairs with LeastAllocated below for spreading
-              - name: ImageLocality
-                weight: 50 # Increase from 11 to prioritize nodes where images are pre-pulled—speeds up startups
-              - name: PodTopologySpread
-                weight: 80 # Increase to ensure pods are spread across zones/nodes for better availability
+    #         enabled: # Tweak weights: Lower NodeResourcesFit, boost ImageLocality and PodTopologySpread for speed/isolation
+    #           - name: NodeAffinity
+    #             weight: 14631 # Keep high: Ensures pods go to preferred nodes
+    #           - name: InterPodAffinity
+    #             weight: 1331 # Keep high: Helps group related pods, reducing network latency
+    #           - name: NodeResourcesFit
+    #             weight: 50 # Reduce from 121 to de-emphasize resource packing; pairs with LeastAllocated below for spreading
+    #           - name: ImageLocality
+    #             weight: 50 # Increase from 11 to prioritize nodes where images are pre-pulled—speeds up startups
+    #           - name: PodTopologySpread
+    #             weight: 80 # Increase to ensure pods are spread across zones/nodes for better availability
 
-        pluginConfig:
-          - name: NodeResourcesFit
-            args:
-              scoringStrategy:
-                type: LeastAllocated # Tweak: Switch from MostAllocated to LeastAllocated. Spreads pods across nodes, reducing contention and improving per-user performance/isolation. UX > cost here!
-      podPriority:
-        enabled: true
-      userPlaceholder:
-        enabled: false
-        replicas: 3
-        resources:
-          requests:
-            cpu: 2
-            memory: 12Gi
-          limits:
-            cpu: 2
-            memory: 12Gi
+    #     pluginConfig:
+    #       - name: NodeResourcesFit
+    #         args:
+    #           scoringStrategy:
+    #             type: LeastAllocated # Tweak: Switch from MostAllocated to LeastAllocated. Spreads pods across nodes, reducing contention and improving per-user performance/isolation. UX > cost here!
+    #   podPriority:
+    #     enabled: true
+    #   userPlaceholder:
+    #     enabled: false
+    #     replicas: 3
+    #     resources:
+    #       requests:
+    #         cpu: 2
+    #         memory: 12Gi
+    #       limits:
+    #         cpu: 2
+    #         memory: 12Gi
 
     # Proxy Configuration
     proxy:
