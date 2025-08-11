@@ -81,6 +81,10 @@ spec:
       # Start with JupyterLab
       defaultUrl: "/lab/tree/notebooks/README.md"
 
+      nodeSelector:
+        # Use the user-scheduler node selector
+        karpenter.sh/capacity-type: on-demand
+
       #  Run bash script define in singleuser.yaml
       lifecycleHooks:
         postStart:
@@ -151,20 +155,20 @@ spec:
       serviceAccountName: user-read
 
       # Additional Configs to be used in pair with the user-scheduler
-      extraPodConfig:
-        topologySpreadConstraints:
-          - maxSkew: 1 # Strict: Keep pod counts within 1 of each other across zones
-            topologyKey: topology.kubernetes.io/zone
-            whenUnsatisfiable: ScheduleAnyway
-            labelSelector:
-              matchLabels:
-                component: singleuser-server # Matches single-user labels
-          - maxSkew: 2
-            topologyKey: kubernetes.io/hostname # Fallback: Spread across individual nodes to reduce hotspots
-            whenUnsatisfiable: ScheduleAnyway
-            labelSelector:
-              matchLabels:
-                component: singleuser-server
+      # extraPodConfig:
+      #   topologySpreadConstraints:
+      #     - maxSkew: 1 # Strict: Keep pod counts within 1 of each other across zones
+      #       topologyKey: topology.kubernetes.io/zone
+      #       whenUnsatisfiable: ScheduleAnyway
+      #       labelSelector:
+      #         matchLabels:
+      #           component: singleuser-server # Matches single-user labels
+      #     - maxSkew: 2
+      #       topologyKey: kubernetes.io/hostname # Fallback: Spread across individual nodes to reduce hotspots
+      #       whenUnsatisfiable: ScheduleAnyway
+      #       labelSelector:
+      #         matchLabels:
+      #           component: singleuser-server
 
     # Scheduling relates to the user-scheduler pods and user-placeholder pods.
     scheduling:
@@ -202,7 +206,7 @@ spec:
       podPriority:
         enabled: true
       userPlaceholder:
-        enabled: true
+        enabled: false
         replicas: 3
         resources:
           requests:
