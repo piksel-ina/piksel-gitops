@@ -57,9 +57,7 @@ data:
     {
     "defaultViewers": {
         "markdown": "Markdown Preview"
-    },
-    "autosave": true,
-    "autosaveInterval": 120
+      }
     }
     EOF
     log "Set markdown preview and autosave settings"

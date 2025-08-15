@@ -52,7 +52,7 @@ data:
                         "storage_capacity": "10Gi",
                         "node_selector": {
                             "karpenter.sh/nodepool": "default",
-                            "karpenter.sh/capacity-type": "on-demand"
+                            "karpenter.sh/capacity-type": "spot"
                         }
                     }
                 }
@@ -70,7 +70,7 @@ data:
                         "storage_capacity": "20Gi",
                         "node_selector": {
                             "karpenter.sh/nodepool": "default",
-                            "karpenter.sh/capacity-type": "on-demand"
+                            "karpenter.sh/capacity-type": "spot"
                         }
                     }
                 }
