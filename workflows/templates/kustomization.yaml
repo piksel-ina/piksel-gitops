@@ -7,3 +7,5 @@ resources:
   - datacube-delete-product.yaml
   - datacube-stac-index.yaml
   - datacube-bulk-index.yaml
+  - datacube-metadata-update.yaml
+  - cubedash-gen-init.yaml

@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: cubedash-gen-init
+  namespace: argo-workflows
+  labels:
+    app: explorer
+    component: cubedash-gen
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: cubedash-gen-init
+  podGC:
+    strategy: OnWorkflowSuccess
+  ttlStrategy:
+    secondsAfterCompletion: 300
+  templates:
+    - name: cubedash-gen-init
+      container:
+        image: opendatacube/explorer:3.0.1
+        command: ["cubedash-gen"]
+        args: ["--init", "--all"]
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_DATABASE
+            value: "odc"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+          - name: ODC_POSTGIS_INDEX_DRIVER
+            value: "postgis"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      retryStrategy:
+        limit: 2
+        retryPolicy: "Always"
+        backoff:
+          duration: "1m"
+          factor: 2
+          maxDuration: "10m"
