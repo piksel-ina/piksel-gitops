@@ -35,7 +35,7 @@ spec:
   wait: true
   timeout: 5m0s
 ---
-# argo-workflows
+# Datacube Explorer
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
@@ -43,8 +43,8 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m0s
-  dependsOn:
-    - name: infra-configs
+  # dependsOn:
+  #   - name: infra-configs
   sourceRef:
     kind: GitRepository
     name: flux-system

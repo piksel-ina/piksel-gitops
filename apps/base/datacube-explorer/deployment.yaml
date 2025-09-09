@@ -31,22 +31,17 @@ spec:
             - name: ODC_DEFAULT_DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: odc
+                  name: odc-secret
                   key: username
             - name: ODC_DEFAULT_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: odc
+                  name: odc-secret
                   key: password
             - name: ODC_DEFAULT_INDEX_DRIVER
               value: "postgis"
             - name: ODC_POSTGIS_INDEX_DRIVER
               value: "postgis"
-
-            - name: ODC_DEFAULT_DB_URL
-              value: "postgresql+psycopg2://$(ODC_DEFAULT_DB_USERNAME):$(ODC_DEFAULT_DB_PASSWORD)@$(ODC_DEFAULT_DB_HOSTNAME):$(ODC_DEFAULT_DB_PORT)/$(ODC_DEFAULT_DB_DATABASE)"
-            - name: ODC_POSTGIS_DB_URL
-              value: "postgresql+psycopg2://$(ODC_DEFAULT_DB_USERNAME):$(ODC_DEFAULT_DB_PASSWORD)@$(ODC_DEFAULT_DB_HOSTNAME):$(ODC_DEFAULT_DB_PORT)/$(ODC_DEFAULT_DB_DATABASE)"
 
             - name: FLASK_APP
               value: "cubedash"
