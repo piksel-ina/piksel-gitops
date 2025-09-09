@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: explorer-ingress
+  labels:
+    app: explorer
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    external-dns.alpha.kubernetes.io/hostname: explorer.staging.pik-sel.id
+spec:
+  rules:
+    - host: explorer.staging.pik-sel.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: explorer-svc
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - explorer.staging.pik-sel.id
+      secretName: explorer-ingress

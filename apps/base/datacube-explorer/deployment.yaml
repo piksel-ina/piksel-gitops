@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+namespace: open-datacube
+metadata:
+  name: explorer
+  labels:
+    app: explorer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: explorer
+  template:
+    metadata:
+      labels:
+        app: explorer
+    spec:
+      containers:
+        - name: explorer
+          image: opendatacube/explorer:3.0.1
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: ODC_DEFAULT_DB_HOSTNAME
+              value: "pg-proxy-service.database.svc.cluster.local"
+            - name: ODC_DEFAULT_DB_PORT
+              value: "6432" # PgBouncer port
+            - name: ODC_DEFAULT_DB_DATABASE
+              value: "odc"
+            - name: ODC_DEFAULT_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: odc
+                  key: username
+            - name: ODC_DEFAULT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odc
+                  key: password
+            - name: ODC_DEFAULT_INDEX_DRIVER
+              value: "postgis"
+            - name: ODC_POSTGIS_INDEX_DRIVER
+              value: "postgis"
+
+            - name: ODC_DEFAULT_DB_URL
+              value: "postgresql+psycopg2://$(ODC_DEFAULT_DB_USERNAME):$(ODC_DEFAULT_DB_PASSWORD)@$(ODC_DEFAULT_DB_HOSTNAME):$(ODC_DEFAULT_DB_PORT)/$(ODC_DEFAULT_DB_DATABASE)"
+            - name: ODC_POSTGIS_DB_URL
+              value: "postgresql+psycopg2://$(ODC_DEFAULT_DB_USERNAME):$(ODC_DEFAULT_DB_PASSWORD)@$(ODC_DEFAULT_DB_HOSTNAME):$(ODC_DEFAULT_DB_PORT)/$(ODC_DEFAULT_DB_DATABASE)"
+
+            - name: FLASK_APP
+              value: "cubedash"
+            - name: FLASK_ENV
+              value: "production"
+            - name: FLASK_DEBUG
+              value: "0"
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+
+      restartPolicy: Always
