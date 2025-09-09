@@ -31,7 +31,7 @@ spec:
       - name: cell-size
         value: "5"
 ---
-# Landsat 9 SR Workflow
+# # Landsat 9 SR Workflow
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
@@ -83,7 +83,7 @@ spec:
       - name: datetime
         value: "1999-04-15/2025-7-27"
       - name: arguments
-        value: '--rename-product=ls7_c2l2_sr --options="query={\"platform\":{\"in\":[\"landsat-7\"]}}"'
+        value: '--rename-product=ls7_c2l2_sr --options="query={\"platform\":{\"in\":[\"LANDSAT_7\"]}} --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
         value: "6"
       - name: min-lon # eastest
@@ -95,7 +95,7 @@ spec:
       - name: min-lat # southest
         value: "-11"
       - name: cell-size
-        value: "5"
+        value: "10"
 ---
 # Landsat 5 SR Workflow
 apiVersion: argoproj.io/v1alpha1
@@ -116,7 +116,7 @@ spec:
       - name: datetime
         value: "1984-03-01/2013-01-05"
       - name: arguments
-        value: '--rename-product=ls5_c2l2_sr --options="query={\"platform\":{\"in\":[\"landsat-5\"]}}" --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
+        value: '--rename-product=ls5_c2l2_sr --options="query={\"platform\":{\"in\":[\"LANDSAT_5\"]}}" --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
         value: "6"
       - name: min-lon # eastest
@@ -128,4 +128,4 @@ spec:
       - name: min-lat # southest
         value: "-11"
       - name: cell-size
-        value: "5"
+        value: "10"
