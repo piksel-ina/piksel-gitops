@@ -1,8 +1,8 @@
-# Landsat 8 SR Workflow
+# Landsat 8 ST Workflow
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: landsat8-sr-bulk-index-
+  generateName: landsat8-st-bulk-index-
   namespace: argo-workflows
 spec:
   serviceAccountName: argo-workflows-executor
@@ -15,7 +15,7 @@ spec:
       - name: collections
         value: "landsat-c2l2-st"
       - name: datetime
-        value: "2013-04-01/2025-7-27"
+        value: "2013-04-01/2025-09-10"
       - name: arguments
         value: '--rename-product=ls8_c2l2_st  --options="query={\"platform\":{\"in\":[\"LANDSAT_8\"]}}" --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
@@ -31,11 +31,11 @@ spec:
       - name: cell-size
         value: "5"
 ---
-# Landsat 9 SR Workflow
+# Landsat 9 ST Workflow
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: landsat9-sr-bulk-index-
+  generateName: landsat9-st-bulk-index-
   namespace: argo-workflows
 spec:
   serviceAccountName: argo-workflows-executor
@@ -48,7 +48,7 @@ spec:
       - name: collections
         value: "landsat-c2l2-st"
       - name: datetime
-        value: "2021-10-01/2025-7-27"
+        value: "2021-10-01/2025-09-10"
       - name: arguments
         value: '--rename-product=ls9_c2l2_st --options="query={\"platform\":{\"in\":[\"LANDSAT_9\"]}}" --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
@@ -64,11 +64,11 @@ spec:
       - name: cell-size
         value: "5"
 ---
-# Landsat 7 SR Workflow
+# Landsat 7 ST Workflow
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: landsat7-sr-bulk-index-
+  generateName: landsat7-st-bulk-index-
   namespace: argo-workflows
 spec:
   serviceAccountName: argo-workflows-executor
@@ -81,9 +81,9 @@ spec:
       - name: collections
         value: "landsat-c2l2-st"
       - name: datetime
-        value: "1999-04-15/2025-7-27"
+        value: "1999-04-15/2025-09-10"
       - name: arguments
-        value: '--rename-product=ls7_c2l2_st --options="query={\"platform\":{\"in\":[\"landsat-7\"]}}"'
+        value: '--rename-product=ls7_c2l2_st --options="query={\"platform\":{\"in\":[\"LANDSAT_7\"]}} --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
         value: "6"
       - name: min-lon # eastest
@@ -97,11 +97,11 @@ spec:
       - name: cell-size
         value: "5"
 ---
-# Landsat 5 SR Workflow
+# Landsat 5 ST Workflow
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: landsat5-sr-bulk-index-
+  generateName: landsat5-st-bulk-index-
   namespace: argo-workflows
 spec:
   serviceAccountName: argo-workflows-executor
@@ -116,7 +116,7 @@ spec:
       - name: datetime
         value: "1984-03-01/2013-01-05"
       - name: arguments
-        value: '--rename-product=ls5_c2l2_st --options="query={\"platform\":{\"in\":[\"landsat-5\"]}}" --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
+        value: '--rename-product=ls5_c2l2_st --options="query={\"platform\":{\"in\":[\"LANDSAT_5\"]}} --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
         value: "6"
       - name: min-lon # eastest

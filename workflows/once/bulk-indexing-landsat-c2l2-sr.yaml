@@ -15,7 +15,7 @@ spec:
       - name: collections
         value: "landsat-c2l2-sr"
       - name: datetime
-        value: "2013-04-01/2025-7-27"
+        value: "2013-04-01/2025-09-10"
       - name: arguments
         value: '--rename-product=ls8_c2l2_sr  --options="query={\"platform\":{\"in\":[\"LANDSAT_8\"]}}" --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
@@ -48,7 +48,7 @@ spec:
       - name: collections
         value: "landsat-c2l2-sr"
       - name: datetime
-        value: "2021-10-01/2025-7-27"
+        value: "2021-10-01/2025-09-10"
       - name: arguments
         value: '--rename-product=ls9_c2l2_sr --options="query={\"platform\":{\"in\":[\"LANDSAT_9\"]}}" --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
@@ -81,7 +81,7 @@ spec:
       - name: collections
         value: "landsat-c2l2-sr"
       - name: datetime
-        value: "1999-04-15/2025-7-27"
+        value: "1999-04-15/2025-09-10"
       - name: arguments
         value: '--rename-product=ls7_c2l2_sr --options="query={\"platform\":{\"in\":[\"LANDSAT_7\"]}} --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"'
       - name: time-chunks
