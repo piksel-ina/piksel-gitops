@@ -1,24 +1,48 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: cubedash-gen-init
+  name: cubedash-operations
   namespace: argo-workflows
   labels:
     app: explorer
     component: cubedash-gen
 spec:
   serviceAccountName: argo-workflows-executor
-  entrypoint: cubedash-gen-init
+  entrypoint: cubedash-operations
   podGC:
     strategy: OnWorkflowSuccess
   ttlStrategy:
     secondsAfterCompletion: 300
+  arguments:
+    parameters:
+      - name: operation
+        value: "index" # options: init, index, force-refresh
   templates:
-    - name: cubedash-gen-init
-      container:
+    - name: cubedash-operations
+      inputs:
+        parameters:
+          - name: operation
+      script:
         image: opendatacube/explorer:3.0.1
-        command: ["cubedash-gen"]
-        args: ["--init", "--all"]
+        command: [bash]
+        source: |
+          #!/bin/bash
+          case "{{inputs.parameters.operation}}" in
+            "init")
+              cubedash-gen --init --all
+              ;;
+            "index")
+              cubedash-gen --all
+              ;;
+            "force-refresh")
+              cubedash-gen --force-refresh --refresh-stats --all
+              ;;
+            *)
+              echo "Invalid operation: {{inputs.parameters.operation}}"
+              echo "Valid operations: init, index, force-refresh"
+              exit 1
+              ;;
+          esac
         env:
           - name: ODC_DEFAULT_DB_HOSTNAME
             value: "pg-proxy-service.database.svc.cluster.local"
