@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: daily-cubedash
+  namespace: argo-workflows
+spec:
+  schedule: "0 1 * * *"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 60
+  workflowSpec:
+    serviceAccountName: argo-workflows-executor
+    entrypoint: daily-cubedash-workflow
+    podGC:
+      strategy: OnWorkflowSuccess
+    ttlStrategy:
+      secondsAfterCompletion: 10
+      secondsAfterSuccess: 5
+      secondsAfterFailure: 600
+    parallelism: 1
+    templates:
+      - name: daily-cubedash-workflow
+        steps:
+          - - name: update-cubedash-index
+              templateRef:
+                name: cubedash-operations
+                template: cubedash-operations
+              arguments:
+                parameters:
+                  - name: operation
+                    value: "index"

@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: daily-sentinel-1rtc
+  namespace: argo-workflows
+spec:
+  schedule: "5 0 * * *"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 0
+  workflowSpec:
+    serviceAccountName: argo-workflows-executor
+    entrypoint: daily-sentinel-1rtc-workflow
+    podGC:
+      strategy: OnWorkflowCompletion
+    ttlStrategy:
+      secondsAfterCompletion: 10
+      secondsAfterSuccess: 5
+      secondsAfterFailure: 600
+    parallelism: 1
+    templates:
+      - name: daily-sentinel-1rtc-workflow
+        steps:
+          - - name: generate-daterange
+              template: gen-date
+
+          - - name: index-sentinel-1rtc
+              templateRef:
+                name: datacube-stac-indexer
+                template: stac-indexing
+              arguments:
+                parameters:
+                  - name: catalog
+                    value: "https://planetarycomputer.microsoft.com/api/stac/v1/"
+                  - name: collections
+                    value: "sentinel-1-rtc"
+                  - name: bbox
+                    value: "{{ item }}"
+                  - name: datetime
+                    value: "{{ steps.generate-daterange.outputs.result }}"
+                  - name: arguments
+                    value: "--rename-product=s1_rtc"
+              withItems:
+                - "95.0,-11.0,110.0,6.0" # Western Indonesia
+                - "110.0,-11.0,125.0,6.0" # Central Indonesia
+                - "125.0,-11.0,141.0,6.0" # Eastern Indonesia
+
+      - name: gen-date
+        script:
+          image: python:3.8
+          command: [python]
+          source: |
+            import datetime
+            import json
+            import os
+            import sys
+            from typing import Any, Dict
+
+            def main() -> None:
+                today = datetime.datetime.utcnow().date()
+                five_days_ago = today - datetime.timedelta(days=5)
+                daterange = f"{five_days_ago.strftime('%Y-%m-%d')}/{today.strftime('%Y-%m-%d')}"
+                print(daterange)
+
+            if __name__ == "__main__":
+                main()

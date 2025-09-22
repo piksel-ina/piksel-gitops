@@ -15,11 +15,11 @@ spec:
       - name: catalog
         value: "https://stac.staging.example.com"
       - name: arguments
-        value: "" # '--rename-product=ls8_c2l2_sr --options="query={\"platform\":{\"in\":[\"landsat-8\"]}}"'
+        value: "--rename-product=s2_l2a"
       - name: bbox
         value: "-180.0,-70,180.0,70"
       - name: datetime
-        value: "2025"
+        value: "2020-04-01/2020-09-30"
       - name: collections
         value: "example-collection"
   templates:
