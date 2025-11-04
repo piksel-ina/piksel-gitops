@@ -1,0 +1,101 @@
+# k8s/workflows/ows-init-workflow.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ows-init-
+  namespace: argo-workflows
+spec:
+  entrypoint: ows-initialization
+  serviceAccountName: argo-workflows-executor
+  podGC:
+    strategy: OnWorkflowSuccess
+
+  templates:
+    - name: ows-initialization
+      script:
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-v20251104-083129
+        resources:
+          requests:
+            memory: 500Mi
+            cpu: 500m
+          limits:
+            memory: 1Gi
+            cpu: 1000m
+        command: [bash]
+        source: |
+          set -e
+
+          echo "=== OWS Schema Initialization ==="
+
+          # Decode passwords if base64 encoded
+          decode_password() {
+            local password="$1"
+            if [[ "$password" =~ ^[A-Za-z0-9+/]*=*$ ]] && [[ "$password" == *"=" ]]; then
+              echo "$password" | base64 -d 2>/dev/null || echo "$password"
+            else
+              echo "$password"
+            fi
+          }
+
+          MASTER_PASS=$(decode_password "$MASTER_PASS")
+          ODC_PASS=$(decode_password "$ODC_PASS")
+
+          # Use MASTER user for schema creation
+          export ODC_DEFAULT_DB_HOSTNAME="db-endpoint.database.svc.cluster.local"
+          export ODC_DEFAULT_DB_PORT="5432"
+          export ODC_DEFAULT_DB_DATABASE="$POSTGRES_DB"
+          export ODC_DEFAULT_DB_USERNAME="$MASTER_USER"
+          export ODC_DEFAULT_DB_PASSWORD="$MASTER_PASS"
+
+          # Check datacube connection
+          echo "🔍 Checking datacube connection (as master user)..."
+          datacube system check
+
+          # Initialize OWS schema with write role for odc user
+          echo "🗄️  Initializing OWS schema and granting permissions to '$ODC_USER'..."
+          datacube-ows-update --write-role "$ODC_USER" --schema
+
+          # Verify with odc user
+          echo "✅ Verifying connection as '$ODC_USER'..."
+          PGPASSWORD="$ODC_PASS" psql \
+            -h db-endpoint.database.svc.cluster.local \
+            -p 5432 \
+            -U "$ODC_USER" \
+            -d "$POSTGRES_DB" \
+            -c "\dt wms.*"
+
+          echo ""
+          echo "🎉 OWS Initialization Complete!"
+          echo "✅ OWS schema created"
+          echo "✅ Write permissions granted to '$ODC_USER'"
+          echo "✅ Ready to update products"
+
+        env:
+          - name: POSTGRES_DB
+            value: "odc"
+          - name: MASTER_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: username
+          - name: MASTER_PASS
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: password
+          - name: ODC_USER
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_PASS
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: DATACUBE_OWS_CFG
+            value: "ows_config.ows_cfg.ows_cfg"
+          - name: PYTHONPATH
+            value: "/env/config"
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
