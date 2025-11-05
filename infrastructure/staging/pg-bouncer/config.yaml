@@ -6,17 +6,22 @@ metadata:
 data:
   pgbouncer.ini: |
     [databases]
-    * = host=db-endpoint.database.svc.cluster.local port=5432
 
     # JupyterHub needs session mode for notebook persistence
     jupyterhub = host=db-endpoint.database.svc.cluster.local port=5432 pool_mode=session pool_size=15
+
+    # ODC needs session mode for prepared statements and temp tables
+    odc = host=db-endpoint.database.svc.cluster.local port=5432 pool_mode=session pool_size=25
+
+    # General connection (uses transaction mode)
+    * = host=db-endpoint.database.svc.cluster.local port=5432
 
     [pgbouncer]
     listen_port = 6432
     listen_addr = *
     auth_type = plain
     auth_file = /etc/pgbouncer/userlist.txt
-    pool_mode = transaction
+
     # Optimized for db.t3.large (2 vCPU, 8GB RAM)
     pool_mode = transaction
     max_client_conn = 300
