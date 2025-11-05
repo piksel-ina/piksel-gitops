@@ -32,7 +32,6 @@ spec:
 
   values:
     controller:
-      # Improve performance by using more resources
       resources:
         requests:
           cpu: 250m
@@ -54,24 +53,28 @@ spec:
       config:
         annotations-risk-level: Critical
 
-      # Make sure nginx-ingress deployed to system instances, but also allow it to run on karpenter nodes
+      # Force nginx-ingress to run only on system nodes
+      nodeSelector:
+        karpenter.sh/controller: "true"
+
+      # Tolerate the system node taint
       tolerations:
         - key: "CriticalAddonsOnly"
           operator: "Equal"
           value: "true"
           effect: "NoSchedule"
-        - operator: "Exists"
-          effect: "NoSchedule"
 
-      # Forces pods deployed to different nodes
+      # Spread replicas across availability zones for HA
       affinity:
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: ingress-nginx
-                  app.kubernetes.io/component: controller
-              topologyKey: kubernetes.io/hostname
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: ingress-nginx
+                    app.kubernetes.io/component: controller
+                topologyKey: topology.kubernetes.io/zone
 
     admissionWebhooks:
       enabled: false
