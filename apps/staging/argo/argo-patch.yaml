@@ -6,6 +6,11 @@ spec:
   values:
     useStaticCredentials: false
     server:
+      serviceAccount:
+        create: true
+        name: "argo-workflows-server"
+        annotations:
+          eks.amazonaws.com/role-arn: "arn:aws:iam::326641642924:role/iam-role-for-argo-workflow-service-account"
       logging:
         level: debug
         globallevel: "9"

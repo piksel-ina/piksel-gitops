@@ -6,7 +6,7 @@ metadata:
   labels:
     app: explorer
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: explorer
@@ -70,10 +70,10 @@ spec:
 
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "250m"
-            limits:
               memory: "1Gi"
               cpu: "500m"
+            limits:
+              memory: "1.2Gi"
+              cpu: "1000m"
 
       restartPolicy: Always
