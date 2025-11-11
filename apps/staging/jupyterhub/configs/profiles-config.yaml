@@ -40,19 +40,29 @@ data:
         profiles_config = {
             "base": [
                 {
-                    "display_name": "Standard Instance",
-                    "description": "2 CPUs, 12GB RAM, 10GB storage",
+                    "display_name": "Geospatial Standard Instance",
+                    "description": "1.5 CPUs, 14GB RAM - For geospatial learning",
                     "slug": "standard",
                     "default": True,
                     "kubespawner_override": {
-                        "cpu_guarantee": 2,
-                        "cpu_limit": 2,
-                        "mem_guarantee": "12G",
-                        "mem_limit": "12G",
-                        "storage_capacity": "10Gi",
+                        "cpu_guarantee": 1.5,
+                        "cpu_limit": 1.5,
+                        "mem_guarantee": "14G",
+                        "mem_limit": "14G",
+                        "storage_capacity": "15Gi",
                         "node_selector": {
-                            "karpenter.sh/nodepool": "default",
-                            "karpenter.sh/capacity-type": "spot"
+                            "jupyter-profile": "standard"
+                        },
+                        "tolerations": [
+                            {
+                                "key": "jupyter-profile",
+                                "operator": "Equal",
+                                "value": "standard",
+                                "effect": "NoSchedule"
+                            }
+                        ],
+                        "extra_annotations": {
+                            "karpenter.sh/do-not-disrupt": "true"
                         }
                     }
                 }
