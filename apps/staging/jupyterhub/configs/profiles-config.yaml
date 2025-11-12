@@ -40,15 +40,15 @@ data:
         profiles_config = {
             "base": [
                 {
-                    "display_name": "Geospatial Standard Instance",
-                    "description": "1.5 CPUs, 14GB RAM - For geospatial learning",
+                    "display_name": "Standard Instance",
+                    "description": "2 vCPUs, 16GB RAM - Geospatial Learning",
                     "slug": "standard",
                     "default": True,
                     "kubespawner_override": {
-                        "cpu_guarantee": 1.5,
-                        "cpu_limit": 1.5,
-                        "mem_guarantee": "14G",
-                        "mem_limit": "14G",
+                        "cpu_guarantee": 1.7,
+                        "cpu_limit": 1.85,
+                        "mem_guarantee": "15G",
+                        "mem_limit": "15G",
                         "storage_capacity": "15Gi",
                         "node_selector": {
                             "jupyter-profile": "standard"
@@ -61,6 +61,9 @@ data:
                                 "effect": "NoSchedule"
                             }
                         ],
+                        "extra_labels": {
+                            "jupyter-profile": "standard"
+                        },
                         "extra_annotations": {
                             "karpenter.sh/do-not-disrupt": "true"
                         }
@@ -70,17 +73,30 @@ data:
             "moderate": [
                 {
                     "display_name": "Medium Instance",
-                    "description": "4 CPUs, 18GB RAM, 20GB storage",
+                    "description": "4 CPUs, 32GB RAM - Product Development",
                     "slug": "medium",
                     "kubespawner_override": {
-                        "cpu_guarantee": 4,
-                        "cpu_limit": 4,
-                        "mem_guarantee": "16G",
-                        "mem_limit": "16G",
+                        "cpu_guarantee": 3.6,
+                        "cpu_limit": 3.85,
+                        "mem_guarantee": "30G",
+                        "mem_limit": "31G",
                         "storage_capacity": "20Gi",
                         "node_selector": {
-                            "karpenter.sh/nodepool": "default",
-                            "karpenter.sh/capacity-type": "spot"
+                            "jupyter-profile": "moderate"
+                        },
+                        "tolerations": [
+                            {
+                                "key": "jupyter-profile",
+                                "operator": "Equal",
+                                "value": "moderate",
+                                "effect": "NoSchedule"
+                            }
+                        ],
+                        "extra_labels": {
+                            "jupyter-profile": "moderate"
+                        },
+                        "extra_annotations": {
+                            "karpenter.sh/do-not-disrupt": "true"
                         }
                     }
                 }
@@ -88,17 +104,30 @@ data:
             "power": [
                 {
                     "display_name": "Large Instance",
-                    "description": "8 CPUs, 32GB RAM, 20GB storage",
+                    "description": "8 CPUs, 64GB RAM - Advanced Projects",
                     "slug": "large",
                     "kubespawner_override": {
-                        "cpu_guarantee": 8,
-                        "cpu_limit": 8,
-                        "mem_guarantee": "32G",
-                        "mem_limit": "32G",
+                        "cpu_guarantee": 7.25,
+                        "cpu_limit": 7.85,
+                        "mem_guarantee": "62G",
+                        "mem_limit": "63G",
                         "storage_capacity": "20Gi",
                         "node_selector": {
-                            "karpenter.sh/nodepool": "default",
-                            "karpenter.sh/capacity-type": "on-demand"
+                            "jupyter-profile": "poweruser"
+                        },
+                        "tolerations": [
+                            {
+                                "key": "jupyter-profile",
+                                "operator": "Equal",
+                                "value": "poweruser",
+                                "effect": "NoSchedule"
+                            }
+                        ],
+                        "extra_labels": {
+                            "jupyter-profile": "poweruser"
+                        },
+                        "extra_annotations": {
+                            "karpenter.sh/do-not-disrupt": "true"
                         }
                     }
                 }
