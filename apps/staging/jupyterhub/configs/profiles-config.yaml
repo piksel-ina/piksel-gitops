@@ -45,10 +45,10 @@ data:
                     "slug": "standard",
                     "default": True,
                     "kubespawner_override": {
-                        "cpu_guarantee": 1.7,
-                        "cpu_limit": 1.85,
-                        "mem_guarantee": "15G",
-                        "mem_limit": "15G",
+                        "cpu_guarantee": 1.5,
+                        "cpu_limit": 2.0,
+                        "mem_guarantee": "12G",
+                        "mem_limit": "14G",
                         "storage_capacity": "15Gi",
                         "node_selector": {
                             "jupyter-profile": "standard"
@@ -61,10 +61,8 @@ data:
                                 "effect": "NoSchedule"
                             }
                         ],
-                        "extra_labels": {
-                            "jupyter-profile": "standard"
-                        },
                         "extra_annotations": {
+                            "jupyter-profile": "standard",
                             "karpenter.sh/do-not-disrupt": "true"
                         }
                     }
@@ -76,10 +74,10 @@ data:
                     "description": "4 CPUs, 32GB RAM - Product Development",
                     "slug": "medium",
                     "kubespawner_override": {
-                        "cpu_guarantee": 3.6,
-                        "cpu_limit": 3.85,
-                        "mem_guarantee": "30G",
-                        "mem_limit": "31G",
+                        "cpu_guarantee": 3,
+                        "cpu_limit": 4.0,
+                        "mem_guarantee": "26G",
+                        "mem_limit": "28G",
                         "storage_capacity": "20Gi",
                         "node_selector": {
                             "jupyter-profile": "moderate"
@@ -92,11 +90,9 @@ data:
                                 "effect": "NoSchedule"
                             }
                         ],
-                        "extra_labels": {
-                            "jupyter-profile": "moderate"
-                        },
                         "extra_annotations": {
-                            "karpenter.sh/do-not-disrupt": "true"
+                            "karpenter.sh/do-not-disrupt": "true",
+                            "jupyter-profile": "moderate"
                         }
                     }
                 }
@@ -107,10 +103,10 @@ data:
                     "description": "8 CPUs, 64GB RAM - Advanced Projects",
                     "slug": "large",
                     "kubespawner_override": {
-                        "cpu_guarantee": 7.25,
-                        "cpu_limit": 7.85,
-                        "mem_guarantee": "62G",
-                        "mem_limit": "63G",
+                        "cpu_guarantee": 7,
+                        "cpu_limit": 8.0,
+                        "mem_guarantee": "58G",
+                        "mem_limit": "60G",
                         "storage_capacity": "20Gi",
                         "node_selector": {
                             "jupyter-profile": "poweruser"
@@ -123,11 +119,9 @@ data:
                                 "effect": "NoSchedule"
                             }
                         ],
-                        "extra_labels": {
-                            "jupyter-profile": "poweruser"
-                        },
                         "extra_annotations": {
-                            "karpenter.sh/do-not-disrupt": "true"
+                            "karpenter.sh/do-not-disrupt": "true",
+                            "jupyter-profile": "poweruser"
                         }
                     }
                 }
