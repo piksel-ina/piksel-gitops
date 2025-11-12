@@ -14,7 +14,7 @@ data:
       <div class="container">
         {% block heading %}
           <div class="row text-center mb-4">
-            <h2>Welcome to Piksel Sandbox</h2>
+            <h2>Selamat Datang di Piksel Sandbox</h2>
           </div>
         {% endblock heading %}
 
@@ -27,37 +27,32 @@ data:
                   <i class="fa fa-rocket me-3"></i>Get Started
                 </h4>
                 <p class="card-text lead">
-                  Piksel Sandbox is a cloud-based Jupyter Notebook environment designed for learning and experimenting with our geospatial datasets.
+                  Piksel Sandbox adalah Jupyter Notebook berbasis komputasi-awan yang didesain untuk belajar dan bereksperimen dengan dataset dan library geospatial.
                 </p>
 
-                <h5 class="mt-4 mb-3">What you can find here:</h5>
+                <h5 class="mt-4 mb-3">Apa yang bisa Anda temukan di sini:</h5>
                 <ul class="list-group list-group-flush">
                   <li class="list-group-item">
                     <i class="fa fa-bar-chart  text-primary me-2"></i>
-                    <strong>Data Science Tools </strong>
+                    <strong>Geospasial Data-Science Toolkit</strong>
                     <p class="ms-4 mt-2 mb-2">
-                      This sandbox includes many essential tools for data science, such as geopandas and other libraries for geospatial data analysis.</p>
+                      Sandbox ini dilengkapi dengan berbagai tools penting untuk data science, seperti geopandas dan library lainnya untuk analisis data geospasial</p>
                   </li>
                   <li class="list-group-item">
                     <i class="fa fa-graduation-cap text-primary me-2"></i>
-                    <strong>Learning Examples</strong>
+                    <strong>Contoh untuk Belajar</strong>
                     <p class="ms-4 mt-2 mb-1">
-                      Explore various examples and understand how to work with geospatial data.
+                      Jelajahi berbagai contoh dan pelajari cara kerja dengan data geospasial.
                     <ul class="mb-2">
-                      <li class="mb-2">Begin with the basics, such as loading, analyzing, and plotting earth observation data using Datacube.</li>
-                      <li>Explore practical applications, like coastline mapping. </li>
+                      <li class="mb-2">Mulai dari hal dasar, seperti loading, analisis, dan plotting data observasi bumi menggunakan Datacube.</li>
+                      <li>Eksplorasi aplikasi praktis, seperti mapping garis pantai. </li>
                     </ul>
                   </li>
                   <li class="list-group-item">
                     <i class="fa fa-desktop text-primary me-2"></i>
-                    <strong>Guaranteed Resources</strong>
+                    <strong>Resource yang Dijamin</strong>
                     <p class="ms-4 mt-2 mb-1">
-                      Every user receives dedicated resources to support their work.
-                    <ul class="mb-2">
-                      <li class="mb-1">2 Cores of CPU</li>
-                      <li class="mb-1">12 GB of memory</li>
-                      <li class="mb-1">10 GB of storage</li>
-                    </ul>
+                      Setiap user mendapat resource khusus untuk mendukung pekerjaan mereka, mulai dari 2 vCPU dan 16GB RAM.
                   </li>
                 </ul>
               </div>
