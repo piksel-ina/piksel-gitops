@@ -113,17 +113,6 @@ spec:
             mountPath: /etc/singleuser
             readOnly: true
 
-      # Default user profile
-      profileList:
-        - display_name: "Standard Environment"
-          description: "Jupyter environment with 2 CPUs and 12GB RAM"
-          default: true # This makes it the default
-          kubespawner_override:
-            cpu_guarantee: 1
-            cpu_limit: 2
-            mem_guarantee: 12G
-            mem_limit: 12G
-
       # Extra environment variables for single user pods
       extraEnv:
         # // Jupyter Environments
