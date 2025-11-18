@@ -97,11 +97,31 @@ data:
                             "karpenter.sh/do-not-disrupt": "true",
                             "jupyter-profile": "medium"
                         },
+
+                        "uid": 1000,
+                        "gid": 100,
+                        "fs_gid": 100,
+                        
+                        "extra_pod_config": {
+                            "securityContext": {
+                                "runAsUser": 1000,
+                                "runAsGroup": 100,
+                                "fsGroup": 100
+                            }
+                        },
+                        "extra_container_config": {
+                            "securityContext": {
+                                "allowPrivilegeEscalation": True,
+                                "runAsUser": 1000,
+                                "runAsGroup": 100
+                            }
+                        },
                         "environment": {
                             "JUPYTER_ENABLE_LAB": "yes",
                             "JUPYTER_ALLOW_INSECURE_WRITES": "1",
                             "GRANT_SUDO": "yes",
-                            "SUDO_USER": "jovyan"
+                            "SUDO_USER": "jovyan",
+                            "CHOWN_HOME": "yes"
                         }
                     }
                 }
