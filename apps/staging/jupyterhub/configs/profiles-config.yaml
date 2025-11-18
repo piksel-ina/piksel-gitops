@@ -81,6 +81,7 @@ data:
                         "mem_limit": "30G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-0b96904",
                         "storage_capacity": "60Gi",
+                        "pvc_name_template": "claim-{username}-dev",
                         "node_selector": {
                             "jupyter-profile": "medium"
                         },
@@ -111,6 +112,7 @@ data:
                         "mem_limit": "62G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-0b96904",
                         "storage_capacity": "60Gi",
+                        "pvc_name_template": "claim-{username}-dev",
                         "node_selector": {
                             "jupyter-profile": "large"
                         },
