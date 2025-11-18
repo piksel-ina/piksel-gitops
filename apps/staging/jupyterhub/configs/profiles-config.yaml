@@ -96,6 +96,12 @@ data:
                         "extra_annotations": {
                             "karpenter.sh/do-not-disrupt": "true",
                             "jupyter-profile": "medium"
+                        },
+                        "environment": {
+                            "JUPYTER_ENABLE_LAB": "yes",
+                            "JUPYTER_ALLOW_INSECURE_WRITES": "1",
+                            "GRANT_SUDO": "yes",
+                            "SUDO_USER": "jovyan"
                         }
                     }
                 }
@@ -127,6 +133,12 @@ data:
                         "extra_annotations": {
                             "karpenter.sh/do-not-disrupt": "true",
                             "jupyter-profile": "large"
+                        },
+                        "environment": {
+                            "JUPYTER_ENABLE_LAB": "yes",
+                            "JUPYTER_ALLOW_INSECURE_WRITES": "1",
+                            "GRANT_SUDO": "yes",
+                            "SUDO_USER": "jovyan"
                         }
                     }
                 }
