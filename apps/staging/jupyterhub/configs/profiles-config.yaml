@@ -103,6 +103,7 @@ data:
                             "SUDO_USER": "jovyan",
                             "CHOWN_HOME": "yes"
                         },
+                        "allow_privilege_escalation": True,
                         "init_containers": [
                             {
                                 "name": "setup-permissions",
@@ -169,6 +170,7 @@ data:
                             "SUDO_USER": "jovyan",
                             "CHOWN_HOME": "yes"
                         },
+                        "allow_privilege_escalation": True,
                         "init_containers": [
                             {
                                 "name": "setup-permissions",
@@ -203,7 +205,7 @@ data:
             "gpu": [
                 {
                     "display_name": "GPU Instance",
-                    "description": "4 CPUs, 16GB RAM, 20GB storage, 1 NVIDIA GPU",
+                    "description": "4 CPUs, 16GB RAM, 20GB storage, 1 NVIDIA GPU | Can't be used temporaryly",
                     "slug": "gpu",
                     "kubespawner_override": {
                         "cpu_guarantee": 4,
