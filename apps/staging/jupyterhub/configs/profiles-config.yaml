@@ -125,7 +125,7 @@ data:
                                 },
                                 "volumeMounts": [
                                     {
-                                        "name": "volume-{username}",  # This matches the volumeNameTemplate
+                                        "name": "volume-{username}", 
                                         "mountPath": "/home/jovyan"
                                     }
                                 ]
@@ -144,7 +144,7 @@ data:
                         "cpu_limit": 8.0,
                         "mem_guarantee": "58G",
                         "mem_limit": "62G",
-                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20251118-081551",
+                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-b60f81d",
                         "storage_capacity": "60Gi",
                         "pvc_name_template": "claim-{username}-dev",
                         "node_selector": {
@@ -166,8 +166,37 @@ data:
                             "JUPYTER_ENABLE_LAB": "yes",
                             "JUPYTER_ALLOW_INSECURE_WRITES": "1",
                             "GRANT_SUDO": "yes",
-                            "SUDO_USER": "jovyan"
-                        }
+                            "SUDO_USER": "jovyan",
+                            "CHOWN_HOME": "yes"
+                        },
+                        "init_containers": [
+                            {
+                                "name": "setup-permissions",
+                                "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-b60f81d",
+                                "command": ["/bin/bash", "-c"],
+                                "args": [
+                                    """
+                                    set -e
+                                    mkdir -p /home/jovyan/.config /home/jovyan/.jupyter
+                                    cp -f /etc/skel/.bashrc /home/jovyan/.bashrc || true
+                                    cp -f /etc/skel/.config/starship.toml /home/jovyan/.config/starship.toml || true
+                                    chown -R 1000:100 /home/jovyan
+                                    echo "Permissions setup complete"
+                                    """
+                                ],
+                                "securityContext": {
+                                    "runAsUser": 0,
+                                    "runAsGroup": 0,
+                                    "allowPrivilegeEscalation": True
+                                },
+                                "volumeMounts": [
+                                    {
+                                        "name": "volume-{username}",
+                                        "mountPath": "/home/jovyan"
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 }
             ],
@@ -197,27 +226,12 @@ data:
                         ]
                     }
                 }
-            ],
-            "admin": [
-                {
-                    "display_name": "Breaks stuffs here! 🧪 ",
-                    "description": "2 CPUs, 12GB RAM - For testing new images",
-                    "slug": "testing",
-                    "kubespawner_override": {
-                        "cpu_guarantee": 2,
-                        "cpu_limit": 2,
-                        "mem_guarantee": "12G",
-                        "mem_limit": "12G",
-                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:jupyter-v20250808-132239",
-                        "default_url": "/lab/tree/notebooks/README.md"
-                    }
-                }
             ]
         }
 
         # Define group hierarchy and access levels
         group_access = {
-            "admin": ["base", "moderate", "power", "gpu", "admin"],
+            "admin": ["base", "moderate", "power", "gpu"],
             "gpu-users": ["base", "moderate", "power", "gpu"],
             "power-users": ["base", "moderate", "power"],
             "moderate-users": ["base", "moderate"],
@@ -248,7 +262,7 @@ data:
             
             # Build final profile list
             self.profile_list = []
-            for profile_type in ["base", "moderate", "power", "gpu", "admin"]:
+            for profile_type in ["base", "moderate", "power", "gpu"]:
                 if profile_type in accessible_profiles:
                     self.profile_list.extend(profiles_config[profile_type])
 
@@ -267,7 +281,6 @@ data:
             # Fallback to base profiles if there's an error
             self.profile_list = profiles_config["base"]
             return self._options_form_default()
-
 
     c.Spawner.debug = True
     c.JupyterHub.log_level = "DEBUG"
