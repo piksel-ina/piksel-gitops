@@ -26,21 +26,6 @@ data:
 
     # --- Step 2 - Quickfix to common environment issues -- 
 
-    # --- LD Preload
-    log "Fixing LD_PRELOAD configuration"
-    if [ -n "$LD_PRELOAD" ]; then
-      export LD_PRELOAD_BACKUP="$LD_PRELOAD"
-      unset LD_PRELOAD
-      log "Temporarily unset LD_PRELOAD"
-    fi
-
-    # Restore LD_PRELOAD if it was set
-    if [ -n "$LD_PRELOAD_BACKUP" ]; then
-      export LD_PRELOAD="$LD_PRELOAD_BACKUP"
-      unset LD_PRELOAD_BACKUP
-      log "Restored LD_PRELOAD"
-    fi
-
     # --- SSH Key
     if [ -f ~/.ssh/id_ed25519 ]; then
       log "Fixing SSH key permissions"
@@ -56,11 +41,6 @@ data:
     fi
 
     # --- GPG agent
-    log "Configuring GPG_TTY"
-    if ! grep -q "export GPG_TTY=\$(tty)" ~/.bashrc 2>/dev/null; then
-      echo 'export GPG_TTY=$(tty)' >> ~/.bashrc 2>/dev/null && log "Added GPG_TTY export to .bashrc" || log "Warning: Failed to add GPG_TTY to .bashrc"
-    fi
-
     export GPG_TTY=$(tty) 2>/dev/null || log "Warning: Failed to set GPG_TTY"
 
     # --- Step 3 - Sync Notebooks ---
@@ -114,6 +94,9 @@ data:
     # Remove empty lost+found directories
     rmdir ~/lost+found/ 2>/dev/null  || true
     rmdir ~/mambauser/ 2>/dev/null  || true
+
+    # Disable LD_PRELOAD to prevent library conflicts
+    unset LD_PRELOAD 2>/dev/null || true
 
     log "Clean up completed"
 
