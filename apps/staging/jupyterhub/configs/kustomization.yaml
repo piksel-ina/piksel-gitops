@@ -3,6 +3,6 @@ kind: Kustomization
 namespace: jupyterhub
 resources:
   - profiles-config.yaml
-  - singleuser.yaml
+  - post-start-scripts.yaml
   - templates.yaml
   - efs-mount.yaml
