@@ -44,12 +44,14 @@ spec:
         ingressClassName: nginx
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
-          external-dns.alpha.kubernetes.io/hostname: grafana.dev.pik-sel.id
+          external-dns.alpha.kubernetes.io/hostname: grafana.dev.pik-sel.id,grafana.staging.piksel.big.go.id
         hosts:
           - grafana.dev.pik-sel.id
+          - grafana.staging.piksel.big.go.id
         tls:
           - hosts:
               - grafana.dev.pik-sel.id
+              - grafana.staging.piksel.big.go.id
             secretName: grafana-ingress
       grafana.ini:
         log:

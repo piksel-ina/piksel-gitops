@@ -7,7 +7,7 @@ metadata:
     app: explorer
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
-    external-dns.alpha.kubernetes.io/hostname: explorer.staging.pik-sel.id
+    external-dns.alpha.kubernetes.io/hostname: explorer.staging.pik-sel.id,explorer.staging.piksel.big.go.id
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
@@ -15,9 +15,20 @@ spec:
   tls:
     - hosts:
         - explorer.staging.pik-sel.id
+        - explorer.staging.piksel.big.go.id
       secretName: explorer-ingress-tls
   rules:
     - host: explorer.staging.pik-sel.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: explorer-svc
+                port:
+                  number: 80
+    - host: explorer.staging.piksel.big.go.id
       http:
         paths:
           - path: /

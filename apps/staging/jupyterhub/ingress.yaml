@@ -10,7 +10,7 @@ spec:
       ingressClassName: nginx
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-production
-        external-dns.alpha.kubernetes.io/hostname: sandbox.staging.pik-sel.id
+        external-dns.alpha.kubernetes.io/hostname: sandbox.staging.pik-sel.id,sandbox.staging.piksel.big.go.id
         nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
         nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
         nginx.ingress.kubernetes.io/proxy-body-size: "0"
@@ -20,7 +20,9 @@ spec:
 
       hosts:
         - sandbox.staging.pik-sel.id
+        - sandbox.staging.piksel.big.go.id
       tls:
         - hosts:
             - sandbox.staging.pik-sel.id
+            - sandbox.staging.piksel.big.go.id
           secretName: jupyterhub-ingress

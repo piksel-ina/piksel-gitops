@@ -19,12 +19,14 @@ spec:
         ingressClassName: nginx
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
-          external-dns.alpha.kubernetes.io/hostname: argo.staging.pik-sel.id
+          external-dns.alpha.kubernetes.io/hostname: argo.staging.pik-sel.id,argo.staging.piksel.big.go.id
         hosts:
           - argo.staging.pik-sel.id
+          - argo.staging.piksel.big.go.id
         tls:
           - hosts:
               - argo.staging.pik-sel.id
+              - argo.staging.piksel.big.go.id
             secretName: argo-ingress
         level: debug
       authModes: [sso]
