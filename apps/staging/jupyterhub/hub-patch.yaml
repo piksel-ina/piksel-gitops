@@ -10,7 +10,7 @@ spec:
         url: postgresql://jupyterhub@pg-proxy-service.database.svc.cluster.local:6432/jupyterhub
       config:
         GenericOAuthenticator:
-          oauth_callback_url: "https://sandbox.staging.pik-sel.id/hub/oauth_callback"
+          oauth_callback_url: "https://sandbox.staging.piksel.big.go.id/hub/oauth_callback"
   valuesFrom:
     - kind: Secret
       name: jupyterhub
