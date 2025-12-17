@@ -26,7 +26,7 @@ spec:
         storageSpec:
           volumeClaimTemplate:
             spec:
-              storageClassName: gp2
+              storageClassName: gp3
               resources:
                 requests:
                   storage: 5Gi # Reduced storage for development
@@ -44,13 +44,11 @@ spec:
         ingressClassName: nginx
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
-          external-dns.alpha.kubernetes.io/hostname: grafana.dev.pik-sel.id,grafana.staging.piksel.big.go.id
+          external-dns.alpha.kubernetes.io/hostname: grafana.staging.piksel.big.go.id
         hosts:
-          - grafana.dev.pik-sel.id
           - grafana.staging.piksel.big.go.id
         tls:
           - hosts:
-              - grafana.dev.pik-sel.id
               - grafana.staging.piksel.big.go.id
             secretName: grafana-ingress
       grafana.ini:
