@@ -288,9 +288,9 @@ data:
     c.JupyterHub.log_level = "DEBUG"
     c.LocalProcessSpawner.debug = True
 
-    # Set cookies to less than 5 day (5 day is the Cognito default cookie expiry)
-    c.JupyterHub.cookie_max_age_days = 4.5
-    c.JupyterHub.tornado_settings["cookie_options"] = dict(expires_days=4.50)
+    # Cookie valid for 30 days (matches cognito refresh token)
+    c.JupyterHub.cookie_max_age_days = 30
+    c.JupyterHub.tornado_settings["cookie_options"] = dict(expires_days=30)
 
     # Override options_form
     c.KubeSpawner.options_form = custom_options_form
