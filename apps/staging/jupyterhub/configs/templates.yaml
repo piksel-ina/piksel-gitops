@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: jupyterhub-custom-templates
-  namespace: jupyterhub # Change to your namespace
+  namespace: jupyterhub
 data:
   spawn.html: |
     {% extends "page.html" %}
@@ -350,7 +350,7 @@ data:
         <div class="container-fluid">
           {% block logo %}
             <span id="jupyterhub-logo" class="navbar-brand">
-              <a href="https://pik-sel.id">
+              <a href="https://sandbox.staging.piksel.big.go.id">
                 <img src='https://raw.githubusercontent.com/piksel-ina/piksel-document/5024fb9c5383bda3835e17ab7545a5fb875d70c3/assets/logo/piksel-sandbox.svg'
                   alt='Piksel logo'
                   class='jpy-logo'
