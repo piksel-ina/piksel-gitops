@@ -15,7 +15,7 @@ spec:
       - name: collections
         value: "sentinel-2-l2a"
       - name: datetime
-        value: "2015-01-01/2025-12-14"
+        value: "2025-12-13/2026-1-6"
       - name: arguments
         value: "--rename-product=sentinel_2_l2a_c0"
       - name: time-chunks
