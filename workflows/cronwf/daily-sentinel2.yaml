@@ -18,7 +18,7 @@ spec:
       secondsAfterFailure: 600
     parallelism: 1
     templates:
-      - name: daily-sentinel2-workflow
+      - name: daily-sentinel-2-workflow
         steps:
           - - name: generate-daterange
               template: gen-date
@@ -32,7 +32,7 @@ spec:
                   - name: catalog
                     value: "https://earth-search.aws.element84.com/v1/"
                   - name: collections
-                    value: "sentinel-2-c1-l2a"
+                    value: "sentinel-2-l2a"
                   - name: bbox
                     value: "{{ item }}"
                   - name: datetime
