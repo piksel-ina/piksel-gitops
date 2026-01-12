@@ -41,14 +41,14 @@ data:
             "base": [
                 {
                     "display_name": "Standard Instance",
-                    "description": "2 vCPUs, 14GB RAM - Geospatial Learning",
+                    "description": "4 vCPUs, 14GB RAM - Geospatial Learning",
                     "slug": "standard",
                     "default": True,
                     "kubespawner_override": {
-                        "cpu_guarantee": 1.5,
-                        "cpu_limit": 2.0,
-                        "mem_guarantee": "14G",
-                        "mem_limit": "14G",
+                        "cpu_guarantee": 2.5,
+                        "cpu_limit": 3.0,
+                        "mem_guarantee": "13G",
+                        "mem_limit": "13G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:jupyter-v20250808-132239",
                         "storage_capacity": "15Gi",
                         "node_selector": {
