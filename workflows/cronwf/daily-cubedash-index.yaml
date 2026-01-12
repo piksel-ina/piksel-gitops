@@ -5,8 +5,15 @@ metadata:
   namespace: argo-workflows
 spec:
   schedule: "0 1 * * *"
-  concurrencyPolicy: "Replace"
+  concurrencyPolicy: "Forbid"
   startingDeadlineSeconds: 60
+  podGC:
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: daily-cubedash
   workflowSpec:
     serviceAccountName: argo-workflows-executor
     entrypoint: daily-cubedash-workflow

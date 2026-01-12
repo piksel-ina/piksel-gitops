@@ -11,7 +11,12 @@ spec:
     serviceAccountName: argo-workflows-executor
     entrypoint: daily-sentinel-1rtc-workflow
     podGC:
-      strategy: OnWorkflowCompletion
+      strategy: OnPodCompletion
+    podMetadata:
+      annotations:
+        karpenter.sh/do-not-disrupt: "true"
+      labels:
+        app: daily-sentinel-1rtc
     ttlStrategy:
       secondsAfterCompletion: 10
       secondsAfterSuccess: 5

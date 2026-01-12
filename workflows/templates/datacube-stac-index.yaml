@@ -6,10 +6,15 @@ metadata:
 spec:
   serviceAccountName: argo-workflows-executor
   entrypoint: stac-indexing
-  podGC:
-    strategy: OnWorkflowCompletion
   ttlStrategy:
     secondsAfterCompletion: 300
+  podGC:
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: datacube-stac-indexer
   arguments:
     parameters:
       - name: catalog

@@ -7,7 +7,12 @@ spec:
   serviceAccountName: argo-workflows-executor
   entrypoint: product-sync
   podGC:
-    strategy: OnWorkflowSuccess
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: datacube-product-sync
   ttlStrategy:
     secondsAfterCompletion: 300
   templates:

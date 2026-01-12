@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argo-workflows
+
+resources:
+  - daily-cubedash-index.yaml
+  - daily-landsat-sr.yaml
+  - daily-landsat-st.yaml
+  - daily-sentinel1-rtc.yaml
+  - daily-sentinel2.yaml

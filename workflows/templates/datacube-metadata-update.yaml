@@ -7,7 +7,12 @@ spec:
   serviceAccountName: argo-workflows-executor
   entrypoint: metadata-update
   podGC:
-    strategy: OnWorkflowSuccess
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: metadata-update
   ttlStrategy:
     secondsAfterCompletion: 300
   templates:

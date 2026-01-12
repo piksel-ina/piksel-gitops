@@ -11,7 +11,12 @@ spec:
     serviceAccountName: argo-workflows-executor
     entrypoint: daily-landsat-sr-workflow
     podGC:
-      strategy: OnWorkflowCompletion
+      strategy: OnPodCompletion
+    podMetadata:
+      annotations:
+        karpenter.sh/do-not-disrupt: "true"
+      labels:
+        app: daily-landsat-sr
     ttlStrategy:
       secondsAfterCompletion: 10
       secondsAfterSuccess: 5

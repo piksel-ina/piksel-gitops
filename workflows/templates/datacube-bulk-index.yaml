@@ -9,6 +9,11 @@ spec:
   parallelism: 10
   podGC:
     strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: datacube-bulk-indexer
   ttlStrategy:
     secondsAfterCompletion: 300
   podMetadata:
