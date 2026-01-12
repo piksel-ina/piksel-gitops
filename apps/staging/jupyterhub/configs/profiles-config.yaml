@@ -69,11 +69,41 @@ data:
                     }
                 }
             ],
+            "medium": [
+                {
+                    "display_name": "Medium Instance",
+                    "description": "4 vCPUs, 30GB RAM - Quick Data Production",
+                    "slug": "medium",
+                    "kubespawner_override": {
+                        "cpu_guarantee": 2.5,
+                        "cpu_limit": 3.5,
+                        "mem_guarantee": "26G",
+                        "mem_limit": "27G",
+                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:jupyter-v20250808-132239",
+                        "storage_capacity": "15Gi",
+                        "node_selector": {
+                            "jupyter-profile": "medium"
+                        },
+                        "tolerations": [
+                            {
+                                "key": "jupyter-profile",
+                                "operator": "Equal",
+                                "value": "medium",
+                                "effect": "NoSchedule"
+                            }
+                        ],
+                        "extra_annotations": {
+                            "jupyter-profile": "medium",
+                            "karpenter.sh/do-not-disrupt": "true"
+                        }
+                    }
+                }
+            ],
             "moderate": [
                 {
-                    "display_name": "For Developer - Medium Instance",
-                    "description": "4 CPUs, 30GB RAM | More permissions but fewer built-in libraries. Build your own environment as needed.",
-                    "slug": "medium",
+                    "display_name": "Medium Instance (Developer)",
+                    "description": "4 CPUs, 30GB RAM | Minimal base + sudo; Build your own environment",
+                    "slug": "dev-medium",
                     "kubespawner_override": {
                         "cpu_guarantee": 2.5,
                         "cpu_limit": 3.5,
@@ -137,9 +167,9 @@ data:
             ],
             "power": [
                 {
-                    "display_name": "For Developer - Large Instance",
-                    "description": "8 CPUs, 62GB RAM | More permissions but fewer built-in libraries. Build your own environment as needed.",
-                    "slug": "large",
+                    "display_name": "Large Instance (Developer)",
+                    "description": "8 CPUs, 62GB RAM | Minimal base + sudo; Build your own environment",
+                    "slug": "dev-large",
                     "kubespawner_override": {
                         "cpu_guarantee": 6.5,
                         "cpu_limit": 7.5,
@@ -205,7 +235,7 @@ data:
             "gpu": [
                 {
                     "display_name": "GPU Instance",
-                    "description": "4 CPUs, 16GB RAM, 20GB storage, 1 NVIDIA GPU | Can't be used temporaryly",
+                    "description": "4 CPUs, 16GB RAM, 20GB storage, 1 NVIDIA GPU | Can't be used temporarily",
                     "slug": "gpu",
                     "kubespawner_override": {
                         "cpu_guarantee": 4,
@@ -233,10 +263,10 @@ data:
 
         # Define group hierarchy and access levels
         group_access = {
-            "admin": ["base", "moderate", "power", "gpu"],
-            "gpu-users": ["base", "moderate", "power", "gpu"],
-            "power-users": ["base", "moderate", "power"],
-            "moderate-users": ["base", "moderate"],
+            "admin": ["base", "medium", "moderate", "power", "gpu"],
+            "gpu-users": ["base", "medium", "moderate", "power", "gpu"],
+            "power-users": ["base", "medium", "moderate", "power"],
+            "moderate-users": ["base", "medium", "moderate"],
             "regular-users": ["base"]
         }       
 
@@ -264,7 +294,7 @@ data:
             
             # Build final profile list
             self.profile_list = []
-            for profile_type in ["base", "moderate", "power", "gpu"]:
+            for profile_type in ["base", "medium", "moderate", "power", "gpu"]:
                 if profile_type in accessible_profiles:
                     self.profile_list.extend(profiles_config[profile_type])
 
