@@ -4,3 +4,4 @@ resources:
   - repository.yaml
   - release-efs-csi.yaml
   - efs-storage-class.yaml
+  - efs-argo.yaml
