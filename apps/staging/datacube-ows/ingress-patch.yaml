@@ -5,6 +5,15 @@ metadata:
   namespace: open-datacube
   annotations:
     external-dns.alpha.kubernetes.io/hostname: ows-uncached.staging.piksel.big.go.id
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($http_x_public_host != "") {
+        set $target_host $http_x_public_host;
+      }
+      if ($http_x_public_host = "") {
+        set $target_host $host;
+      }
+      proxy_set_header Host $target_host;
+      proxy_set_header X-Forwarded-Host $target_host;
 spec:
   rules:
     - host: ows-uncached.staging.piksel.big.go.id

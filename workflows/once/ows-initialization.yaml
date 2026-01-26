@@ -7,6 +7,8 @@ metadata:
 spec:
   entrypoint: ows-initialization
   serviceAccountName: argo-workflows-executor
+  ttlStrategy:
+    secondsAfterCompletion: 86400
   podGC:
     strategy: OnWorkflowSuccess
 
@@ -16,11 +18,12 @@ spec:
         image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-v20260126
         resources:
           requests:
-            memory: 500Mi
-            cpu: 500m
+            memory: 14Gi
+            cpu: 4000m
           limits:
-            memory: 1Gi
-            cpu: 1000m
+            memory: 20Gi
+            cpu: 6000m
+
         command: [bash]
         source: |
           set -e
@@ -48,27 +51,20 @@ spec:
           export ODC_DEFAULT_DB_PASSWORD="$MASTER_PASS"
 
           # Check datacube connection
-          echo "🔍 Checking datacube connection (as master user)..."
+          echo "Checking datacube connection (as master user)..."
           datacube system check
 
           # Initialize OWS schema with write role for odc user
-          echo "🗄️  Initializing OWS schema and granting permissions to '$ODC_USER'..."
-          datacube-ows-update --write-role "$ODC_USER" --schema
+          echo "Initializing OWS schema and granting write permissions to '$ODC_USER'..."
+          datacube-ows-update --schema --write-role "$ODC_USER"
 
-          # Verify with odc user
-          echo "✅ Verifying connection as '$ODC_USER'..."
-          PGPASSWORD="$ODC_PASS" psql \
-            -h db-endpoint.database.svc.cluster.local \
-            -p 5432 \
-            -U "$ODC_USER" \
-            -d "$POSTGRES_DB" \
-            -c "\dt wms.*"
+          echo "Granting READ permissions to '$ODC_READ_USER' (for OWS service)..."
+          datacube-ows-update --schema --write-role "$ODC_USER" --read-role "$ODC_READ_USER"
+
+          datacube-ows-update s2_l2a
 
           echo ""
-          echo "🎉 OWS Initialization Complete!"
-          echo "✅ OWS schema created"
-          echo "✅ Write permissions granted to '$ODC_USER'"
-          echo "✅ Ready to update products"
+          echo "OWS Initialization Complete!"
 
         env:
           - name: POSTGRES_DB
@@ -88,14 +84,10 @@ spec:
               secretKeyRef:
                 name: odc
                 key: username
-          - name: ODC_PASS
+          - name: ODC_READ_USER
             valueFrom:
               secretKeyRef:
-                name: odc
-                key: password
-          - name: DATACUBE_OWS_CFG
-            value: "ows_config.ows_cfg.ows_cfg"
-          - name: PYTHONPATH
-            value: "/env/config"
+                name: odcread
+                key: username
           - name: ODC_DEFAULT_INDEX_DRIVER
             value: "postgis"
