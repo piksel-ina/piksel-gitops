@@ -17,6 +17,7 @@ spec:
         app: datacube-ows
         component: web-service
     spec:
+      serviceAccountName: odc-data-reader
       containers:
         - name: datacube-ows
           image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-latest
