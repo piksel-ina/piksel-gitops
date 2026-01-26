@@ -109,7 +109,7 @@ data:
                         "cpu_limit": 3.5,
                         "mem_guarantee": "26G",
                         "mem_limit": "27G",
-                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20251124",
+                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
                         "storage_capacity": "60Gi",
                         "node_selector": {
                             "jupyter-profile": "medium"
@@ -137,7 +137,7 @@ data:
                         "init_containers": [
                             {
                                 "name": "setup-permissions",
-                                "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20251124",
+                                "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
                                 "command": ["/bin/bash", "-c"],
                                 "args": [
                                     """
@@ -175,7 +175,7 @@ data:
                         "cpu_limit": 7.5,
                         "mem_guarantee": "57G",
                         "mem_limit": "61G",
-                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20251124",
+                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
                         "storage_capacity": "60Gi",
                         "pvc_name_template": "claim-{username}-dev",
                         "node_selector": {
@@ -204,7 +204,7 @@ data:
                         "init_containers": [
                             {
                                 "name": "setup-permissions",
-                                "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20251124",
+                                "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
                                 "command": ["/bin/bash", "-c"],
                                 "args": [
                                     """
