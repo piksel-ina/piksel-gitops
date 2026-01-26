@@ -4,26 +4,11 @@ kind: Kustomization
 namespace: open-datacube
 
 resources:
-  - ../../base/datacube-ows
-
-configMapGenerator:
-  - name: ows-config
-    files:
-      - ows_config/
-    options:
-      disableNameSuffixHash: true # Important: keeps configmap name consistent
+- ../../base/datacube-ows
 
 images:
-  - name: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core
-    newTag: ows-v20251029-072223
+- name: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core
+  newTag: ows-v20260126
 
 patches:
-  - path: patches/deployment-patch.yaml
-  - path: patches/hpa-patch.yaml
-
-commonLabels:
-  environment: staging
-
-commonAnnotations:
-  deployed-by: "kustomize"
-  config-version: "v1.0"
+- path: ingress-patch.yaml

@@ -17,8 +17,6 @@ spec:
         app: datacube-ows
         component: web-service
     spec:
-      serviceAccountName: data-reader
-
       containers:
         - name: datacube-ows
           image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-latest
@@ -30,8 +28,16 @@ spec:
             - "0.0.0.0:8000"
             - "-w"
             - "4"
+            - "--threads"
+            - "12"
+            - "--worker-class"
+            - "gthread"
             - "--keep-alive"
             - "50"
+            - "--max-requests"
+            - "2000"
+            - "--max-requests-jitter"
+            - "200"
             - "--timeout"
             - "120"
             - "--log-level"
@@ -86,7 +92,7 @@ spec:
             - name: VSI_CACHE
               value: "TRUE"
             - name: VSI_CACHE_SIZE
-              value: "536870912" # 512MB
+              value: "536870912"
             - name: GDAL_HTTP_MERGE_CONSECUTIVE_RANGES
               value: "YES"
             - name: GDAL_DISABLE_READDIR_ON_OPEN
@@ -96,16 +102,11 @@ spec:
 
           resources:
             requests:
-              cpu: "1000m"
-              memory: "1Gi"
+              cpu: "1500m"
+              memory: "3Gi"
             limits:
-              cpu: "2000m"
-              memory: "2Gi"
-
-          volumeMounts:
-            - name: ows-config
-              mountPath: /env/config/ows_config
-              readOnly: true
+              cpu: "2500m"
+              memory: "4Gi"
 
           livenessProbe:
             httpGet:

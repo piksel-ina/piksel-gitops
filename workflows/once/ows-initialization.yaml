@@ -13,7 +13,7 @@ spec:
   templates:
     - name: ows-initialization
       script:
-        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-v20251104-083129
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-v20260126
         resources:
           requests:
             memory: 500Mi

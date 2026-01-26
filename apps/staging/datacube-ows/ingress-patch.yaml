@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: datacube-ows
+  namespace: open-datacube
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: ows-uncached.staging.piksel.big.go.id
+spec:
+  rules:
+    - host: ows-uncached.staging.piksel.big.go.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: datacube-ows-svc
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - ows-uncached.staging.piksel.big.go.id
+      secretName: ows-ingress-tls-staging

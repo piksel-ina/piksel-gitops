@@ -9,9 +9,8 @@ spec:
     kind: Deployment
     name: datacube-ows
   minReplicas: 2
-  maxReplicas: 20
+  maxReplicas: 12
   metrics:
-    # CPU-based scaling
     - type: Resource
       resource:
         name: cpu
@@ -19,7 +18,6 @@ spec:
           type: Utilization
           averageUtilization: 70
 
-    # Memory-based scaling
     - type: Resource
       resource:
         name: memory
@@ -29,23 +27,23 @@ spec:
 
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 300 # Wait 5 min before scaling down
+      stabilizationWindowSeconds: 300
       policies:
         - type: Percent
-          value: 25 # Scale down max 25% of pods at a time
+          value: 25
           periodSeconds: 60
         - type: Pods
-          value: 2 # Or max 2 pods at a time
+          value: 1
           periodSeconds: 60
-      selectPolicy: Min # Use the most conservative policy
+      selectPolicy: Min
 
     scaleUp:
-      stabilizationWindowSeconds: 30 # Quick scale up
+      stabilizationWindowSeconds: 60
       policies:
         - type: Percent
-          value: 100 # Can double pods quickly
+          value: 100
           periodSeconds: 30
         - type: Pods
-          value: 4 # Or add 4 pods at a time
+          value: 2
           periodSeconds: 30
-      selectPolicy: Max # Use the most aggressive policy
+      selectPolicy: Max
