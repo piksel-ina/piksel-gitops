@@ -3,8 +3,4 @@ kind: Kustomization
 namespace: argo-workflows
 
 resources:
-  - daily-cubedash-index.yaml
-  - daily-landsat-sr.yaml
-  - daily-landsat-st.yaml
-  - daily-sentinel1-rtc.yaml
-  - daily-sentinel2.yaml
+  - daily-indexing.yaml

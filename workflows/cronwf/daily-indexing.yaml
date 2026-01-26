@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: daily-satellite-all
+  namespace: argo-workflows
+spec:
+  schedule: "5 17 * * *"
+  concurrencyPolicy: "Forbid"
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  workflowSpec:
+    workflowTemplateRef:
+      name: daily-satellite-orchestrator
+    arguments:
+      parameters:
+        - name: days-back
+          value: "5"

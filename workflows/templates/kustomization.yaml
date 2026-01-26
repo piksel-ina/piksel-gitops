@@ -9,3 +9,4 @@ resources:
   - datacube-bulk-index.yaml
   - datacube-metadata-update.yaml
   - cubedash.yaml
+  - daily-indexing-template.yaml

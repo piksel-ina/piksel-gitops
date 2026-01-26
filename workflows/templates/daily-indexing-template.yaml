@@ -1,0 +1,211 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: daily-satellite-orchestrator
+  namespace: argo-workflows
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: run-all
+  podGC:
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+  ttlStrategy:
+    secondsAfterCompletion: 10
+    secondsAfterSuccess: 5
+    secondsAfterFailure: 600
+
+  templates:
+    - name: run-all
+      inputs:
+        parameters:
+          - name: days-back
+            value: "5"
+      steps:
+        - - name: sentinel-1rtc
+            continueOn:
+              failed: true
+              error: true
+            template: daily-indexing
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "https://planetarycomputer.microsoft.com/api/stac/v1/"
+                - name: collections
+                  value: "sentinel-1-rtc"
+                - name: product-name
+                  value: "s1_rtc"
+                - name: extra-args
+                  value: ""
+                - name: days-back
+                  value: "{{inputs.parameters.days-back}}"
+
+        - - name: sentinel-2
+            continueOn:
+              failed: true
+              error: true
+            template: daily-indexing
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "https://earth-search.aws.element84.com/v1/"
+                - name: collections
+                  value: "sentinel-2-l2a"
+                - name: product-name
+                  value: "s2_l2a"
+                - name: extra-args
+                  value: ""
+                - name: days-back
+                  value: "{{inputs.parameters.days-back}}"
+
+        - - name: landsat-9-sr
+            continueOn:
+              failed: true
+              error: true
+            template: daily-indexing
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "https://landsatlook.usgs.gov/stac-server/"
+                - name: collections
+                  value: "landsat-c2l2-sr"
+                - name: product-name
+                  value: "ls9_c2l2_sr"
+                - name: extra-args
+                  value: >-
+                    --options="query={\"platform\":{\"in\":[\"LANDSAT_9\"]}}"
+                    --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"
+                - name: days-back
+                  value: "{{inputs.parameters.days-back}}"
+
+        - - name: landsat-8-sr
+            continueOn:
+              failed: true
+              error: true
+            template: daily-indexing
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "https://landsatlook.usgs.gov/stac-server/"
+                - name: collections
+                  value: "landsat-c2l2-sr"
+                - name: product-name
+                  value: "ls8_c2l2_sr"
+                - name: extra-args
+                  value: >-
+                    --options="query={\"platform\":{\"in\":[\"LANDSAT_8\"]}}"
+                    --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"
+                - name: days-back
+                  value: "{{inputs.parameters.days-back}}"
+
+        - - name: landsat-9-st
+            continueOn:
+              failed: true
+              error: true
+            template: daily-indexing
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "https://landsatlook.usgs.gov/stac-server/"
+                - name: collections
+                  value: "landsat-c2l2-st"
+                - name: product-name
+                  value: "ls9_c2l2_st"
+                - name: extra-args
+                  value: >-
+                    --options="query={\"platform\":{\"in\":[\"LANDSAT_9\"]}}"
+                    --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"
+                - name: days-back
+                  value: "{{inputs.parameters.days-back}}"
+
+        - - name: landsat-8-st
+            continueOn:
+              failed: true
+              error: true
+            template: daily-indexing
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "https://landsatlook.usgs.gov/stac-server/"
+                - name: collections
+                  value: "landsat-c2l2-st"
+                - name: product-name
+                  value: "ls8_c2l2_st"
+                - name: extra-args
+                  value: >-
+                    --options="query={\"platform\":{\"in\":[\"LANDSAT_8\"]}}"
+                    --url-string-replace="https://landsatlook.usgs.gov/data,s3://usgs-landsat"
+                - name: days-back
+                  value: "{{inputs.parameters.days-back}}"
+
+        - - name: cubedash
+            continueOn:
+              failed: true
+              error: true
+            templateRef:
+              name: cubedash-operations
+              template: cubedash-operations
+            arguments:
+              parameters:
+                - name: operation
+                  value: "index"
+
+    - name: daily-indexing
+      inputs:
+        parameters:
+          - name: catalog
+          - name: collections
+          - name: product-name
+          - name: extra-args
+            value: ""
+          - name: days-back
+            value: "5"
+      steps:
+        - - name: generate-daterange
+            template: gen-date
+            arguments:
+              parameters:
+                - name: days-back
+                  value: "{{inputs.parameters.days-back}}"
+
+        - - name: index-bbox
+            templateRef:
+              name: datacube-stac-indexer
+              template: stac-indexing
+            arguments:
+              parameters:
+                - name: catalog
+                  value: "{{inputs.parameters.catalog}}"
+                - name: collections
+                  value: "{{inputs.parameters.collections}}"
+                - name: bbox
+                  value: "{{item}}"
+                - name: datetime
+                  value: "{{steps.generate-daterange.outputs.result}}"
+                - name: arguments
+                  value: "--rename-product={{inputs.parameters.product-name}} {{inputs.parameters.extra-args}}"
+            withItems:
+              - "95.0,-11.0,110.0,6.0" # Western Indonesia
+              - "110.0,-11.0,125.0,6.0" # Central Indonesia
+              - "125.0,-11.0,141.0,6.0" # Eastern Indonesia
+
+    - name: gen-date
+      inputs:
+        parameters:
+          - name: days-back
+      script:
+        image: python:3.8
+        command: [python]
+        source: |
+          import datetime
+
+          def main() -> None:
+              days_back = int("{{ inputs.parameters.days-back }}")
+              today = datetime.datetime.utcnow().date()
+              past_date = today - datetime.timedelta(days=days_back)
+              daterange = f"{past_date.strftime('%Y-%m-%d')}/{today.strftime('%Y-%m-%d')}"
+              print(daterange)
+
+          if __name__ == "__main__":
+              main()

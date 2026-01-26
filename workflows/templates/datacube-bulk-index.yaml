@@ -16,9 +16,6 @@ spec:
       app: datacube-bulk-indexer
   ttlStrategy:
     secondsAfterCompletion: 300
-  podMetadata:
-    annotations:
-      karpenter.sh/do-not-disrupt: "true"
     labels:
       app: datacube-bulk-indexer
   arguments:
