@@ -71,16 +71,6 @@ spec:
             - name: ODC_DEFAULT_INDEX_DRIVER
               value: "postgis"
 
-            # OWS configuration
-            - name: PYTHONPATH
-              value: "/env/config"
-            - name: DATACUBE_OWS_CFG
-              value: ows_config.ows.ows_cfg
-            - name: WMS_CONFIG_PATH
-              value: /env/config/ows_config/ows.py
-            - name: PROXY_FIX
-              value: "yes"
-
             # AWS configuration
             - name: AWS_NO_SIGN_REQUEST
               value: "no"
