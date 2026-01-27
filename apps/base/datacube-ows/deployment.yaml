@@ -18,6 +18,40 @@ spec:
         component: web-service
     spec:
       serviceAccountName: odc-data-reader
+
+      initContainers:
+        - name: git-clone-config
+          image: alpine/git:v2.52.0
+          command:
+            - sh
+            - -c
+            - |
+              echo "Cloning OWS configuration from piksel-core repository..."
+
+              git clone --depth 1 --branch ${GIT_BRANCH} \
+                https://github.com/piksel-ina/piksel-core.git /tmp/repo
+
+              cp -r /tmp/repo/docker/ows/ows_config /config/
+              chmod -R 755 /config/ows_config
+
+              echo "Configuration cloned successfully from branch: ${GIT_BRANCH}"
+              echo "Git commit: $(cd /tmp/repo && git rev-parse HEAD)"
+              echo "Contents:"
+              ls -la /config/ows_config
+
+              if [ -f /config/ows_config/ows_cfg.py ]; then
+                echo "✓ ows_cfg.py found"
+              else
+                echo "ERROR: ows_cfg.py not found!"
+                exit 1
+              fi
+          volumeMounts:
+            - name: ows-config
+              mountPath: /config
+          env:
+            - name: GIT_BRANCH
+              value: "main"
+
       containers:
         - name: datacube-ows
           image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-latest
@@ -29,20 +63,22 @@ spec:
             - "0.0.0.0:8000"
             - "-w"
             - "4"
-            - "--threads"
-            - "12"
-            - "--worker-class"
-            - "gthread"
+            - "-k"
+            - "gevent"
+            - "--worker-connections"
+            - "1000"
             - "--keep-alive"
-            - "50"
+            - "75"
             - "--max-requests"
-            - "2000"
+            - "10000"
             - "--max-requests-jitter"
-            - "200"
+            - "1000"
             - "--timeout"
-            - "120"
+            - "300"
             - "--log-level"
             - "info"
+            - "--worker-tmp-dir"
+            - "/dev/shm"
             - "datacube_ows.wsgi"
 
           ports:
@@ -70,6 +106,8 @@ spec:
               value: odc
             - name: ODC_DEFAULT_INDEX_DRIVER
               value: "postgis"
+            - name: DB_CONNECTION_TIMEOUT
+              value: "60"
 
             # AWS configuration
             - name: AWS_NO_SIGN_REQUEST
@@ -78,6 +116,12 @@ spec:
               value: "requester"
             - name: AWS_DEFAULT_REGION
               value: "ap-southeast-3"
+
+            # OWS Config
+            - name: PYTHONPATH
+              value: "/config"
+            - name: DATACUBE_OWS_CFG
+              value: "ows_config.ows_cfg.ows_cfg"
 
             # GDAL optimization
             - name: VSI_CACHE
@@ -90,6 +134,13 @@ spec:
               value: "EMPTY_DIR"
             - name: CPL_VSIL_CURL_ALLOWED_EXTENSIONS
               value: ".tif,.tiff,.ovr"
+
+          volumeMounts:
+            - name: ows-config
+              mountPath: /config
+              readOnly: true
+            - name: dshm
+              mountPath: /dev/shm
 
           resources:
             requests:
@@ -128,10 +179,12 @@ spec:
 
       volumes:
         - name: ows-config
-          configMap:
-            name: ows-config
+          emptyDir: {}
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
 
-      # Pod anti-affinity for better distribution
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
