@@ -12,13 +12,22 @@ metadata:
     nginx.ingress.kubernetes.io/preserve-host: "false"
 
     nginx.ingress.kubernetes.io/configuration-snippet: |
-      proxy_set_header Host $http_x_public_host;
-      proxy_set_header X-Forwarded-Host $http_x_public_host;
+      if ($request_uri = "/healthz") {
+        return 200 "ok\n";
+      }
+      if ($http_x_public_host != "") {
+        set $target_host $http_x_public_host;
+      }
+      if ($http_x_public_host = "") {
+        set $target_host $host;
+      }
+      proxy_set_header Host $target_host;
+      proxy_set_header X-Forwarded-Host $target_host;
+      proxy_set_header X-Forwarded-Proto $scheme;
 
-    # Performance optimizations
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
 
 spec:

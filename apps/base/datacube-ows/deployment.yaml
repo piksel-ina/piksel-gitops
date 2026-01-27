@@ -74,7 +74,7 @@ spec:
             - "--max-requests-jitter"
             - "1000"
             - "--timeout"
-            - "300"
+            - "60"
             - "--log-level"
             - "info"
             - "--worker-tmp-dir"
@@ -107,7 +107,7 @@ spec:
             - name: ODC_DEFAULT_INDEX_DRIVER
               value: "postgis"
             - name: DB_CONNECTION_TIMEOUT
-              value: "60"
+              value: "120"
 
             # AWS configuration
             - name: AWS_NO_SIGN_REQUEST
@@ -142,6 +142,14 @@ spec:
             - name: dshm
               mountPath: /dev/shm
 
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - sleep 15
+
           resources:
             requests:
               cpu: "1500m"
@@ -150,32 +158,46 @@ spec:
               cpu: "2500m"
               memory: "4Gi"
 
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
+        - name: healthz
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 8080
+              name: healthz
+          command:
+            - sh
+            - -c
+            - |
+              cat >/etc/nginx/conf.d/default.conf <<'EOF'
+              server {
+                listen 8080;
+                location = /healthz {
+                  return 200 "ok\n";
+                }
+              }
+              EOF
+              nginx -g 'daemon off;'
 
           readinessProbe:
             httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 30
+              path: /healthz
+              port: healthz
             periodSeconds: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 2
             failureThreshold: 3
-
-          startupProbe:
+          livenessProbe:
             httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 30
+              path: /healthz
+              port: healthz
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 200m
+              memory: 400Mi
 
       volumes:
         - name: ows-config
@@ -183,7 +205,7 @@ spec:
         - name: dshm
           emptyDir:
             medium: Memory
-            sizeLimit: 1Gi
+            sizeLimit: 2Gi
 
       affinity:
         podAntiAffinity:
