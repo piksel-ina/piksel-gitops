@@ -1,0 +1,102 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: datacube-s3-indexer
+  namespace: argo-workflows
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: s3-indexing
+  ttlStrategy:
+    secondsAfterCompletion: 300
+  podGC:
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: datacube-s3-indexer
+  arguments:
+    parameters:
+      - name: s3-uri
+        value: "s3://piksel-staging-public-data/gm_s2/0.0.1/**/*.stac-item.json"
+      - name: product-name
+        value: "gm_s2_annual"
+      - name: aws-region
+        value: "ap-southeast-3"
+      - name: no-sign-request
+        value: "true"
+      - name: rename-product
+        value: "geomad_s2_annual"
+  templates:
+    - name: s3-indexing
+      inputs:
+        parameters:
+          - name: s3-uri
+            value: "{{workflow.parameters.s3-uri}}"
+          - name: product-name
+            value: "{{workflow.parameters.product-name}}"
+          - name: aws-region
+            value: "{{workflow.parameters.aws-region}}"
+          - name: no-sign-request
+            value: "{{workflow.parameters.no-sign-request}}"
+          - name: rename-product
+            value: "{{workflow.parameters.rename-product}}"
+      container:
+        name: odc-container
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/odc:v20260206-1722
+        command:
+          - bash
+        args:
+          - "-c"
+          - |
+            CMD="s3-to-dc --stac"
+
+            if [ "{{inputs.parameters.no-sign-request}}" = "true" ]; then
+              CMD="$CMD --no-sign-request"
+            fi
+
+            # Add rename-product if provided
+            if [ -n "{{inputs.parameters.rename-product}}" ] && [ "{{inputs.parameters.rename-product}}" != "" ]; then
+              CMD="$CMD --rename-product={{inputs.parameters.rename-product}}"
+            fi
+
+            CMD="$CMD '{{inputs.parameters.s3-uri}}' '{{inputs.parameters.product-name}}'"
+
+            echo "$CMD"
+            eval $CMD
+
+            echo "Completed S3 STAC indexing"
+
+        env:
+          - name: AWS_DEFAULT_REGION
+            value: "{{inputs.parameters.aws-region}}"
+          - name: AWS_REGION
+            value: "{{inputs.parameters.aws-region}}"
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "8Gi"
+            cpu: "4"
