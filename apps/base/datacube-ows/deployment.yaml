@@ -54,7 +54,7 @@ spec:
 
       containers:
         - name: datacube-ows
-          image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-latest
+          image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/ows:12345
           imagePullPolicy: IfNotPresent
 
           command:
