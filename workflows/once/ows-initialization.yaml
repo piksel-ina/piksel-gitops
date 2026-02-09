@@ -15,14 +15,14 @@ spec:
   templates:
     - name: ows-initialization
       script:
-        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:ows-v20260126
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/ows:v20260210-0620
         resources:
           requests:
-            memory: 14Gi
-            cpu: 4000m
+            memory: 8Gi
+            cpu: 2000m
           limits:
-            memory: 20Gi
-            cpu: 6000m
+            memory: 12Gi
+            cpu: 4000m
 
         command: [bash]
         source: |
@@ -30,7 +30,6 @@ spec:
 
           echo "=== OWS Schema Initialization ==="
 
-          # Decode passwords if base64 encoded
           decode_password() {
             local password="$1"
             if [[ "$password" =~ ^[A-Za-z0-9+/]*=*$ ]] && [[ "$password" == *"=" ]]; then
@@ -41,30 +40,21 @@ spec:
           }
 
           MASTER_PASS=$(decode_password "$MASTER_PASS")
-          ODC_PASS=$(decode_password "$ODC_PASS")
 
-          # Use MASTER user for schema creation
+          # Database connection
           export ODC_DEFAULT_DB_HOSTNAME="db-endpoint.database.svc.cluster.local"
           export ODC_DEFAULT_DB_PORT="5432"
           export ODC_DEFAULT_DB_DATABASE="$POSTGRES_DB"
           export ODC_DEFAULT_DB_USERNAME="$MASTER_USER"
           export ODC_DEFAULT_DB_PASSWORD="$MASTER_PASS"
 
-          # Check datacube connection
-          echo "Checking datacube connection (as master user)..."
+          # Verify connection
           datacube system check
 
-          # Initialize OWS schema with write role for odc user
-          echo "Initializing OWS schema and granting write permissions to '$ODC_USER'..."
-          datacube-ows-update --schema --write-role "$ODC_USER"
-
-          echo "Granting READ permissions to '$ODC_READ_USER' (for OWS service)..."
+          # Create OWS schema and grant permissions
           datacube-ows-update --schema --write-role "$ODC_USER" --read-role "$ODC_READ_USER"
 
-          datacube-ows-update s2_l2a
-
-          echo ""
-          echo "OWS Initialization Complete!"
+          echo "OWS schema initialized successfully"
 
         env:
           - name: POSTGRES_DB
@@ -91,3 +81,7 @@ spec:
                 key: username
           - name: ODC_DEFAULT_INDEX_DRIVER
             value: "postgis"
+          - name: AWS_DEFAULT_REGION
+            value: "ap-southeast-3"
+          - name: AWS_REGION
+            value: "ap-southeast-3"
