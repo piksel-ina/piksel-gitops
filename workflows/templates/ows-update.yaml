@@ -1,0 +1,88 @@
+# k8s/workflows/ows-update-workflow-template.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ows-update
+  namespace: argo-workflows
+spec:
+  entrypoint: ows-update
+  serviceAccountName: argo-workflows-executor
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+  podGC:
+    strategy: OnWorkflowSuccess
+
+  arguments:
+    parameters:
+      - name: products
+        value: "geomad_s2_annual"
+      - name: ows-image
+        value: "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/ows:v20260210-0620"
+
+  templates:
+    - name: ows-update
+      inputs:
+        parameters:
+          - name: products
+          - name: ows-image
+
+      script:
+        image: "{{inputs.parameters.ows-image}}"
+        resources:
+          requests:
+            memory: 8Gi
+            cpu: 2000m
+          limits:
+            memory: 12Gi
+            cpu: 4000m
+
+        command: [bash]
+        source: |
+          set -e
+
+          echo "=== OWS Product Update ==="
+
+          datacube-ows-update --version
+          datacube system check
+
+          # Verify config files are present (baked into image)
+          echo "Checking OWS config files..."
+          ls -lah /env/config/ows_config/
+
+          echo "Updating ows ranges"
+          for product in "{{inputs.parameters.products}}"; do
+              if [ $product == "--all" ]; then
+                  echo "Updating all"
+                  datacube-ows-update
+              else
+                  echo "Updating $product"
+                  datacube-ows-update $product
+              fi
+          done
+
+          echo ""
+          echo "=== Product Update Complete! ==="
+
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            value: odc
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+          - name: AWS_DEFAULT_REGION
+            value: "ap-southeast-3"
+          - name: AWS_REGION
+            value: "ap-southeast-3"
