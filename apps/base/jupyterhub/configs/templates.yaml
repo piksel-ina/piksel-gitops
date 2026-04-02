@@ -864,49 +864,50 @@ data:
                       {{ spawner_options_form | safe }}
     
                     <!-- DO NOT REMOVE - Test profiles for visual testing -->
-                      <div id="kubespawner-profiles-list">
-                        <label class="profile">
-                          <div class="radio"><input type="radio" name="profile" value="standard" checked></div>
-                          <div>
-                            <h3>Geospatial Standard</h3>
-                            <p>Standard environment with geopandas, rasterio, and basic geospatial tools.</p>
-                          </div>
-                        </label>
-                        <label class="profile">
-                          <div class="radio"><input type="radio" name="profile" value="datacube"></div>
-                          <div>
-                            <h3>Open Data Cube</h3>
-                            <p>Includes Open Data Cube for satellite imagery analysis and time-series exploration.</p>
-                          </div>
-                        </label>
-                        <label class="profile">
-                          <div class="radio"><input type="radio" name="profile" value="deep-learning"></div>
-                          <div>
-                            <h3>Deep Learning GPU</h3>
-                            <p>TensorFlow &amp; PyTorch with GPU support for machine learning on geospatial data.</p>
-                          </div>
-                        </label>
-                        <label class="profile">
-                          <div class="radio"><input type="radio" name="profile" value="coastal"></div>
-                          <div>
-                            <h3>Coastal Mapping</h3>
-                            <p>Specialized tools for coastline analysis, shoreline detection, and coastal monitoring.</p>
-                          </div>
-                        </label>
-                        <label class="profile">
-                          <div class="radio"><input type="radio" name="profile" value="radar"></div>
-                          <div>
-                            <h3>SAR / Radar Analysis</h3>
-                            <p>Synthetic Aperture Radar processing with SNAP toolbox and Sentinel-1 data support.</p>
-                          </div>
-                        </label>
-                        <label class="profile">
-                          <div class="radio"><input type="radio" name="profile" value="minimal"></div>
-                          <div>
-                            <h3>Minimal Python</h3>
-                            <p>Lightweight environment with just Jupyter and Python essentials for quick experiments.</p>
-                          </div>
-                        </label>
+                      <!-- <div id="kubespawner-profiles-list"> -->
+                      <!--   <label class="profile"> -->
+                      <!--     <div class="radio"><input type="radio" name="profile" value="standard" checked></div> -->
+                      <!--     <div> -->
+                      <!--       <h3>Geospatial Standard</h3> -->
+                      <!--       <p>Standard environment with geopandas, rasterio, and basic geospatial tools.</p> -->
+                      <!--     </div> -->
+                      <!--   </label> -->
+                      <!--   <label class="profile"> -->
+                      <!--     <div class="radio"><input type="radio" name="profile" value="datacube"></div> -->
+                      <!--     <div> -->
+                      <!--       <h3>Open Data Cube</h3> -->
+                      <!--       <p>Includes Open Data Cube for satellite imagery analysis and time-series exploration.</p> -->
+                      <!--     </div> -->
+                      <!--   </label> -->
+                      <!--   <label class="profile"> -->
+                      <!--     <div class="radio"><input type="radio" name="profile" value="deep-learning"></div> -->
+                      <!--     <div> -->
+                      <!--       <h3>Deep Learning GPU</h3> -->
+                      <!--       <p>TensorFlow &amp; PyTorch with GPU support for machine learning on geospatial data.</p> -->
+                      <!--     </div> -->
+                      <!--   </label> -->
+                      <!--   <label class="profile"> -->
+                      <!--     <div class="radio"><input type="radio" name="profile" value="coastal"></div> -->
+                      <!--     <div> -->
+                      <!--       <h3>Coastal Mapping</h3> -->
+                      <!--       <p>Specialized tools for coastline analysis, shoreline detection, and coastal monitoring.</p> -->
+                      <!--     </div> -->
+                      <!--   </label> -->
+                      <!--   <label class="profile"> -->
+                      <!--     <div class="radio"><input type="radio" name="profile" value="radar"></div> -->
+                      <!--     <div> -->
+                      <!--       <h3>SAR / Radar Analysis</h3> -->
+                      <!--       <p>Synthetic Aperture Radar processing with SNAP toolbox and Sentinel-1 data support.</p> -->
+                      <!--     </div> -->
+                      <!--   </label> -->
+                      <!--   <label class="profile"> -->
+                      <!--     <div class="radio"><input type="radio" name="profile" value="minimal"></div> -->
+                      <!--     <div> -->
+                      <!--       <h3>Minimal Python</h3> -->
+                      <!--       <p>Lightweight environment with just Jupyter and Python essentials for quick experiments.</p> -->
+                      <!--     </div> -->
+                      <!--   </label> -->
+                      <!-- </div> -->
                       </div>
                     <div class="scroll-fade"></div>
                   </div>
