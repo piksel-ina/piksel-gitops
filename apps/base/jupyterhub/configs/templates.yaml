@@ -380,10 +380,10 @@ data:
 
   spawn.css: |
     .spawn-heading {
-      font-size: 1.75rem;
+      font-size: 28px;
       font-weight: 700;
       color: var(--text-primary);
-      letter-spacing: -0.025em;
+      letter-spacing: -0.4px;
       margin-bottom: 0;
     }
     
@@ -425,10 +425,10 @@ data:
       background: var(--bg-surface) !important;
       color: var(--text-primary) !important;
       border-bottom: 1px solid var(--border) !important;
-      padding: 0.85rem 1.25rem !important;
+      padding: 14px 20px !important;
       font-weight: 600;
-      letter-spacing: 0.01em;
-      font-size: 0.92rem;
+      letter-spacing: 0.16px;
+      font-size: 15px;
     }
     
     .card-body {
@@ -440,7 +440,7 @@ data:
       background-color: transparent !important;
       color: var(--text-primary) !important;
       border-color: var(--border-light) !important;
-      padding: 0.85rem 1rem !important;
+      padding: 14px 16px !important;
       transition: background var(--transition);
     }
     
@@ -467,9 +467,9 @@ data:
       align-items: center;
       justify-content: center;
       color: var(--text-tertiary);
-      font-size: 0.85rem;
+      font-size: 14px;
       flex-shrink: 0;
-      margin-right: 0.35rem;
+      margin-right: 6px;
     }
     
     .btn-primary {
@@ -477,11 +477,11 @@ data:
       border: none !important;
       border-radius: var(--radius-sm) !important;
       font-weight: 600;
-      padding: 0.65rem 1.5rem;
-      letter-spacing: 0.015em;
+      padding: 10px 24px;
+      letter-spacing: 0.24px;
       transition: all var(--transition);
       box-shadow: var(--shadow-sm);
-      font-size: 0.92rem;
+      font-size: 15px;
     }
     
     .btn-primary:hover,
@@ -512,7 +512,7 @@ data:
       font-weight: normal;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      margin-bottom: 0.6rem;
+      margin-bottom: 10px;
       padding: 0;
       background-color: var(--bg-card);
       transition: all var(--transition);
@@ -531,7 +531,7 @@ data:
     }
     
     #kubespawner-profiles-list .profile .radio {
-      padding: 0.85rem;
+      padding: 14px;
       padding-right: 0;
       display: flex;
       align-items: center;
@@ -544,20 +544,20 @@ data:
     }
     
     #kubespawner-profiles-list .profile > div:last-child {
-      padding: 0.85rem 1rem;
+      padding: 14px 16px;
       flex: 1;
     }
     
     #kubespawner-profiles-list .profile h3 {
-      font-size: 0.92rem;
+      font-size: 15px;
       font-weight: 600;
-      margin: 0 0 0.15rem 0;
+      margin: 0 0 2px 0;
       color: var(--text-primary);
     }
     
     #kubespawner-profiles-list .profile p {
       margin: 0;
-      font-size: 0.8rem;
+      font-size: 13px;
       color: var(--text-secondary);
       line-height: 1.45;
     }
@@ -566,21 +566,21 @@ data:
       display: flex;
       flex-direction: row;
       align-items: center;
-      padding-bottom: 0.6rem;
-      margin-top: 0.35rem;
+      padding-bottom: 10px;
+      margin-top: 6px;
     }
     
     #kubespawner-profiles-list .profile .option label {
       font-weight: 500;
-      margin-right: 0.5rem;
+      margin-right: 8px;
       min-width: 96px;
-      font-size: 0.82rem;
+      font-size: 13px;
       color: var(--text-secondary);
     }
     
     #kubespawner-profiles-list .profile .option select {
       flex: 1;
-      font-size: 0.82rem;
+      font-size: 13px;
     }
     
     .alert-info {
@@ -588,7 +588,7 @@ data:
       color: var(--accent);
       border-color: var(--accent);
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
+      font-size: 14px;
     }
     
     .alert-danger {
@@ -596,7 +596,7 @@ data:
       color: #dc2626;
       border-color: rgba(220, 38, 38, 0.15);
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
+      font-size: 14px;
     }
     
     [data-theme="dark"] .alert-danger {
@@ -610,65 +610,65 @@ data:
     }
     
     .spawn-subheading {
-      font-size: 1.02rem;
+      font-size: 16px;
       font-weight: 600;
       color: var(--text-primary);
     }
     
     .feature-title {
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 14px;
       color: var(--text-primary);
-      margin-bottom: 0.15rem;
+      margin-bottom: 2px;
     }
     
     .feature-desc {
-      font-size: 0.8rem;
+      font-size: 13px;
       color: var(--text-secondary);
       line-height: 1.5;
       margin: 0;
     }
     
     .section-label {
-      font-size: 1.1rem;
+      font-size: 18px;
       font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 0.75rem;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 8px;
     }
     
     .section-label i {
       color: var(--accent);
-      font-size: 0.95rem;
+      font-size: 15px;
     }
     
     .section-intro {
-      font-size: 0.88rem;
+      font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.6;
     }
     
     .subsection-title {
-      font-size: 0.92rem;
+      font-size: 15px;
       font-weight: 600;
       color: var(--text-primary);
-      margin-top: 1.25rem;
-      margin-bottom: 0.6rem;
+      margin-top: 20px;
+      margin-bottom: 10px;
     }
     
     .feature-list-inner {
-      font-size: 0.8rem;
+      font-size: 13px;
       color: var(--text-secondary);
       list-style: none;
       padding-left: 0;
-      margin: 0.35rem 0 0 0;
+      margin: 6px 0 0 0;
     }
     
     .feature-list-inner li {
-      padding: 0.2rem 0;
-      padding-left: 1rem;
+      padding: 3px 0;
+      padding-left: 16px;
       position: relative;
     }
     
@@ -676,7 +676,7 @@ data:
       content: '';
       position: absolute;
       left: 0;
-      top: 0.6rem;
+      top: 10px;
       width: 4px;
       height: 4px;
       border-radius: 50%;
@@ -685,13 +685,14 @@ data:
     
     .contact-box {
       text-align: center;
-      font-size: 0.8rem;
+      font-size: 13px;
       color: var(--text-tertiary);
-      padding: 0.35rem 0.75rem;
+      padding: 6px 12px;
       background: var(--bg-surface);
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-light);
       flex-shrink: 0;
+      z-index: 2;
     }
     
     .contact-box .fw-medium {
@@ -699,10 +700,16 @@ data:
       font-weight: 500;
     }
     
+    .spawn-right-body form > .btn-primary,
+    .spawn-right-body form > .feedback-widget {
+      flex-shrink: 0;
+    }
+    
     .spawn-card-right {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      height: 500px;
     }
     
     .spawn-right-body {
@@ -712,7 +719,10 @@ data:
     }
     
     .spawn-right-body form {
+      flex: 1;
       min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
     
     [data-theme="dark"] .form-select,
@@ -722,10 +732,17 @@ data:
       border-color: var(--border);
     }
     
-    #spawn-options-scroll {
+    .scroll-wrapper {
+      position: relative;
       flex: 1;
       min-height: 0;
+      overflow: hidden;
+    }
+    
+    #spawn-options-scroll {
+      height: 100%;
       overflow-y: auto;
+      padding-right: 2px;
     }
     
     #spawn-options-scroll::-webkit-scrollbar {
@@ -746,12 +763,14 @@ data:
     }
     
     .scroll-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
       height: 32px;
       flex-shrink: 0;
       background: linear-gradient(to bottom, transparent, var(--bg-card));
       pointer-events: none;
-      margin-top: -8px;
-      position: relative;
       z-index: 1;
     }
     
@@ -840,56 +859,58 @@ data:
                       method="post"
                       role="form"
                       class="d-flex flex-column flex-grow-1">
-                  <div id="spawn-options-scroll" class="flex-grow-1">
-                    {{ spawner_options_form | safe }}
-                    <!-- Uncomment hardcoded profiles below when testing many profiles view -->
-                  <!--   <div id="kubespawner-profiles-list"> -->
-                  <!--     <label class="profile"> -->
-                  <!--       <div class="radio"><input type="radio" name="profile" value="standard" checked></div> -->
-                  <!--       <div> -->
-                  <!--         <h3>Geospatial Standard</h3> -->
-                  <!--         <p>Standard environment with geopandas, rasterio, and basic geospatial tools.</p> -->
-                  <!--       </div> -->
-                  <!--     </label> -->
-                  <!--     <label class="profile"> -->
-                  <!--       <div class="radio"><input type="radio" name="profile" value="datacube"></div> -->
-                  <!--       <div> -->
-                  <!--         <h3>Open Data Cube</h3> -->
-                  <!--         <p>Includes Open Data Cube for satellite imagery analysis and time-series exploration.</p> -->
-                  <!--       </div> -->
-                  <!--     </label> -->
-                  <!--     <label class="profile"> -->
-                  <!--       <div class="radio"><input type="radio" name="profile" value="deep-learning"></div> -->
-                  <!--       <div> -->
-                  <!--         <h3>Deep Learning GPU</h3> -->
-                  <!--         <p>TensorFlow &amp; PyTorch with GPU support for machine learning on geospatial data.</p> -->
-                  <!--       </div> -->
-                  <!--     </label> -->
-                  <!--     <label class="profile"> -->
-                  <!--       <div class="radio"><input type="radio" name="profile" value="coastal"></div> -->
-                  <!--       <div> -->
-                  <!--         <h3>Coastal Mapping</h3> -->
-                  <!--         <p>Specialized tools for coastline analysis, shoreline detection, and coastal monitoring.</p> -->
-                  <!--       </div> -->
-                  <!--     </label> -->
-                  <!--     <label class="profile"> -->
-                  <!--       <div class="radio"><input type="radio" name="profile" value="radar"></div> -->
-                  <!--       <div> -->
-                  <!--         <h3>SAR / Radar Analysis</h3> -->
-                  <!--         <p>Synthetic Aperture Radar processing with SNAP toolbox and Sentinel-1 data support.</p> -->
-                  <!--       </div> -->
-                  <!--     </label> -->
-                  <!--     <label class="profile"> -->
-                  <!--       <div class="radio"><input type="radio" name="profile" value="minimal"></div> -->
-                  <!--       <div> -->
-                  <!--         <h3>Minimal Python</h3> -->
-                  <!--         <p>Lightweight environment with just Jupyter and Python essentials for quick experiments.</p> -->
-                  <!--       </div> -->
-                  <!--     </label> -->
-                  <!--   </div> -->
-                  <!-- </div> -->
-                  <!---->
-                  <div class="scroll-fade"></div>
+                  <div class="scroll-wrapper">
+                    <div id="spawn-options-scroll">
+                      {{ spawner_options_form | safe }}
+    
+                    <!-- DO NOT REMOVE - Test profiles for visual testing -->
+                      <div id="kubespawner-profiles-list">
+                        <label class="profile">
+                          <div class="radio"><input type="radio" name="profile" value="standard" checked></div>
+                          <div>
+                            <h3>Geospatial Standard</h3>
+                            <p>Standard environment with geopandas, rasterio, and basic geospatial tools.</p>
+                          </div>
+                        </label>
+                        <label class="profile">
+                          <div class="radio"><input type="radio" name="profile" value="datacube"></div>
+                          <div>
+                            <h3>Open Data Cube</h3>
+                            <p>Includes Open Data Cube for satellite imagery analysis and time-series exploration.</p>
+                          </div>
+                        </label>
+                        <label class="profile">
+                          <div class="radio"><input type="radio" name="profile" value="deep-learning"></div>
+                          <div>
+                            <h3>Deep Learning GPU</h3>
+                            <p>TensorFlow &amp; PyTorch with GPU support for machine learning on geospatial data.</p>
+                          </div>
+                        </label>
+                        <label class="profile">
+                          <div class="radio"><input type="radio" name="profile" value="coastal"></div>
+                          <div>
+                            <h3>Coastal Mapping</h3>
+                            <p>Specialized tools for coastline analysis, shoreline detection, and coastal monitoring.</p>
+                          </div>
+                        </label>
+                        <label class="profile">
+                          <div class="radio"><input type="radio" name="profile" value="radar"></div>
+                          <div>
+                            <h3>SAR / Radar Analysis</h3>
+                            <p>Synthetic Aperture Radar processing with SNAP toolbox and Sentinel-1 data support.</p>
+                          </div>
+                        </label>
+                        <label class="profile">
+                          <div class="radio"><input type="radio" name="profile" value="minimal"></div>
+                          <div>
+                            <h3>Minimal Python</h3>
+                            <p>Lightweight environment with just Jupyter and Python essentials for quick experiments.</p>
+                          </div>
+                        </label>
+                      </div>
+                    <div class="scroll-fade"></div>
+                  </div>
+                  </div>
                   <div class="contact-box mt-auto">
                     <p class="mb-0">Any issue? Contact: <span class="fw-medium">piksel@big.go.id</span></p>
                   </div>
@@ -924,17 +945,7 @@ data:
       form.find('.feedback-widget .fa-spinner').addClass('fa-pulse');
     });
     
-    function syncCardHeights() {
-      var leftCard = document.querySelector('.spawn-card-left');
-      var rightCard = document.querySelector('.spawn-card-right');
-      if (leftCard && rightCard) {
-        var h = leftCard.offsetHeight;
-          rightCard.style.height = h + 'px';
-      }
-    }
-    syncCardHeights();
-    window.addEventListener('resize', syncCardHeights);
-    new ResizeObserver(syncCardHeights).observe(document.querySelector('.spawn-card-left'));
+    
     </script>
     {% endblock script %}
 
