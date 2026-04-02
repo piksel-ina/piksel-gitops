@@ -4,5 +4,4 @@ namespace: jupyterhub
 resources:
   - profiles-config.yaml
   - post-start-scripts.yaml
-  - templates.yaml
   - efs-mount.yaml
