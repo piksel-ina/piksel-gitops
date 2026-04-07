@@ -106,7 +106,7 @@ data:
                     "slug": "dev-medium",
                     "kubespawner_override": {
                         "cpu_guarantee": 2.5,
-                        "cpu_limit": 3.5,
+                        "cpu_limit": 3.2,
                         "mem_guarantee": "26G",
                         "mem_limit": "27G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
@@ -172,9 +172,9 @@ data:
                     "slug": "dev-large",
                     "kubespawner_override": {
                         "cpu_guarantee": 6.5,
-                        "cpu_limit": 7.5,
-                        "mem_guarantee": "57G",
-                        "mem_limit": "61G",
+                        "cpu_limit": 7.0,
+                        "mem_guarantee": "55G",
+                        "mem_limit": "58G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
                         "storage_capacity": "60Gi",
                         "pvc_name_template": "claim-{username}-dev",
