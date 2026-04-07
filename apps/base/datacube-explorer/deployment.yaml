@@ -50,7 +50,7 @@ spec:
             - name: FLASK_DEBUG
               value: "0"
             - name: CUBEDASH_THEME
-              value: "piksel"
+              value: "default"
 
           livenessProbe:
             httpGet:
