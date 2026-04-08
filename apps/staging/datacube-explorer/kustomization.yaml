@@ -5,21 +5,6 @@ resources:
   - ../../base/datacube-explorer
   - ingress.yaml
 
-patches:
-  - patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: explorer
-      spec:
-        template:
-          spec:
-            containers:
-              - name: explorer
-                env:
-                  - name: CUBEDASH_THEME
-                    value: "deindonesia"
-
 images:
   - name: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/dc-explorer
-    newTag: v20260407-1656
+    newTag: v20260408-1147

@@ -49,8 +49,12 @@ spec:
               value: "production"
             - name: FLASK_DEBUG
               value: "0"
-            - name: CUBEDASH_THEME
-              value: "default"
+            - name: CUBEDASH_SETTINGS
+              value: "/config/settings.env.py"
+
+          volumeMounts:
+            - name: settings
+              mountPath: /config
 
           livenessProbe:
             httpGet:
@@ -77,5 +81,10 @@ spec:
             limits:
               memory: "1.2Gi"
               cpu: "1000m"
+
+      volumes:
+        - name: settings
+          configMap:
+            name: explorer-settings
 
       restartPolicy: Always

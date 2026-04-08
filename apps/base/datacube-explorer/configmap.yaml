@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: explorer-settings
+data:
+  settings.env.py: |
+    CUBEDASH_THEME = "deindonesia"
+    CUBEDASH_DEFAULT_TIMEZONE = "Asia/Jakarta"
