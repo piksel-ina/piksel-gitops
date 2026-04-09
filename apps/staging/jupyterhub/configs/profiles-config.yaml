@@ -235,13 +235,13 @@ data:
             "high_power": [
                 {
                     "display_name": "Very Large Instance (Developer)",
-                    "description": "16 CPUs, 120GB RAM | Minimal base + sudo; Build your own environment",
+                    "description": "32 CPUs, 240GB RAM | Minimal base + sudo; Build your own environment",
                     "slug": "dev-very-large",
                     "kubespawner_override": {
-                        "cpu_guarantee": 13.0,
-                        "cpu_limit": 15.0,
-                        "mem_guarantee": "110G",
-                        "mem_limit": "128G",
+                        "cpu_guarantee": 26.0,
+                        "cpu_limit": 30.0,
+                        "mem_guarantee": "220G",
+                        "mem_limit": "256G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
                         "storage_capacity": "60Gi",
                         "pvc_name_template": "claim-{username}-dev",
