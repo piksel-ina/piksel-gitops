@@ -299,6 +299,73 @@ data:
                     }
                 }
             ],
+            "ultra_power": [
+                {
+                    "display_name": "Ultra Large Instance (Developer)",
+                    "description": "32 CPUs, 256GB RAM | Minimal base + sudo; Build your own environment",
+                    "slug": "dev-ultra",
+                    "kubespawner_override": {
+                        "cpu_guarantee": 28.0,
+                        "cpu_limit": 30.0,
+                        "mem_guarantee": "240G",
+                        "mem_limit": "256G",
+                        "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
+                        "storage_capacity": "80Gi",
+                        "pvc_name_template": "claim-{username}-dev",
+                        "node_selector": {
+                            "jupyter-profile": "ultra"
+                        },
+                        "tolerations": [
+                            {
+                                "key": "jupyter-profile",
+                                "operator": "Equal",
+                                "value": "ultra",
+                                "effect": "NoSchedule"
+                            }
+                        ],
+                        "extra_annotations": {
+                            "karpenter.sh/do-not-disrupt": "true",
+                            "jupyter-profile": "ultra"
+                        },
+                        "environment": {
+                            "JUPYTER_ENABLE_LAB": "yes",
+                            "JUPYTER_ALLOW_INSECURE_WRITES": "1",
+                            "GRANT_SUDO": "yes",
+                            "SUDO_USER": "jovyan",
+                            "CHOWN_HOME": "yes"
+                        },
+                        "allow_privilege_escalation": True,
+                        "init_containers": [
+                            {
+                                "name": "setup-permissions",
+                                "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
+                                "command": ["/bin/bash", "-c"],
+                                "args": [
+                                    """
+                                    set -e
+                                    mkdir -p /home/jovyan/.config /home/jovyan/.jupyter
+                                    cp -f /etc/skel/.bashrc /home/jovyan/.bashrc || true
+                                    cp -f /etc/skel/.config/starship.toml /home/jovyan/.config/starship.toml || true
+                                    chown -R 1000:100 /home/jovyan
+                                    echo "Permissions setup complete"
+                                    """
+                                ],
+                                "securityContext": {
+                                    "runAsUser": 0,
+                                    "runAsGroup": 0,
+                                    "allowPrivilegeEscalation": True
+                                },
+                                "volumeMounts": [
+                                    {
+                                        "name": "volume-{username}",
+                                        "mountPath": "/home/jovyan"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
             "gpu": [
                 {
                     "display_name": "GPU Instance",
@@ -330,9 +397,9 @@ data:
 
         # Define group hierarchy and access levels
         group_access = {
-            "admin": ["base", "medium", "moderate", "power", "high_power", "gpu"],
+            "admin": ["base", "medium", "moderate", "power", "high_power", "ultra_power", "gpu"],
             "gpu-users": ["base", "medium", "moderate", "power", "gpu"],
-            "power-users": ["base", "medium", "moderate", "power", "high_power"],
+            "power-users": ["base", "medium", "moderate", "power", "high_power", "ultra_power"],
             "moderate-users": ["base", "medium", "moderate"],
             "regular-users": ["base"]
         }
@@ -361,7 +428,7 @@ data:
             
             # Build final profile list
             self.profile_list = []
-            for profile_type in ["base", "medium", "moderate", "power", "high_power", "gpu"]:
+            for profile_type in ["base", "medium", "moderate", "power", "high_power", "ultra_power", "gpu"]:
                 if profile_type in accessible_profiles:
                     self.profile_list.extend(profiles_config[profile_type])
 
