@@ -305,9 +305,9 @@ data:
                     "description": "32 CPUs, 256GB RAM | Minimal base + sudo; Build your own environment",
                     "slug": "dev-ultra",
                     "kubespawner_override": {
-                        "cpu_guarantee": 28.0,
+                        "cpu_guarantee": 27.0,
                         "cpu_limit": 30.0,
-                        "mem_guarantee": "240G",
+                        "mem_guarantee": "230G",
                         "mem_limit": "256G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
                         "storage_capacity": "80Gi",
