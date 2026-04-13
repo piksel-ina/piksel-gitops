@@ -24,7 +24,7 @@ data:
     TARGET_DIR="${TARGET_DIR:-/home/jovyan/notebooks}"
     CONDA_ENV="${CONDA_ENV:-notebook}"
 
-    # --- Step 2 - Quickfix to common environment issues -- 
+    # --- Step 2 - Quickfix to common environment issues --
 
     # --- SSH Key
     if [ -f ~/.ssh/id_ed25519 ]; then
@@ -51,7 +51,7 @@ data:
       log "Successfully synced notebooks to ${TARGET_DIR}"
     else
       log "Warning: Failed to sync repository [1]"
-      
+
       # Sync with gitpuller (attempt 2)
       log "Trying alternative gitpuller path"
       if /opt/conda/bin/gitpuller "${GITHUB_REPO}" "${BRANCH}" "${TARGET_DIR}" 2>/dev/null; then

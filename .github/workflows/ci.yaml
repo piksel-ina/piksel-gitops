@@ -1,0 +1,59 @@
+name: CI
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pre-commit:
+    name: Pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install detect-secrets
+      - uses: pre-commit/action@v3.0.1
+
+  checkov:
+    name: Security Scan (Checkov)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install checkov
+        run: pip install --break-system-packages checkov
+      - name: Run checkov
+        run: |
+          checkov \
+            --framework kubernetes \
+            --directory . \
+            --skip-check CKV_K8S_21 \
+            --compact \
+            --output cli \
+            --soft-fail
+
+  flux-validation:
+    name: Flux Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Flux CLI
+        run: |
+          curl -s https://fluxcd.io/install.sh | sudo bash
+      - name: Validate Flux Kustomizations
+        run: |
+          STATUS=0
+          for file in $(find . -name "*.yaml" -not -path '*/flux-system/gotk-components.yaml' | sort); do
+            if grep -q "kind: Kustomization" "$file" && grep -q "kustomize.toolkit.fluxcd.io" "$file"; then
+              echo "::group::flux check ${file}"
+              if ! flux check --kustomization-file "$file" 2>&1; then
+                echo "WARNING: flux check failed for ${file}"
+              fi
+              echo "::endgroup::"
+            fi
+          done
+          echo "Flux validation complete"
+          exit $STATUS

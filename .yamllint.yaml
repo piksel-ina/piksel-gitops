@@ -6,6 +6,7 @@ ignore: |
   */flux-system/
   /**/gotk-*.yaml
   /**/*-gotk.yaml
+  /**/templates.yaml
 
 rules:
   indentation:

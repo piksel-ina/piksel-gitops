@@ -156,7 +156,7 @@ data:
                                 },
                                 "volumeMounts": [
                                     {
-                                        "name": "volume-{username}", 
+                                        "name": "volume-{username}",
                                         "mountPath": "/home/jovyan"
                                     }
                                 ]
@@ -425,7 +425,7 @@ data:
             elif 'moderate-users' in user_groups:
                 user_type = "moderate-user"
                 accessible_profiles.update(group_access["moderate-users"])
-            
+
             # Build final profile list
             self.profile_list = []
             for profile_type in ["base", "medium", "moderate", "power", "high_power", "ultra_power", "gpu"]:

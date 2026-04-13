@@ -32,12 +32,12 @@ data:
             volumes = []
             volume_mounts = []
 
-            # Base public data 
+            # Base public data
             public_volume = {
                 "name": "efs-public-data",
                 "persistentVolumeClaim": {"claimName": "efs-public-data"}
             }
-           
+
             # Public data mount
             if 'admin' in user_groups:
                 public_mount = {
@@ -48,7 +48,7 @@ data:
             else:
                 public_mount = {
                     "name": "efs-public-data",
-                    "mountPath": "/home/jovyan/data/public", 
+                    "mountPath": "/home/jovyan/data/public",
                     "readOnly": True   # Everyone else gets read-only
                 }
 
@@ -57,7 +57,7 @@ data:
                 "name": "efs-coastline-data",
                 "persistentVolumeClaim": {"claimName": "efs-coastline-data"}
             }
-            
+
             # Coastline data mount - determine permissions based on user groups
             if 'admin' in user_groups or 'coastline' in user_groups:
                 coastline_mount = {
@@ -67,7 +67,7 @@ data:
                 }
             else:
                 coastline_mount = {
-                    "name": "efs-coastline-data", 
+                    "name": "efs-coastline-data",
                     "mountPath": "/home/jovyan/data/coastlines",
                     "readOnly": True   # Everyone else gets read-only
                 }
@@ -77,7 +77,7 @@ data:
             volumes.append(coastline_volume)
             volume_mounts.append(public_mount)
             volume_mounts.append(coastline_mount)
-            
+
             # Handle spawner.volumes or spawner.volume_mounts is None
             if spawner.volumes is None:
                 spawner.volumes = []
