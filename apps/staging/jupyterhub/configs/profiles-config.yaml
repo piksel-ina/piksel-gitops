@@ -50,7 +50,7 @@ data:
                         "mem_guarantee": "13G",
                         "mem_limit": "16G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:jupyter-v20250808-132239",
-                        "storage_capacity": "15Gi",
+                        "storage_capacity": "30Gi",
                         "node_selector": {
                             "jupyter-profile": "standard"
                         },
@@ -80,7 +80,7 @@ data:
                         "mem_guarantee": "26G",
                         "mem_limit": "30G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:jupyter-v20250808-132239",
-                        "storage_capacity": "15Gi",
+                        "storage_capacity": "30Gi",
                         "node_selector": {
                             "jupyter-profile": "medium"
                         },
@@ -110,7 +110,7 @@ data:
                         "mem_guarantee": "26G",
                         "mem_limit": "32G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
-                        "storage_capacity": "60Gi",
+                        "storage_capacity": "30Gi",
                         "node_selector": {
                             "jupyter-profile": "medium"
                         },
@@ -177,8 +177,7 @@ data:
                         "mem_guarantee": "55G",
                         "mem_limit": "64G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
-                        "storage_capacity": "60Gi",
-                        "pvc_name_template": "claim-{username}-dev",
+                        "storage_capacity": "30Gi",
                         "node_selector": {
                             "jupyter-profile": "large"
                         },
@@ -246,8 +245,7 @@ data:
                         "mem_guarantee": "110G",
                         "mem_limit": "128G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
-                        "storage_capacity": "60Gi",
-                        "pvc_name_template": "claim-{username}-dev",
+                        "storage_capacity": "30Gi",
                         "node_selector": {
                             "jupyter-profile": "very-large"
                         },
@@ -315,8 +313,7 @@ data:
                         "mem_guarantee": "230G",
                         "mem_limit": "256G",
                         "image": "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:dev-jupyter-v20260126",
-                        "storage_capacity": "80Gi",
-                        "pvc_name_template": "claim-{username}-dev",
+                        "storage_capacity": "30Gi",
                         "node_selector": {
                             "jupyter-profile": "ultra"
                         },
@@ -383,7 +380,7 @@ data:
                         "cpu_limit": 4,
                         "mem_guarantee": "16G",
                         "mem_limit": "16G",
-                        "storage_capacity": "20Gi",
+                        "storage_capacity": "30Gi",
                         "extra_resource_limits": {
                             "nvidia.com/gpu": "1"
                         },

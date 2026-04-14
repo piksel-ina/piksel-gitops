@@ -92,7 +92,7 @@ spec:
       # Persistent storage configuration
       storage:
         type: dynamic
-        capacity: 10Gi
+        capacity: 30Gi
         homeMountPath: /home/jovyan
         dynamic:
           storageClass: gp3
