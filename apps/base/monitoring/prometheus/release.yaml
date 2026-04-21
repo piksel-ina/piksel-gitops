@@ -1,0 +1,41 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  releaseName: prometheus
+  targetNamespace: monitoring
+  chart:
+    spec:
+      chart: prometheus
+      version: "27.x"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+      interval: 5m
+  interval: 5m
+  values:
+    image:
+      tag: "v3.5.2"
+    alertmanager:
+      enabled: false
+    kube-state-metrics:
+      enabled: false
+    prometheus-node-exporter:
+      enabled: false
+    prometheus-pushgateway:
+      enabled: false
+    server:
+      retention: "2d"
+      resources:
+        requests:
+          cpu: 250m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      persistentVolume:
+        enabled: true
+        size: 5Gi
+        storageClass: gp3
