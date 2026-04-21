@@ -1,7 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - cluster-issuers.yaml
+  # cluster-issuers.yaml - migrated to TF (terraform-iac/cluster-addons/)
+  # storage-class.yaml - migrated to TF (terraform-iac/cluster-addons/)
   - db-user-create-job.yaml
   - db-user-create-config.yaml
-  - storage-class.yaml
+  - notifications.yaml

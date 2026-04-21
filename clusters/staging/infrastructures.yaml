@@ -1,29 +1,12 @@
-# --- Infrastructure controllers for the development cluster ---
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: infra-controllers
-  namespace: flux-system
-spec:
-  interval: 1h
-  retryInterval: 1m
-  timeout: 5m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./infrastructure/controllers
-  prune: true
-  wait: true
----
-# --- Infrastructure configurations for the development cluster ---
+# --- Infrastructure configurations (db-user-create, notifications) ---
+# Note: cert-manager, ingress-nginx, metrics-server, nvidia-device-plugin, cluster-issuers,
+# storage-class, and efs-csi have been migrated to Terraform (terraform-iac/cluster-addons/)
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
   name: infra-configs
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: infra-controllers
   interval: 1h
   retryInterval: 1m
   timeout: 5m
@@ -34,7 +17,7 @@ spec:
   prune: true
   wait: true
 ---
-# --- Addons ---
+# --- Addons (pg-bouncer only) ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
@@ -49,6 +32,6 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/staging/
+  path: ./infrastructure/staging/pg-bouncer
   prune: true
   wait: true
