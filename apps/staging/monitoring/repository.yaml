@@ -4,5 +4,6 @@ metadata:
   name: victoria-metrics
   namespace: monitoring
 spec:
+  type: oci
   interval: 120m
-  url: https://victoria-metrics.github.io/helm-charts
+  url: oci://ghcr.io/victoriametrics/helm-charts
