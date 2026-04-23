@@ -1,6 +1,6 @@
-# --- Infrastructure configurations (db-user-create, notifications) ---
+# --- Infrastructure configurations (notifications only) ---
 # Note: cert-manager, ingress-nginx, metrics-server, nvidia-device-plugin, cluster-issuers,
-# storage-class, and efs-csi have been migrated to Terraform (terraform-iac/cluster-addons/)
+# storage-class, efs-csi, and db-user-create have been migrated to Terraform (terraform-iac/)
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:

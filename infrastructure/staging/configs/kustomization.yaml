@@ -3,6 +3,6 @@ kind: Kustomization
 resources:
   # cluster-issuers.yaml - migrated to TF (terraform-iac/cluster-addons/)
   # storage-class.yaml - migrated to TF (terraform-iac/cluster-addons/)
-  - db-user-create-job.yaml
-  - db-user-create-config.yaml
+  # db-user-create-job.yaml - migrated to TF (terraform-iac/aws-database/database-users.tf)
+  # db-user-create-config.yaml - migrated to TF (terraform-iac/aws-database/database-users.tf)
   - notifications.yaml
