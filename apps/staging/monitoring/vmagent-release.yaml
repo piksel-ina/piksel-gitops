@@ -17,7 +17,7 @@ spec:
   interval: 5m
   values:
     remoteWrite:
-      - url: "http://vmsingle-victoria-metrics-single:8428/api/v1/write"
+      - url: "http://vmsingle-victoria-metrics-single-server:8428/api/v1/write"
 
     resources:
       requests:
