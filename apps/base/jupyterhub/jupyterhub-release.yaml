@@ -22,6 +22,8 @@ spec:
         customTemplate: |
           import os
           c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates']
+        metrics: |
+          c.JupyterHub.authenticate_prometheus = False
         pre-spawn-hook: |
           # Load the pre-spawn hook from the ConfigMap
           import os
