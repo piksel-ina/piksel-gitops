@@ -36,7 +36,7 @@ spec:
           - name: cpu-request
             value: "500m"
           - name: cpu-limit
-            value: "2"
+            value: "2000m"
       container:
         name: odc
         image: "{{inputs.parameters.odc-image}}"
