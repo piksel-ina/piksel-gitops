@@ -27,8 +27,6 @@ spec:
         value: "true"
       - name: rename-product
         value: "geomad_s2_annual"
-  workflowTemplateRef:
-    name: odc-base
   templates:
     - name: s3-indexing
       inputs:
@@ -43,21 +41,55 @@ spec:
             value: "{{workflow.parameters.no-sign-request}}"
           - name: rename-product
             value: "{{workflow.parameters.rename-product}}"
-      steps:
-        - - name: index-from-s3
-            templateRef:
-              name: odc-base
-              template: run
-            arguments:
-              parameters:
-                - name: command
-                  value: >-
-                    CMD="s3-to-dc --stac";
-                    if [ "{{inputs.parameters.no-sign-request}}" = "true" ]; then CMD="$CMD --no-sign-request"; fi;
-                    if [ -n "{{inputs.parameters.rename-product}}" ] && [ "{{inputs.parameters.rename-product}}" != "" ]; then CMD="$CMD --rename-product={{inputs.parameters.rename-product}}"; fi;
-                    CMD="$CMD '{{inputs.parameters.s3-uri}}' '{{inputs.parameters.product-name}}'";
-                    echo "$CMD";
-                    eval $CMD;
-                    echo "Completed S3 STAC indexing"
-                - name: aws-region
-                  value: "{{inputs.parameters.aws-region}}"
+      container:
+        name: odc
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/inadc-core:v20260429-1009
+        command: [bash, -c]
+        args:
+          - |
+            CMD="s3-to-dc --stac"
+
+            if [ "{{inputs.parameters.no-sign-request}}" = "true" ]; then
+              CMD="$CMD --no-sign-request"
+            fi
+
+            if [ -n "{{inputs.parameters.rename-product}}" ] && [ "{{inputs.parameters.rename-product}}" != "" ]; then
+              CMD="$CMD --rename-product={{inputs.parameters.rename-product}}"
+            fi
+
+            CMD="$CMD '{{inputs.parameters.s3-uri}}' '{{inputs.parameters.product-name}}'"
+
+            echo "$CMD"
+            eval $CMD
+
+            echo "Completed S3 STAC indexing"
+        env:
+          - name: AWS_DEFAULT_REGION
+            value: "{{inputs.parameters.aws-region}}"
+          - name: AWS_REGION
+            value: "{{inputs.parameters.aws-region}}"
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            value: "odc"
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"

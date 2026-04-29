@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: argo-workflows
 
 resources:
-  - odc-base.yaml
   - odc-schema-migrate.yaml
   - odc-stac-index.yaml
   - odc-bulk-index.yaml

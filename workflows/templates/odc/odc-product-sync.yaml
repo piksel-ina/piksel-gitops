@@ -21,15 +21,38 @@ spec:
         parameters:
           - name: product-list
             value: "https://raw.githubusercontent.com/piksel-ina/piksel-core/main/products.csv"
-      steps:
-        - - name: run
-            templateRef:
-              name: odc-base
-              template: run
-            arguments:
-              parameters:
-                - name: command
-                  value: |
-                    datacube --version
-                    dc-sync-products {{inputs.parameters.product-list}} --update-if-exists
-                    datacube product list
+      container:
+        name: odc
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/inadc-core:v20260429-1009
+        command: [bash, -c]
+        args:
+          - |
+            datacube --version
+            dc-sync-products {{inputs.parameters.product-list}} --update-if-exists
+            datacube product list
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            value: "odc"
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"

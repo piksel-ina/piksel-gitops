@@ -41,19 +41,42 @@ spec:
             value: "{{workflow.parameters.datetime}}"
           - name: arguments
             value: "{{workflow.parameters.arguments}}"
-      steps:
-        - - name: run
-            templateRef:
-              name: odc-base
-              template: run
-            arguments:
-              parameters:
-                - name: command
-                  value: |
-                    set -e
-                    stac-to-dc \
-                      --catalog-href={{inputs.parameters.catalog}} \
-                      --collections={{inputs.parameters.collections}} \
-                      --bbox={{inputs.parameters.bbox}} \
-                      --datetime={{inputs.parameters.datetime}} \
-                      {{inputs.parameters.arguments}}
+      container:
+        name: odc
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/inadc-core:v20260429-1009
+        command: [bash, -c]
+        args:
+          - |
+            set -e
+            stac-to-dc \
+              --catalog-href={{inputs.parameters.catalog}} \
+              --collections={{inputs.parameters.collections}} \
+              --bbox={{inputs.parameters.bbox}} \
+              --datetime={{inputs.parameters.datetime}} \
+              {{inputs.parameters.arguments}}
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            value: "pg-proxy-service.database.svc.cluster.local"
+          - name: ODC_DEFAULT_DB_PORT
+            value: "6432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: odc
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            value: "odc"
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
