@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: odc-schema-migrate
+  namespace: argo-workflows
+  annotations:
+    description: "Run datacube schema migration. Use: argo submit --from workflowtemplate/odc-schema-migrate"
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: migrate
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+  podGC:
+    strategy: OnWorkflowSuccess
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: odc-schema-migrate
+  templates:
+    - name: migrate
+      steps:
+        - - name: schema-init
+            templateRef:
+              name: odc-base
+              template: run-admin
+            arguments:
+              parameters:
+                - name: command
+                  value: |
+                    set -e
+                    echo "=== ODC Schema Migration ==="
+                    datacube --version
+                    echo ""
+                    echo "Running datacube system init..."
+                    datacube -v system init
+                    echo ""
+                    echo "Running system check..."
+                    datacube system check
+                    echo ""
+                    echo "Schema migration complete"
+
+        - - name: update-spatial-indexes
+            templateRef:
+              name: odc-base
+              template: run-admin
+            arguments:
+              parameters:
+                - name: command
+                  value: |
+                    set -e
+                    echo "Updating spatial indexes..."
+                    for epsg in 4326 3857; do
+                      echo "Creating/updating spatial index for EPSG:$epsg"
+                      datacube spindex create $epsg || true
+                      datacube spindex update $epsg
+                    done
+                    echo "Spatial indexes updated"

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: datacube-bulk-indexer
+  name: odc-bulk-indexer
   namespace: argo-workflows
 spec:
   serviceAccountName: argo-workflows-executor
@@ -13,11 +13,9 @@ spec:
     annotations:
       karpenter.sh/do-not-disrupt: "true"
     labels:
-      app: datacube-bulk-indexer
+      app: odc-bulk-indexer
   ttlStrategy:
     secondsAfterCompletion: 300
-    labels:
-      app: datacube-bulk-indexer
   arguments:
     parameters:
       - name: catalog
@@ -29,8 +27,7 @@ spec:
       - name: arguments
         value: "--rename-product=s2_l2a"
       - name: time-chunks
-        value: "3" # process 3 months at a time
-      # Grid parameters
+        value: "3"
       - name: min-lon
         value: "114"
       - name: max-lon
@@ -44,7 +41,6 @@ spec:
   templates:
     - name: grid-bulk-indexing
       steps:
-        # Step 1: Generate time chunks
         - - name: generate-time-chunks
             template: gen-time-chunks-artifact
             arguments:
@@ -54,7 +50,6 @@ spec:
                 - name: chunk-months
                   value: "{{workflow.parameters.time-chunks}}"
 
-        # Step 2: Generate grid cells dynamically
         - - name: generate-grid
             template: gen-grid-cells-artifact
             arguments:
@@ -70,7 +65,6 @@ spec:
                 - name: cell-size
                   value: "{{workflow.parameters.cell-size}}"
 
-        # Step 3: Generate all individual tasks
         - - name: generate-all-tasks
             template: generate-all-tasks
             arguments:
@@ -80,7 +74,6 @@ spec:
                 - name: grid-cells-file
                   from: "{{steps.generate-grid.outputs.artifacts.result}}"
 
-        # Step 4: Process each task individually
         - - name: indexing-tasks
             template: indexing-tasks
             arguments:
@@ -99,7 +92,6 @@ spec:
                   value: "{{item.grid_id}}"
             withParam: "{{steps.generate-all-tasks.outputs.parameters.all-tasks}}"
 
-    # Generate time chunks
     - name: gen-time-chunks-artifact
       inputs:
         parameters:
@@ -116,7 +108,6 @@ spec:
           import subprocess
           import sys
 
-          # Install dateutil
           subprocess.check_call([sys.executable, "-m", "pip", "install", "python-dateutil"])
 
           import json
@@ -126,7 +117,6 @@ spec:
           datetime_param = "{{inputs.parameters.datetime}}"
           chunk_months = int("{{inputs.parameters.chunk-months}}")
 
-          # Parse datetime parameter
           start_str, end_str = datetime_param.split('/')
           start_date = datetime.strptime(start_str, "%Y-%m-%d")
           end_date = datetime.strptime(end_str, "%Y-%m-%d")
@@ -135,12 +125,9 @@ spec:
           current_date = start_date
 
           while current_date < end_date:
-            # Add months using relativedelta
             chunk_end = current_date + relativedelta(months=chunk_months)
-
-            # Don't exceed the overall end date
             if chunk_end > end_date:
-                chunk_end = end_date
+              chunk_end = end_date
 
             period_str = f"{current_date.strftime('%Y-%m-%d')}/{chunk_end.strftime('%Y-%m-%d')}"
             time_id = f"{current_date.strftime('%Y%m')}_{chunk_end.strftime('%Y%m')}"
@@ -159,7 +146,6 @@ spec:
 
           print(f"Generated {len(time_chunks)} time chunks", file=sys.stderr)
 
-    # Generate grid cells dynamically
     - name: gen-grid-cells-artifact
       inputs:
         parameters:
@@ -187,20 +173,13 @@ spec:
 
           grid_cells = []
 
-          # Generate grid cells
           lon = min_lon
           while lon < max_lon:
             lat = min_lat
             while lat < max_lat:
-              # Create bbox: west,south,east,north
               bbox = f"{lon},{lat},{min(lon + cell_size, max_lon)},{min(lat + cell_size, max_lat)}"
               grid_id = f"grid_{lon}_{lat}".replace(".", "_").replace("-", "minus")
-
-              grid_cells.append({
-                "id": grid_id,
-                "bbox": bbox,
-              })
-
+              grid_cells.append({"id": grid_id, "bbox": bbox})
               lat += cell_size
             lon += cell_size
 
@@ -228,13 +207,11 @@ spec:
           import json
           import sys
 
-          # Read inputs
           with open('/tmp/time-chunks.json', 'r') as f:
               time_chunks = json.load(f)
           with open('/tmp/grid-cells.json', 'r') as f:
               grid_cells = json.load(f)
 
-          # Generate all individual tasks
           all_tasks = []
           for time_chunk in time_chunks:
               for grid_cell in grid_cells:
@@ -245,16 +222,12 @@ spec:
                   }
                   all_tasks.append(task)
 
-          # Write as JSON
           with open('/tmp/all-tasks.json', 'w') as f:
               json.dump(all_tasks, f, ensure_ascii=False)
 
-          # Also print to stdout for parameter capture
           print(json.dumps(all_tasks, ensure_ascii=False))
-
           print(f"Generated {len(all_tasks)} individual tasks", file=sys.stderr)
 
-    # Main indexing task template
     - name: indexing-tasks
       inputs:
         parameters:
@@ -264,52 +237,25 @@ spec:
           - name: datetime
           - name: bbox
           - name: grid-id
-      container:
-        name: odc-container
-        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/piksel-core:odc-v0.2.0
-        command:
-          - bash
-        args:
-          - "-c"
-          - |
-            echo "🌍 Processing grid cell: {{inputs.parameters.grid-id}}"
-            echo "📅 Datetime: {{inputs.parameters.datetime}}"
-            echo "📍 Bbox: {{inputs.parameters.bbox}}"
+      steps:
+        - - name: run
+            templateRef:
+              name: odc-base
+              template: run
+            arguments:
+              parameters:
+                - name: command
+                  value: |
+                    set -e
+                    echo "Processing grid cell: {{inputs.parameters.grid-id}}"
+                    echo "Datetime: {{inputs.parameters.datetime}}"
+                    echo "Bbox: {{inputs.parameters.bbox}}"
 
-            stac-to-dc \
-            --catalog-href={{inputs.parameters.catalog}} \
-            --collections={{inputs.parameters.collections}} \
-            --bbox={{inputs.parameters.bbox}} \
-            --datetime={{inputs.parameters.datetime}} \
-            {{inputs.parameters.arguments}} \
+                    stac-to-dc \
+                      --catalog-href={{inputs.parameters.catalog}} \
+                      --collections={{inputs.parameters.collections}} \
+                      --bbox={{inputs.parameters.bbox}} \
+                      --datetime={{inputs.parameters.datetime}} \
+                      {{inputs.parameters.arguments}}
 
-            echo "Completed grid cell: {{inputs.parameters.grid-id}}"
-        env:
-          - name: ODC_DEFAULT_DB_HOSTNAME
-            value: "pg-proxy-service.database.svc.cluster.local"
-          - name: ODC_DEFAULT_DB_PORT
-            value: "6432"
-          - name: ODC_DEFAULT_DB_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: odc
-                key: username
-          - name: ODC_DEFAULT_DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: odc
-                key: password
-          - name: ODC_DEFAULT_DB_DATABASE
-            valueFrom:
-              secretKeyRef:
-                name: odc
-                key: username
-          - name: ODC_DEFAULT_INDEX_DRIVER
-            value: "postgis"
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "500m"
-          limits:
-            memory: "4Gi"
-            cpu: "2"
+                    echo "Completed grid cell: {{inputs.parameters.grid-id}}"

@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argo-workflows
+
+resources:
+  - odc-base.yaml
+  - odc-schema-migrate.yaml
+  - odc-stac-index.yaml
+  - odc-bulk-index.yaml
+  - odc-product-sync.yaml
+  - odc-metadata-update.yaml
+  - odc-delete-product.yaml
+  - odc-s3-index.yaml

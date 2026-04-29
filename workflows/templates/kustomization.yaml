@@ -3,11 +3,7 @@ kind: Kustomization
 namespace: argo-workflows
 
 resources:
-  - datacube-product-sync.yaml
-  - datacube-delete-product.yaml
-  - datacube-stac-index.yaml
-  - datacube-bulk-index.yaml
-  - datacube-metadata-update.yaml
+  - odc
   - cubedash.yaml
   - daily-indexing-template.yaml
   - ows-update.yaml

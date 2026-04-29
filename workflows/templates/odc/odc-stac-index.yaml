@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: odc-stac-indexer
+  namespace: argo-workflows
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: stac-indexing
+  ttlStrategy:
+    secondsAfterCompletion: 300
+  podGC:
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: odc-stac-indexer
+  arguments:
+    parameters:
+      - name: catalog
+        value: "https://stac.staging.example.com"
+      - name: arguments
+        value: "--rename-product=s2_l2a"
+      - name: bbox
+        value: "-180.0,-70,180.0,70"
+      - name: datetime
+        value: "2020-04-01/2020-09-30"
+      - name: collections
+        value: "example-collection"
+  templates:
+    - name: stac-indexing
+      inputs:
+        parameters:
+          - name: catalog
+            value: "{{workflow.parameters.catalog}}"
+          - name: collections
+            value: "{{workflow.parameters.collections}}"
+          - name: bbox
+            value: "{{workflow.parameters.bbox}}"
+          - name: datetime
+            value: "{{workflow.parameters.datetime}}"
+          - name: arguments
+            value: "{{workflow.parameters.arguments}}"
+      steps:
+        - - name: run
+            templateRef:
+              name: odc-base
+              template: run
+            arguments:
+              parameters:
+                - name: command
+                  value: |
+                    set -e
+                    stac-to-dc \
+                      --catalog-href={{inputs.parameters.catalog}} \
+                      --collections={{inputs.parameters.collections}} \
+                      --bbox={{inputs.parameters.bbox}} \
+                      --datetime={{inputs.parameters.datetime}} \
+                      {{inputs.parameters.arguments}}

@@ -5,7 +5,7 @@
 1. **Landsat STAC to DC Indexing**
 
 ```bash
-argo submit --from workflowtemplate/datacube-stac-indexer \
+argo submit --from workflowtemplate/odc-stac-indexer \
   --parameter catalog="https://landsatlook.usgs.gov/stac-server/" \
   --parameter collections="landsat-c2l2-sr" \
   --parameter datetime="2024-01-01/2024-01-30" \
@@ -18,7 +18,7 @@ argo submit --from workflowtemplate/datacube-stac-indexer \
 2. **Sentinel 2 STAC to DC Indexing**
 
 ```bash
-argo submit --from workflowtemplate/datacube-stac-indexer \
+argo submit --from workflowtemplate/odc-stac-indexer \
   -n argo-workflows \
   -p catalog="https://earth-search.aws.element84.com/v1/" \
   -p bbox="114,-9,116,-7" \

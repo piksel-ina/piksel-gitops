@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: odc-product-sync
+  namespace: argo-workflows
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: product-sync
+  podGC:
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: odc-product-sync
+  ttlStrategy:
+    secondsAfterCompletion: 300
+  templates:
+    - name: product-sync
+      inputs:
+        parameters:
+          - name: product-list
+            value: "https://raw.githubusercontent.com/piksel-ina/piksel-core/main/products.csv"
+      steps:
+        - - name: run
+            templateRef:
+              name: odc-base
+              template: run
+            arguments:
+              parameters:
+                - name: command
+                  value: |
+                    datacube --version
+                    dc-sync-products {{inputs.parameters.product-list}} --update-if-exists
+                    datacube product list

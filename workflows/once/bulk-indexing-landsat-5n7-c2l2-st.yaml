@@ -8,7 +8,7 @@ metadata:
 spec:
   serviceAccountName: argo-workflows-executor
   workflowTemplateRef:
-    name: datacube-bulk-indexer
+    name: odc-bulk-indexer
   arguments:
     parameters:
       - name: catalog
@@ -41,7 +41,7 @@ metadata:
 spec:
   serviceAccountName: argo-workflows-executor
   workflowTemplateRef:
-    name: datacube-bulk-indexer
+    name: odc-bulk-indexer
   arguments:
     parameters:
       - name: catalog

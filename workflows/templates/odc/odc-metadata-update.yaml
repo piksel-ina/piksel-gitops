@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: odc-metadata-update
+  namespace: argo-workflows
+spec:
+  serviceAccountName: argo-workflows-executor
+  entrypoint: metadata-update
+  podGC:
+    strategy: OnPodCompletion
+  podMetadata:
+    annotations:
+      karpenter.sh/do-not-disrupt: "true"
+    labels:
+      app: metadata-update
+  ttlStrategy:
+    secondsAfterCompletion: 300
+  templates:
+    - name: metadata-update
+      steps:
+        - - name: run
+            templateRef:
+              name: odc-base
+              template: run
+            arguments:
+              parameters:
+                - name: command
+                  value: |
+                    datacube --version
+                    datacube metadata update --allow-unsafe https://raw.githubusercontent.com/piksel-ina/piksel-core/main/metadata/custom_metadata.odc-type.yaml
