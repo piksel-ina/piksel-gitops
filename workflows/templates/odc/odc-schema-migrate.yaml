@@ -17,6 +17,10 @@ spec:
       karpenter.sh/do-not-disrupt: "true"
     labels:
       app: odc-schema-migrate
+  arguments:
+    parameters:
+      - name: odc-image
+        value: "686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/inadc-core:v20260429-1009"
   templates:
     - name: migrate
       steps:
@@ -39,6 +43,8 @@ spec:
                     datacube system check
                     echo ""
                     echo "Schema migration complete"
+                - name: odc-image
+                  value: "{{workflow.parameters.odc-image}}"
 
         - - name: update-spatial-indexes
             templateRef:
@@ -56,3 +62,5 @@ spec:
                       datacube spindex update $epsg
                     done
                     echo "Spatial indexes updated"
+                - name: odc-image
+                  value: "{{workflow.parameters.odc-image}}"
