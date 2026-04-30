@@ -52,7 +52,7 @@ spec:
           datacube system check
 
           # Create OWS schema and grant permissions
-          datacube-ows-update --schema --write-role "$ODC_USER" --read-role "$ODC_READ_USER"
+          datacube-ows-update --schema
 
           echo "OWS schema initialized successfully"
 
