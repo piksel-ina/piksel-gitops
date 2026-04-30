@@ -4,7 +4,7 @@ metadata:
   name: odc-schema-migrate
   namespace: argo-workflows
   annotations:
-    description: "Run datacube schema migration. Use: argo submit --from workflowtemplate/odc-schema-migrate"
+    description: "Run datacube schema migration (idempotent). Use: argo submit --from workflowtemplate/odc-schema-migrate"
 spec:
   serviceAccountName: argo-workflows-executor
   entrypoint: migrate
@@ -17,11 +17,18 @@ spec:
       karpenter.sh/do-not-disrupt: "true"
     labels:
       app: odc-schema-migrate
+  volumes:
+    - name: rds-ca
+      configMap:
+        name: rds-ca-cert
   templates:
     - name: migrate
       steps:
         - - name: schema-init
             template: schema-init
+
+        - - name: grant-roles
+            template: grant-roles
 
         - - name: update-spatial-indexes
             template: update-spatial-indexes
@@ -34,16 +41,19 @@ spec:
         args:
           - |
             set -e
+            export PGSSLMODE=verify-ca
+            export PGSSLROOTCERT=/tmp/rds-ca/ap-southeast-3-bundle.pem
+
             echo "=== ODC Schema Migration ==="
             datacube --version
             echo ""
-            echo "Running datacube system init..."
+            echo "Running datacube system init (idempotent)..."
             datacube -v system init
             echo ""
             echo "Running system check..."
             datacube system check
             echo ""
-            echo "Schema migration complete"
+            echo "✓ Schema migration complete"
         env:
           - name: ODC_DEFAULT_DB_HOSTNAME
             valueFrom:
@@ -66,6 +76,9 @@ spec:
             value: "odc"
           - name: ODC_DEFAULT_INDEX_DRIVER
             value: "postgis"
+        volumeMounts:
+          - name: rds-ca
+            mountPath: /tmp/rds-ca
         resources:
           requests:
             memory: "1Gi"
@@ -73,6 +86,55 @@ spec:
           limits:
             memory: "4Gi"
             cpu: "2000m"
+
+    - name: grant-roles
+      container:
+        name: odc
+        image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/inadc-core:v20260429-1009
+        command: [bash, -c]
+        args:
+          - |
+            set -e
+            export PGSSLMODE=verify-ca
+            export PGSSLROOTCERT=/tmp/rds-ca/ap-southeast-3-bundle.pem
+
+            echo "=== Granting ODC roles ==="
+            datacube user grant manage odc
+            echo "✓ odc_manage granted to odc user"
+            datacube user grant user odcread
+            echo "✓ odc_user granted to odcread user"
+        env:
+          - name: ODC_DEFAULT_DB_HOSTNAME
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: db_address
+          - name: ODC_DEFAULT_DB_PORT
+            value: "5432"
+          - name: ODC_DEFAULT_DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: username
+          - name: ODC_DEFAULT_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-secret
+                key: password
+          - name: ODC_DEFAULT_DB_DATABASE
+            value: "odc"
+          - name: ODC_DEFAULT_INDEX_DRIVER
+            value: "postgis"
+        volumeMounts:
+          - name: rds-ca
+            mountPath: /tmp/rds-ca
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
 
     - name: update-spatial-indexes
       container:
@@ -82,13 +144,16 @@ spec:
         args:
           - |
             set -e
+            export PGSSLMODE=verify-ca
+            export PGSSLROOTCERT=/tmp/rds-ca/ap-southeast-3-bundle.pem
+
             echo "Updating spatial indexes..."
             for epsg in 4326 3857; do
               echo "Creating/updating spatial index for EPSG:$epsg"
               datacube spindex create $epsg || true
               datacube spindex update $epsg
             done
-            echo "Spatial indexes updated"
+            echo "✓ Spatial indexes updated"
         env:
           - name: ODC_DEFAULT_DB_HOSTNAME
             valueFrom:
@@ -111,6 +176,9 @@ spec:
             value: "odc"
           - name: ODC_DEFAULT_INDEX_DRIVER
             value: "postgis"
+        volumeMounts:
+          - name: rds-ca
+            mountPath: /tmp/rds-ca
         resources:
           requests:
             memory: "1Gi"
