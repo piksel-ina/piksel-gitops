@@ -32,6 +32,7 @@ spec:
             - "--threads=4"
             - "-k"
             - "gthread"
+            - "--preload"
             - "--keep-alive"
             - "75"
             - "--max-requests"
@@ -114,6 +115,10 @@ spec:
               value: "EMPTY_DIR"
             - name: CPL_VSIL_CURL_ALLOWED_EXTENSIONS
               value: ".tif,.tiff,.ovr"
+            - name: GDAL_HTTP_MULTIRANGE
+              value: "YES"
+            - name: GDAL_HTTP_TCP_KEEPALIVE
+              value: "YES"
 
           volumeMounts:
             - name: dshm
