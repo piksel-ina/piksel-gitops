@@ -4,6 +4,8 @@ kind: Kustomization
 namespace: terria
 
 resources:
+  - configmap-client.yaml
+  - configmap-server.yaml
   - deployment.yaml
   - service.yaml
   - hpa-pdb.yaml

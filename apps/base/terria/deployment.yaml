@@ -21,6 +21,11 @@ spec:
         - name: terria
           image: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/terriamap:v20260129-0612
           imagePullPolicy: Always
+          command:
+            - node
+            - ./node_modules/terriajs-server/lib/app.js
+            - --config-file
+            - /etc/terria-config/server/serverconfig.json
           ports:
             - name: http
               containerPort: 3001
@@ -38,6 +43,14 @@ spec:
                 configMapKeyRef:
                   name: terria-config
                   key: bucket-name
+          volumeMounts:
+            - name: terria-client-config
+              mountPath: /etc/terria-config/client
+            - name: terria-client-config
+              mountPath: /app/wwwroot/config.json
+              subPath: config.json
+            - name: terria-server-config
+              mountPath: /etc/terria-config/server
           resources:
             requests:
               cpu: "1.5"
@@ -61,6 +74,13 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3
+      volumes:
+        - name: terria-client-config
+          configMap:
+            name: terria-client-config
+        - name: terria-server-config
+          configMap:
+            name: terria-server-config
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

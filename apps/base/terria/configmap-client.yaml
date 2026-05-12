@@ -1,0 +1,549 @@
+---
+# yamllint disable rule:line-length
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: terria-client-config
+  namespace: terria
+  labels:
+    app: terria
+data:
+  config.json: |
+    {
+      "initializationUrls": ["simple"],
+      "parameters": {
+        "googleUrlShortenerKey": null,
+        "googleAnalyticsKey": null,
+        "googleAnalyticsOptions": null,
+        "disclaimer": {
+          "text": "Disclaimer: Peta ini tidak boleh digunakan untuk navigasi atau analisis spasial yang presisi",
+          "url": ""
+        },
+        "developerAttribution": {
+          "text": "Badan Informasi Geospasial Indonesia (BIG)",
+          "link": "https://www.big.go.id"
+        },
+        "appName": "Map - Piksel BIG",
+        "brandBarElements": [],
+        "supportEmail": "piksel@big.go.id",
+        "proj4ServiceBaseUrl": "proj4def/",
+        "feedbackUrl": "feedback",
+        "mobileDefaultViewerMode": "2d",
+        "experimentalFeatures": false,
+        "showWelcomeMessage": true,
+        "welcomeMessageVideo": {
+          "videoTitle": "Mulai menggunakan peta",
+          "videoUrl": "https://www.youtube-nocookie.com/embed/NTtSM70rIvI",
+          "placeholderImage": "https://img.youtube.com/vi/NTtSM70rIvI/maxresdefault.jpg"
+        },
+        "showInAppGuides": true,
+        "languageConfiguration": {
+          "enabled": true,
+          "debug": false,
+          "languages": {
+            "id": "Indonesia",
+            "en": "English"
+          },
+          "fallbackLanguage": "id"
+        },
+        "searchBarConfig": {},
+        "searchProviders": [
+          {
+            "id": "search-provider/cesium-ion",
+            "type": "cesium-ion-search-provider",
+            "name": "translate#viewModels.searchLocations",
+            "flightDurationSeconds": 1.5,
+            "minCharacters": 3
+          }
+        ],
+        "helpContent": [
+          {
+            "title": "translate#gettingstarted.title",
+            "itemName": "gettingstarted",
+            "paneMode": "videoAndContent",
+            "markdownText": "translate#gettingstarted.markdownText",
+            "icon": "video",
+            "videoUrl": "translate#gettingstarted.videoUrl",
+            "placeholderImage": "translate#gettingstarted.placeholderImage"
+          },
+          {
+            "title": "translate#stepbystepguide.title",
+            "itemName": "stepbystepguide",
+            "paneMode": "trainer",
+            "markdownText": "translate#stepbystepguide.markdownText",
+            "icon": "oneTwoThree",
+            "trainerItems": [
+              {
+                "title": "translate#stepbystepguide.gettingstarted.title",
+                "footnote": "translate#stepbystepguide.gettingstarted.footnote",
+                "steps": [
+                  {
+                    "title": "translate#stepbystepguide.gettingstarted.step1.title",
+                    "markdownDescription": "translate#stepbystepguide.gettingstarted.step1.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.gettingstarted.step2.title",
+                    "markdownDescription": "translate#stepbystepguide.gettingstarted.step2.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.gettingstarted.step3.title",
+                    "markdownDescription": "translate#stepbystepguide.gettingstarted.step3.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.gettingstarted.step4.title"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.gettingstarted.step5.title"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.gettingstarted.step6.title"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.gettingstarted.step7.title"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.gettingstarted.step8.title"
+                  }
+                ]
+              },
+              {
+                "title": "translate#stepbystepguide.satelliteimagery.title",
+                "footnote": "translate#stepbystepguide.satelliteimagery.footnote",
+                "steps": [
+                  {
+                    "title": "translate#stepbystepguide.satelliteimagery.step1.title",
+                    "markdownDescription": "translate#stepbystepguide.satelliteimagery.step1.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.satelliteimagery.step2.title",
+                    "markdownDescription": "translate#stepbystepguide.satelliteimagery.step2.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.satelliteimagery.step3.title",
+                    "markdownDescription": "translate#stepbystepguide.satelliteimagery.step3.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.satelliteimagery.step4.title",
+                    "markdownDescription": "translate#stepbystepguide.satelliteimagery.step4.markdownDescription"
+                  }
+                ]
+              },
+              {
+                "title": "translate#stepbystepguide.comparetimeseries.title",
+                "footnote": "translate#stepbystepguide.comparetimeseries.footnote",
+                "steps": [
+                  {
+                    "title": "translate#stepbystepguide.comparetimeseries.step1.title",
+                    "markdownDescription": "translate#stepbystepguide.comparetimeseries.step1.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.comparetimeseries.step2.title",
+                    "markdownDescription": "translate#stepbystepguide.comparetimeseries.step2.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.comparetimeseries.step3.title",
+                    "markdownDescription": "translate#stepbystepguide.comparetimeseries.step3.markdownDescription"
+                  },
+                  {
+                    "title": "translate#stepbystepguide.comparetimeseries.step4.title",
+                    "markdownDescription": "translate#stepbystepguide.comparetimeseries.step4.markdownDescription"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "icon": "story",
+            "itemName": "storymigration",
+            "markdownText": "## Migrasi Share & Story\n\n### Panduan update link share, termasuk stories\n\nKalau kamu dapat peringatan bahwa link share dibuat dari versi TerriaJS yang lebih lama, kamu perlu buat ulang di versi Terria terbaru!\n\n#### Pembuat\n\n1. Cari URL share yang memunculkan notifikasi upaya preservasi share saat dimuat ke Terria. Misalnya kamu mungkin tahu di mana mereka di-embed, atau menemukan secara tidak sengaja\n2. Buka di aplikasi peta berbasis versi baru (v8)\n3. Cek bahwa semuanya share seperti yang kamu harapkan, sesuaikan layer kalau ada yang hilang atau tidak bekerja dengan benar\n4. Update link share dengan klik tombol Share/Print dan copy link baru\n5. Kalau distribusi link share diketahui, update url di halaman web kamu (kalau di-embed), atau kirim link baru ke user\n\n#### Konsumen\n1. Load URL share\n2. Kalau tidak terlihat benar, beritahu penyedia supaya mereka bisa ikuti langkah di atas untuk buat ulang di versi Terria terbaru",
+            "title": "Migrasi Share & Story"
+          },
+          {
+            "itemName": "satelliteimagery",
+            "title": "Citra Satelit",
+            "paneMode": "slider",
+            "icon": "satellite"
+          }
+        ],
+        "helpContentTerms": [
+          {
+            "term": "translate#helpContentTerm1.term",
+            "aliases": "translate#helpContentTerm1.aliases",
+            "content": "translate#helpContentTerm1.content"
+          },
+          {
+            "term": "translate#helpContentTerm2.term",
+            "aliases": "translate#helpContentTerm2.aliases",
+            "content": "translate#helpContentTerm2.content"
+          },
+          {
+            "term": "translate#helpContentTerm3.term",
+            "content": "translate#helpContentTerm3.content"
+          },
+          {
+            "term": "translate#helpContentTerm4.term",
+            "content": "translate#helpContentTerm4.content"
+          },
+          {
+            "term": "translate#helpContentTerm5.term",
+            "aliases": ["catalogue"],
+            "content": "translate#helpContentTerm5.content"
+          },
+          {
+            "term": "translate#helpContentTerm6.term",
+            "aliases": "translate#helpContentTerm6.aliases",
+            "content": "translate#helpContentTerm6.content"
+          },
+          {
+            "term": "translate#helpContentTerm7.term",
+            "content": "translate#helpContentTerm7.content"
+          },
+          {
+            "term": "translate#helpContentTerm8.term",
+            "content": "translate#helpContentTerm8.content"
+          }
+        ],
+        "cesiumIonAccessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNjQwYjBhMS1iNmM4LTRjMDEtYTIzOS00N2QwNWFhOTdkYzIiLCJpZCI6Mzg0MzQ1LCJpYXQiOjE3Njk2NjIwNTF9.KHSejRvxVc2zByf-gAKZ7MyeEuAdffebm8tH8gm01Lk"
+      }
+    }
+  simple.json: |
+    {
+      "homeCamera": {
+        "north": 6,
+        "east": 141,
+        "south": -11,
+        "west": 82
+      },
+      "catalog": [
+        {
+          "id": "aB3dE4FgHi",
+          "type": "group",
+          "name": "Data Global",
+          "members": [
+            {
+              "id": "QwErTyUiOp",
+              "type": "group",
+              "name": "Sentinel-2 cloudless world",
+              "members": [
+                {
+                  "id": "lIvVnuKJA9",
+                  "name": "Sentinel-2 cloudless world 2016",
+                  "type": "wmts",
+                  "url": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml",
+                  "layer": "s2cloudless_3857",
+                  "style": "default",
+                  "opacity": 1
+                },
+                {
+                  "id": "jCJmccfll6",
+                  "name": "Sentinel-2 cloudless world 2018",
+                  "type": "wmts",
+                  "url": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml",
+                  "layer": "s2cloudless-2018_3857",
+                  "style": "default",
+                  "opacity": 1
+                },
+                {
+                  "id": "HrWLyyyo6V",
+                  "name": "Sentinel-2 cloudless world 2019",
+                  "type": "wmts",
+                  "url": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml",
+                  "layer": "s2cloudless-2019_3857",
+                  "style": "default",
+                  "opacity": 1
+                },
+                {
+                  "id": "B8gpm2I3gB",
+                  "name": "Sentinel-2 cloudless world 2020",
+                  "type": "wmts",
+                  "url": "https://tiles.maps.eox.at/wmts/1.0.0/WMTSCapabilities.xml",
+                  "layer": "s2cloudless-2020_3857",
+                  "style": "default",
+                  "opacity": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "surface-reflectance-group",
+          "type": "group",
+          "name": "Surface Reflectance",
+          "members": [
+            {
+              "id": "s2_l2a",
+              "type": "group",
+              "name": "Sentinel 2 Surface Reflectance",
+              "members": [
+                {
+                  "id": "s2-l2a",
+                  "name": "Sentinel-2 L2 SR",
+                  "type": "wms",
+                  "url": "https://ows.staging.piksel.big.go.id/wms",
+                  "layers": "s2_l2a",
+                  "opacity": 0.8,
+                  "tileErrorHandlingOptions": {
+                    "thresholdBeforeDisablingItem": 20,
+                    "ignoreUnknownTileErrors": true
+                  }
+                }
+              ]
+            },
+            {
+              "id": "geomad",
+              "type": "group",
+              "name": "Sentinel-2 Annual GeoMAD",
+              "members": [
+                {
+                  "id": "geomad-spectral-composites",
+                  "type": "group",
+                  "name": "Spectral Composites",
+                  "members": [
+                    {
+                      "id": "s2-geomad-rgb",
+                      "type": "wms",
+                      "name": "True Color (RGB)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "rgb",
+                      "opacity": 0.8,
+                      "description": "Annual cloud-free composite (geomedian) in true color (Red, Green, Blue).",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-false-color",
+                      "type": "wms",
+                      "name": "False Color (NIR)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "false_color_nir",
+                      "opacity": 0.8,
+                      "description": "Annual cloud-free composite in false color (NIR, Red, Green). Vegetation appears red.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-rededge",
+                      "type": "wms",
+                      "name": "False Color (Red Edge)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "false_color_rededge",
+                      "opacity": 0.8,
+                      "description": "False color composite using red edge 2, NIR and red bands for vegetation stress analysis.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "geomad-spectral-indices",
+                  "type": "group",
+                  "name": "Spectral Indices",
+                  "members": [
+                    {
+                      "id": "s2-geomad-ndvi",
+                      "type": "wms",
+                      "name": "NDVI (Vegetation)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "ndvi",
+                      "opacity": 0.8,
+                      "description": "Normalised Difference Vegetation Index. Higher values (green) indicate denser vegetation.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-ndvi-re",
+                      "type": "wms",
+                      "name": "NDVI Red Edge",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "ndvi_rededge",
+                      "opacity": 0.8,
+                      "description": "Red Edge NDVI using red edge 1 and NIR narrow bands. More sensitive to chlorophyll content.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-ndwi",
+                      "type": "wms",
+                      "name": "NDWI (Water)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "ndwi",
+                      "opacity": 0.8,
+                      "description": "Normalised Difference Water Index. Higher values (blue) indicate water bodies.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-mndwi",
+                      "type": "wms",
+                      "name": "MNDWI (Water, SWIR)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "mndwi",
+                      "opacity": 0.8,
+                      "description": "Modified NDWI using SWIR band. Better at detecting water in built-up areas.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-ndbi",
+                      "type": "wms",
+                      "name": "NDBI (Built-up)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "ndbi",
+                      "opacity": 0.8,
+                      "description": "Normalised Difference Built-up Index. Higher values (pink) indicate urban/built-up areas.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-ndmi",
+                      "type": "wms",
+                      "name": "NDMI (Moisture)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "ndmi",
+                      "opacity": 0.8,
+                      "description": "Normalised Difference Moisture Index. Indicates vegetation water content.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-bsi",
+                      "type": "wms",
+                      "name": "BSI (Bare Soil)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "bsi",
+                      "opacity": 0.8,
+                      "description": "Bare Soil Index. Higher values (red) indicate exposed soil.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "geomad-statistics",
+                  "type": "group",
+                  "name": "Statistics",
+                  "members": [
+                    {
+                      "id": "s2-geomad-emad",
+                      "type": "wms",
+                      "name": "EMAD (Change Detection)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "emad",
+                      "opacity": 0.8,
+                      "description": "Euclidean Median Absolute Deviation. Brighter pixels indicate greater spectral change from the geomedian.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-smad",
+                      "type": "wms",
+                      "name": "SMAD (Spectral Variability)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "smad",
+                      "opacity": 0.8,
+                      "description": "Spectral Median Absolute Deviation. Brighter pixels indicate more spectral variation over the composite period.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-bcmad",
+                      "type": "wms",
+                      "name": "BCMAD (Compositional Change)",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "bcmad",
+                      "opacity": 0.8,
+                      "description": "Bray-Curtis Median Absolute Deviation. Brighter pixels indicate greater spectral dissimilarity.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    },
+                    {
+                      "id": "s2-geomad-count",
+                      "type": "wms",
+                      "name": "Observation Count",
+                      "url": "https://ows.staging.piksel.big.go.id/wms",
+                      "layers": "s2_geomad_annual",
+                      "styles": "count",
+                      "opacity": 0.8,
+                      "description": "Number of clear Sentinel-2 observations used in the annual composite. Brighter areas had more cloud-free acquisitions.",
+                      "tileErrorHandlingOptions": {
+                        "thresholdBeforeDisablingItem": 20,
+                        "ignoreUnknownTileErrors": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "viewerMode": "2d",
+      "baseMaps": {
+        "items": [
+          {
+            "item": {
+              "id": "basemap-openstreetmap"
+            },
+            "image": "images/basemaps/indo-osm.png"
+          },
+          {
+            "item": {
+              "id": "basemap-esri-world-imagery",
+              "name": "ESRI World Imagery",
+              "type": "url-template-imagery",
+              "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+              "attribution": "Tiles \u00a9 Esri",
+              "opacity": 1.0
+            },
+            "image": "images/basemaps/indo-esri.png"
+          },
+          {
+            "item": {
+              "id": "basemap-natural-earth-II"
+            },
+            "image": "images/basemaps/indo-ne.png"
+          }
+        ],
+        "defaultBaseMapId": "basemap-natural-earth-II",
+        "previewBaseMapId": "basemap-openstreetmap"
+      }
+    }
