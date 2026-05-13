@@ -49,6 +49,9 @@ spec:
             - name: terria-client-config
               mountPath: /app/wwwroot/config.json
               subPath: config.json
+            - name: terria-client-config
+              mountPath: /app/wwwroot/init/simple.json
+              subPath: simple.json
             - name: terria-server-config
               mountPath: /etc/terria-config/server
           resources:
