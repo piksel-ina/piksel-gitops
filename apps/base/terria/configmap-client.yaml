@@ -295,19 +295,6 @@ data:
               "name": "Sentinel-2 Annual GeoMAD",
               "members": [
                 {
-                  "id": "s2-geomad-legacy-rgb",
-                  "type": "wms",
-                  "name": "GeoMAD Annual - Legacy RGB (Sentinel-2)",
-                  "url": "https://ows.staging.piksel.big.go.id/wms",
-                  "layers": "geomad_s2_annual_legacy",
-                  "opacity": 0.8,
-                  "description": "True-colour (RGB) image from the legacy 6-band annual GeoMAD composite, for quick visual comparison.",
-                  "tileErrorHandlingOptions": {
-                    "thresholdBeforeDisablingItem": 20,
-                    "ignoreUnknownTileErrors": true
-                  }
-                },
-                {
                   "id": "s2-geomad-spectral",
                   "type": "wms",
                   "name": "GeoMAD Annual - Spectral (Sentinel-2)",
