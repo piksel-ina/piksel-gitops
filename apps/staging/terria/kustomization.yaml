@@ -9,4 +9,4 @@ resources:
 
 images:
   - name: 686410905891.dkr.ecr.ap-southeast-3.amazonaws.com/terriamap
-    newTag: v20260512-0821
+    newTag: v20260520-1018
